@@ -1,0 +1,252 @@
+# Skill taxonomy for undergraduate Mathematics programmes.
+#
+# Each skill lists the syllabus phrases ("terms") that count as evidence for
+# it. Matching ignores case and punctuation, accepts a plural ending (s/es),
+# and prefers the longest phrase: "partial differential equations" is
+# evidence for PDEs, not for ODEs, and "linear programming" is evidence for
+# optimisation, not for programming. A term may appear under more than one
+# skill (e.g. "matplotlib" is both Python and visualisation).
+#
+# Write British and American spellings separately. Apostrophes become
+# spaces, so "Green's theorem" is written "green s theorem".
+
+name: Undergraduate Mathematics
+version: 1
+
+areas:
+  - id: pure
+    name: Pure Mathematics
+    skills:
+      - id: calculus
+        name: Calculus
+        terms: [calculus, differential calculus, integral calculus, limits and continuity,
+                differentiability, differentiation, integration, mean value theorem,
+                taylor series, taylor s theorem, maclaurin series, partial derivative,
+                multiple integral, double integral, triple integral, maxima and minima,
+                successive differentiation, improper integral, curve tracing, jacobian]
+      - id: real_analysis
+        name: Real Analysis
+        terms: [real analysis, sequences and series, sequence of real numbers, cauchy sequence,
+                convergence of series, uniform convergence, riemann integral, riemann integration,
+                completeness property, supremum and infimum, bolzano weierstrass, pointwise convergence,
+                mathematical analysis, uniform continuity, power series]
+      - id: linear_algebra
+        name: Linear Algebra
+        terms: [linear algebra, vector space, linear transformation, linear map, eigenvalue,
+                eigenvector, matrix, matrices, rank of a matrix, inner product space,
+                basis and dimension, determinant, diagonalisation, diagonalization,
+                system of linear equations, systems of linear equations, gram schmidt]
+      - id: abstract_algebra
+        name: Abstract Algebra
+        terms: [abstract algebra, group theory, group, subgroup, ring theory, ring, ideal,
+                field theory, integral domain, homomorphism, isomorphism theorem, coset,
+                lagrange s theorem, permutation group, cyclic group, normal subgroup,
+                quotient group, algebraic structure]
+      - id: complex_analysis
+        name: Complex Analysis
+        terms: [complex analysis, complex variable, analytic function, cauchy riemann equation,
+                contour integration, contour integral, residue theorem, residue, conformal mapping,
+                laurent series, cauchy s integral formula, theory of complex functions]
+      - id: topology
+        name: Topology
+        terms: [topology, topological space, open set, compactness, connectedness, homeomorphism,
+                point set topology]
+      - id: metric_spaces
+        name: Metric Spaces
+        terms: [metric space, complete metric space, contraction mapping, banach fixed point]
+      - id: number_theory
+        name: Number Theory
+        terms: [number theory, divisibility, congruence, prime number, diophantine equation,
+                fermat s little theorem, chinese remainder theorem, quadratic residue,
+                euler s totient, arithmetic function, euclidean algorithm, division algorithm, modular arithmetic]
+      - id: discrete_mathematics
+        name: Discrete Mathematics & Combinatorics
+        terms: [discrete mathematics, discrete structure, combinatorics, recurrence relation,
+                pigeonhole principle, permutations and combinations, generating function,
+                inclusion exclusion, mathematical logic, propositional logic, boolean algebra,
+                lattice, set theory, mathematical induction]
+      - id: graph_theory
+        name: Graph Theory
+        terms: [graph theory, spanning tree, shortest path, eulerian graph, hamiltonian graph,
+                graph colouring, graph coloring, planar graph, trees and connectivity, paths and cycles]
+      - id: vector_calculus
+        name: Vector Calculus
+        terms: [vector calculus, gradient divergence and curl, curl, line integral,
+                surface integral, volume integral, green s theorem, stokes theorem, stokes s theorem,
+                gauss divergence theorem, vector field, vector differentiation]
+      - id: differential_geometry
+        name: Differential Geometry
+        terms: [differential geometry, curves and surfaces, serret frenet, frenet serret,
+                geodesic, curvature and torsion, first fundamental form]
+      - id: functional_analysis
+        name: Functional Analysis
+        terms: [functional analysis, normed space, normed linear space, banach space, hilbert space,
+                bounded linear operator, hahn banach]
+
+  - id: applied
+    name: Applied Mathematics
+    skills:
+      - id: ode
+        name: Ordinary Differential Equations
+        terms: [ordinary differential equation, differential equation, first order equation,
+                linear differential equation, wronskian, initial value problem, exact equation,
+                higher order linear equation, series solution, method of undetermined coefficients,
+                variation of parameters]
+      - id: pde
+        name: Partial Differential Equations
+        terms: [partial differential equation, heat equation, wave equation, laplace equation,
+                laplace s equation, separation of variables, lagrange s method, charpit s method,
+                classification of second order]
+      - id: mechanics
+        name: Mechanics
+        terms: [mechanics, statics, dynamics, kinematics, newton s laws, rigid body, projectile,
+                central force, equilibrium of forces, simple harmonic motion, lagrangian mechanics,
+                hamiltonian mechanics]
+      - id: modelling
+        name: Mathematical Modelling
+        terms: [mathematical modelling, mathematical modeling, modelling, modeling,
+                population model, epidemic model, compartmental model, predator prey,
+                model formulation, sir model, logistic growth, population dynamics]
+      - id: optimisation
+        name: Optimisation
+        terms: [optimisation, optimization, linear programming, simplex method, duality,
+                simplex algorithm, transportation problem, assignment problem, nonlinear programming,
+                non linear programming, convex optimisation, convex optimization,
+                lagrange multiplier, integer programming, gradient descent, dynamic programming]
+      - id: operations_research
+        name: Operations Research
+        terms: [operations research, operation research, queueing theory, queuing theory,
+                game theory, inventory model, inventory control, pert, cpm, project scheduling,
+                decision theory, replacement model]
+      - id: transforms
+        name: Integral Transforms & Fourier Analysis
+        terms: [laplace transform, fourier series, fourier transform, z transform,
+                integral transform, inverse laplace transform, convolution theorem]
+      - id: numerical_methods
+        name: Numerical Methods
+        terms: [numerical method, numerical analysis, root finding, bisection method,
+                newton raphson, regula falsi, interpolation, numerical differentiation,
+                numerical integration, trapezoidal rule, simpson s rule, runge kutta,
+                euler s method, finite difference, gauss seidel, jacobi method, lu decomposition,
+                numerical solution, error analysis]
+      - id: financial_mathematics
+        name: Financial Mathematics
+        terms: [financial mathematics, mathematical finance, compound interest, annuity,
+                annuities, option pricing, black scholes, actuarial, present value, portfolio theory]
+      - id: cryptography
+        name: Cryptography
+        terms: [cryptography, rsa, encryption, public key, cipher, coding theory]
+
+  - id: computational
+    name: Computational Skills
+    skills:
+      - id: python
+        name: Python
+        terms: [python, numpy, scipy, matplotlib, pandas, jupyter, sympy]
+      - id: r_language
+        name: R
+        terms: [r programming, r software, r language, rstudio, r studio, ggplot2]
+      - id: matlab
+        name: MATLAB / Octave / Scilab
+        terms: [matlab, octave, gnu octave, scilab]
+      - id: c_programming
+        name: C / C++ programming
+        terms: [c programming, programming in c, c language, object oriented programming, pointer]
+      - id: computer_algebra
+        name: Computer Algebra Systems
+        terms: [computer algebra, sagemath, sage, mathematica, maxima, wolfram, geogebra]
+      - id: programming
+        name: Programming Fundamentals
+        terms: [programming, algorithm, data structure, flowchart, pseudocode,
+                problem solving using computers, computer programming]
+      - id: scientific_computing
+        name: Scientific Computing & Simulation
+        terms: [scientific computing, computational mathematics, simulation, monte carlo,
+                numerical simulation, computer simulation]
+      - id: latex
+        name: LaTeX
+        terms: [latex, mathematical typesetting, typesetting, beamer]
+
+  - id: statistics
+    name: Probability & Statistics
+    skills:
+      - id: descriptive_statistics
+        name: Descriptive Statistics
+        terms: [statistics, descriptive statistics, measures of central tendency, central tendency,
+                dispersion, measures of dispersion, skewness, kurtosis, frequency distribution,
+                mean median and mode, standard deviation]
+      - id: probability
+        name: Probability
+        terms: [probability, random variable, probability distribution, binomial distribution,
+                poisson distribution, normal distribution, bayes theorem, bayes s theorem,
+                conditional probability, mathematical expectation, central limit theorem,
+                moment generating function]
+      - id: inference
+        name: Statistical Inference
+        terms: [statistical inference, inferential statistics, hypothesis testing,
+                testing of hypothesis, testing of hypotheses, test of significance,
+                tests of significance, estimation, confidence interval, t test, chi square test,
+                anova, analysis of variance, maximum likelihood, p value, sampling distribution]
+      - id: regression
+        name: Correlation & Regression
+        terms: [regression, correlation, linear regression, least squares, curve fitting,
+                multiple regression, logistic regression, regression analysis]
+      - id: sampling
+        name: Sampling & Surveys
+        terms: [sampling, sampling technique, sample survey, stratified sampling,
+                systematic sampling, simple random sampling]
+      - id: design_of_experiments
+        name: Design of Experiments
+        terms: [design of experiments, randomised block design, randomized block design,
+                latin square, factorial experiment, completely randomised design,
+                completely randomized design]
+      - id: time_series
+        name: Time Series & Forecasting
+        terms: [time series, forecasting, moving average, arima, trend analysis, seasonal variation]
+      - id: stochastic_processes
+        name: Stochastic Processes
+        terms: [stochastic process, markov chain, random walk, poisson process, birth and death process]
+
+  - id: data
+    name: Data Skills
+    skills:
+      - id: data_analysis
+        name: Data Analysis
+        terms: [data analysis, data analytics, exploratory data analysis, data cleaning,
+                data handling, data wrangling, data science, pandas, real world data, dataset]
+      - id: visualisation
+        name: Data Visualisation
+        terms: [data visualisation, data visualization, visualisation, visualization,
+                plotting, dashboard, matplotlib, ggplot2, graphical representation of data]
+      - id: machine_learning
+        name: Machine Learning & AI
+        terms: [machine learning, supervised learning, unsupervised learning, clustering,
+                neural network, deep learning, k means, decision tree, support vector machine,
+                artificial intelligence, classification algorithm, model evaluation]
+      - id: databases
+        name: Databases & SQL
+        terms: [database, sql, dbms, relational database]
+      - id: spreadsheets
+        name: Spreadsheets
+        terms: [spreadsheet, excel, ms excel, microsoft excel, what if analysis]
+
+  - id: professional
+    name: Research & Professional
+    skills:
+      - id: research
+        name: Research Project / Dissertation
+        terms: [project, research project, dissertation, research methodology, capstone, thesis,
+                project work, research methods, literature review]
+      - id: internship
+        name: Internship / Field Work
+        terms: [internship, industrial training, field work, fieldwork, apprenticeship,
+                on the job training, summer training]
+      - id: communication
+        name: Mathematical Communication
+        terms: [mathematical writing, technical writing, communication skill, presentation skill,
+                seminar, report writing]
+      - id: history_iks
+        name: History of Mathematics & Indian Knowledge Systems
+        terms: [history of mathematics, indian mathematics, vedic mathematics,
+                indian knowledge system, ancient indian, kerala school, aryabhata, brahmagupta,
+                bhaskara, greek mathematics, development of calculus]

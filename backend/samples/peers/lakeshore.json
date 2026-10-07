@@ -1,0 +1,293 @@
+{
+  "institution": "Lakeshore University",
+  "name": "B.Sc. Mathematics (Honours)",
+  "source": "Fictional sample",
+  "year": "2025-26",
+  "courses": [
+    {
+      "code": "LMA101",
+      "title": "Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Limits and continuity",
+        "Differentiability and mean value theorems",
+        "Successive differentiation, Leibniz rule",
+        "Taylor's theorem and Maclaurin series",
+        "Maxima and minima of functions of one variable",
+        "Curve tracing"
+      ]
+    },
+    {
+      "code": "LMA102",
+      "title": "Real Analysis I",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Real number system, completeness property",
+        "Sequences of real numbers, Cauchy sequences",
+        "Convergence of series, comparison and ratio tests",
+        "Continuity and uniform continuity"
+      ]
+    },
+    {
+      "code": "LMA103",
+      "title": "Linear Algebra",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Vector spaces, subspaces, basis and dimension",
+        "Linear transformations, rank-nullity theorem",
+        "Matrix of a linear transformation",
+        "Eigenvalues and eigenvectors, diagonalisation",
+        "Inner product spaces, Gram-Schmidt process"
+      ]
+    },
+    {
+      "code": "LMA104",
+      "title": "Programming in C",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Algorithms and flowcharts",
+        "C programming: data types and control structures",
+        "Arrays and functions",
+        "Pointers and structures"
+      ]
+    },
+    {
+      "code": "LMA201",
+      "title": "Real Analysis II",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Riemann integration",
+        "Uniform convergence of sequences and series of functions",
+        "Power series",
+        "Improper integrals"
+      ]
+    },
+    {
+      "code": "LMA202",
+      "title": "Group Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Groups, subgroups and cyclic groups",
+        "Permutation groups",
+        "Cosets and Lagrange's theorem",
+        "Normal subgroups and quotient groups",
+        "Homomorphisms and isomorphism theorems"
+      ]
+    },
+    {
+      "code": "LMA203",
+      "title": "Ordinary Differential Equations",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "First order equations, exact equations",
+        "Linear differential equations with constant coefficients",
+        "Wronskian and variation of parameters",
+        "Series solutions",
+        "Initial value problems"
+      ]
+    },
+    {
+      "code": "LMA204",
+      "title": "Ring Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Rings, integral domains and fields",
+        "Ideals and quotient rings",
+        "Ring homomorphisms",
+        "Polynomial rings"
+      ]
+    },
+    {
+      "code": "LMA301",
+      "title": "Complex Analysis",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Analytic functions, Cauchy-Riemann equations",
+        "Contour integration, Cauchy's integral formula",
+        "Laurent series",
+        "Residue theorem and its applications",
+        "Conformal mapping"
+      ]
+    },
+    {
+      "code": "LMA302",
+      "title": "Statistical Methods",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Measures of central tendency and dispersion",
+        "Skewness and kurtosis",
+        "Correlation and regression",
+        "Probability distributions: binomial, Poisson and normal",
+        "Tests of significance: t test, chi square test"
+      ]
+    },
+    {
+      "code": "LMA303",
+      "title": "Numerical Methods",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Errors and error analysis",
+        "Root finding: bisection method, Newton-Raphson method",
+        "Interpolation",
+        "Numerical differentiation and numerical integration: trapezoidal rule, Simpson's rule",
+        "Numerical solution of ODE: Euler's method, Runge-Kutta methods"
+      ]
+    },
+    {
+      "code": "LMA304",
+      "title": "Numerical Methods Lab (C)",
+      "credits": 2.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Programming in C: bisection and Newton-Raphson",
+        "Gauss-Seidel iteration",
+        "Trapezoidal rule and Simpson's rule programs"
+      ]
+    },
+    {
+      "code": "LMA401",
+      "title": "Partial Differential Equations",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Formation of partial differential equations",
+        "Lagrange's method",
+        "Charpit's method",
+        "Classification of second order equations",
+        "Heat equation, wave equation and Laplace equation by separation of variables"
+      ]
+    },
+    {
+      "code": "LMA402",
+      "title": "Mechanics",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Statics: equilibrium of forces",
+        "Kinematics in one and two dimensions",
+        "Projectile motion",
+        "Central forces",
+        "Simple harmonic motion"
+      ]
+    },
+    {
+      "code": "LMA403",
+      "title": "Linear Programming",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Formulation of linear programming problems",
+        "Simplex method",
+        "Duality",
+        "Transportation problem",
+        "Assignment problem"
+      ]
+    },
+    {
+      "code": "LMA404",
+      "title": "Operations Research",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Queueing theory",
+        "Game theory",
+        "Inventory models",
+        "PERT and CPM project scheduling"
+      ]
+    },
+    {
+      "code": "LMA501",
+      "title": "Integral Transforms",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Laplace transform and inverse Laplace transform",
+        "Convolution theorem",
+        "Fourier series",
+        "Fourier transform",
+        "Applications to differential equations"
+      ]
+    },
+    {
+      "code": "LMA502",
+      "title": "Number Theory",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Divisibility and the Euclidean algorithm",
+        "Prime numbers",
+        "Congruences, Chinese remainder theorem",
+        "Fermat's little theorem and Euler's totient function",
+        "Quadratic residues"
+      ]
+    },
+    {
+      "code": "LMA503",
+      "title": "Discrete Mathematics",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Propositional logic",
+        "Set theory and relations",
+        "Mathematical induction",
+        "Permutations and combinations, pigeonhole principle",
+        "Recurrence relations and generating functions"
+      ]
+    },
+    {
+      "code": "LMA504",
+      "title": "Differential Geometry",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Curves in space, Serret-Frenet formulae",
+        "Curvature and torsion",
+        "Surfaces and the first fundamental form",
+        "Geodesics"
+      ]
+    },
+    {
+      "code": "LMA601",
+      "title": "Project / Dissertation",
+      "credits": 6.0,
+      "semester": "VI",
+      "category": "Project",
+      "topics": [
+        "Research methodology",
+        "Literature review",
+        "Dissertation and viva voce"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,293 @@
+{
+  "institution": "Southbank Institute of Technology",
+  "name": "B.Sc. Mathematics (Honours)",
+  "source": "Fictional sample",
+  "year": "2025-26",
+  "courses": [
+    {
+      "code": "SMA101",
+      "title": "Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Limits and continuity",
+        "Differentiability and mean value theorems",
+        "Successive differentiation, Leibniz rule",
+        "Taylor's theorem and Maclaurin series",
+        "Maxima and minima of functions of one variable",
+        "Curve tracing"
+      ]
+    },
+    {
+      "code": "SMA102",
+      "title": "Multivariable Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Functions of several variables, partial derivatives",
+        "Jacobians and change of variables",
+        "Maxima and minima, Lagrange multipliers",
+        "Double and triple integrals",
+        "Change of order of integration"
+      ]
+    },
+    {
+      "code": "SMA103",
+      "title": "Linear Algebra",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Vector spaces, subspaces, basis and dimension",
+        "Linear transformations, rank-nullity theorem",
+        "Matrix of a linear transformation",
+        "Eigenvalues and eigenvectors, diagonalisation",
+        "Inner product spaces, Gram-Schmidt process"
+      ]
+    },
+    {
+      "code": "SMA104",
+      "title": "Real Analysis I",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Real number system, completeness property",
+        "Sequences of real numbers, Cauchy sequences",
+        "Convergence of series, comparison and ratio tests",
+        "Continuity and uniform continuity"
+      ]
+    },
+    {
+      "code": "SMA201",
+      "title": "Programming with Python",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Python basics: variables, control flow and functions",
+        "Lists and dictionaries",
+        "NumPy arrays",
+        "Plotting with Matplotlib",
+        "SymPy for symbolic computation"
+      ]
+    },
+    {
+      "code": "SMA202",
+      "title": "Discrete Mathematics",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Propositional logic",
+        "Set theory and relations",
+        "Mathematical induction",
+        "Permutations and combinations, pigeonhole principle",
+        "Recurrence relations and generating functions"
+      ]
+    },
+    {
+      "code": "SMA203",
+      "title": "Graph Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Graphs, paths and cycles",
+        "Trees and connectivity, spanning trees",
+        "Eulerian graphs and Hamiltonian graphs",
+        "Planar graphs",
+        "Graph colouring",
+        "Shortest path algorithms"
+      ]
+    },
+    {
+      "code": "SMA204",
+      "title": "Ordinary Differential Equations",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "First order equations, exact equations",
+        "Linear differential equations with constant coefficients",
+        "Wronskian and variation of parameters",
+        "Series solutions",
+        "Initial value problems"
+      ]
+    },
+    {
+      "code": "SMA301",
+      "title": "Probability Theory",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Axioms of probability, conditional probability, Bayes theorem",
+        "Random variables and mathematical expectation",
+        "Binomial, Poisson and normal distribution",
+        "Moment generating function",
+        "Central limit theorem"
+      ]
+    },
+    {
+      "code": "SMA302",
+      "title": "Numerical Methods",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Errors and error analysis",
+        "Root finding: bisection method, Newton-Raphson method",
+        "Interpolation",
+        "Numerical differentiation and numerical integration: trapezoidal rule, Simpson's rule",
+        "Numerical solution of ODE: Euler's method, Runge-Kutta methods"
+      ]
+    },
+    {
+      "code": "SMA303",
+      "title": "Numerical Methods Lab (Python)",
+      "credits": 2.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Implementing bisection and Newton-Raphson in Python",
+        "Interpolation using NumPy",
+        "Numerical integration with SciPy",
+        "Plotting solutions with Matplotlib"
+      ]
+    },
+    {
+      "code": "SMA304",
+      "title": "Data Analysis with Python",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Data handling with pandas",
+        "Exploratory data analysis",
+        "Data visualisation with Matplotlib",
+        "Working with a real world dataset",
+        "Descriptive statistics in Python"
+      ]
+    },
+    {
+      "code": "SMA401",
+      "title": "Databases for Data Science",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Relational database concepts",
+        "SQL queries",
+        "Data cleaning"
+      ]
+    },
+    {
+      "code": "SMA402",
+      "title": "Statistical Inference",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Sampling distribution",
+        "Point estimation, maximum likelihood",
+        "Confidence intervals",
+        "Testing of hypotheses",
+        "Analysis of variance"
+      ]
+    },
+    {
+      "code": "SMA403",
+      "title": "Introduction to Machine Learning",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Supervised learning: linear and logistic regression",
+        "Decision trees",
+        "Unsupervised learning: k-means clustering",
+        "Gradient descent",
+        "Model evaluation"
+      ]
+    },
+    {
+      "code": "SMA404",
+      "title": "Linear Programming",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Formulation of linear programming problems",
+        "Simplex method",
+        "Duality",
+        "Transportation problem",
+        "Assignment problem"
+      ]
+    },
+    {
+      "code": "SMA501",
+      "title": "Operations Research",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Queueing theory",
+        "Game theory",
+        "Inventory models",
+        "PERT and CPM project scheduling"
+      ]
+    },
+    {
+      "code": "SMA502",
+      "title": "Mathematical Modelling",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Model formulation and validation",
+        "Population models and logistic growth",
+        "Predator-prey models",
+        "Epidemic models: the SIR model",
+        "Modelling with difference equations"
+      ]
+    },
+    {
+      "code": "SMA503",
+      "title": "Scientific Computing",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Scientific computing with Python",
+        "Monte Carlo simulation",
+        "Numerical solution of ODE using SciPy",
+        "Visualisation of results"
+      ]
+    },
+    {
+      "code": "SMA504",
+      "title": "Internship",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Project",
+      "topics": [
+        "Internship of four weeks",
+        "Report writing and presentation"
+      ]
+    },
+    {
+      "code": "SMA601",
+      "title": "Project / Dissertation",
+      "credits": 6.0,
+      "semester": "VI",
+      "category": "Project",
+      "topics": [
+        "Research methodology",
+        "Literature review",
+        "Dissertation and viva voce"
+      ]
+    }
+  ]
+}

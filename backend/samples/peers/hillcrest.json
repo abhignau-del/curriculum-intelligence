@@ -1,0 +1,364 @@
+{
+  "institution": "Hillcrest University",
+  "name": "B.Sc. Mathematics (Honours)",
+  "source": "Fictional sample",
+  "year": "2025-26",
+  "courses": [
+    {
+      "code": "HMA101",
+      "title": "Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Limits and continuity",
+        "Differentiability and mean value theorems",
+        "Successive differentiation, Leibniz rule",
+        "Taylor's theorem and Maclaurin series",
+        "Maxima and minima of functions of one variable",
+        "Curve tracing"
+      ]
+    },
+    {
+      "code": "HMA102",
+      "title": "Multivariable Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Functions of several variables, partial derivatives",
+        "Jacobians and change of variables",
+        "Maxima and minima, Lagrange multipliers",
+        "Double and triple integrals",
+        "Change of order of integration"
+      ]
+    },
+    {
+      "code": "HMA103",
+      "title": "Vector Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Vector differentiation",
+        "Gradient, divergence and curl",
+        "Line integrals, surface integrals and volume integrals",
+        "Green's theorem in the plane",
+        "Stokes's theorem and Gauss divergence theorem"
+      ]
+    },
+    {
+      "code": "HMA104",
+      "title": "Real Analysis I",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Real number system, completeness property",
+        "Sequences of real numbers, Cauchy sequences",
+        "Convergence of series, comparison and ratio tests",
+        "Continuity and uniform continuity"
+      ]
+    },
+    {
+      "code": "HMA105",
+      "title": "Linear Algebra",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Vector spaces, subspaces, basis and dimension",
+        "Linear transformations, rank-nullity theorem",
+        "Matrix of a linear transformation",
+        "Eigenvalues and eigenvectors, diagonalisation",
+        "Inner product spaces, Gram-Schmidt process"
+      ]
+    },
+    {
+      "code": "HMA201",
+      "title": "Programming with Python",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Python basics: variables, control flow and functions",
+        "Lists and dictionaries",
+        "NumPy arrays",
+        "Plotting with Matplotlib",
+        "SymPy for symbolic computation"
+      ]
+    },
+    {
+      "code": "HMA202",
+      "title": "Real Analysis II",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Riemann integration",
+        "Uniform convergence of sequences and series of functions",
+        "Power series",
+        "Improper integrals"
+      ]
+    },
+    {
+      "code": "HMA203",
+      "title": "Group Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Groups, subgroups and cyclic groups",
+        "Permutation groups",
+        "Cosets and Lagrange's theorem",
+        "Normal subgroups and quotient groups",
+        "Homomorphisms and isomorphism theorems"
+      ]
+    },
+    {
+      "code": "HMA204",
+      "title": "Ordinary Differential Equations",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "First order equations, exact equations",
+        "Linear differential equations with constant coefficients",
+        "Wronskian and variation of parameters",
+        "Series solutions",
+        "Initial value problems"
+      ]
+    },
+    {
+      "code": "HMA205",
+      "title": "Ring Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Rings, integral domains and fields",
+        "Ideals and quotient rings",
+        "Ring homomorphisms",
+        "Polynomial rings"
+      ]
+    },
+    {
+      "code": "HMA301",
+      "title": "Complex Analysis",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Analytic functions, Cauchy-Riemann equations",
+        "Contour integration, Cauchy's integral formula",
+        "Laurent series",
+        "Residue theorem and its applications",
+        "Conformal mapping"
+      ]
+    },
+    {
+      "code": "HMA302",
+      "title": "Metric Spaces",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Metric spaces, open and closed sets",
+        "Complete metric spaces",
+        "Contraction mapping, Banach fixed point theorem",
+        "Compactness in metric spaces"
+      ]
+    },
+    {
+      "code": "HMA303",
+      "title": "Topology",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Topological spaces, open sets and bases",
+        "Continuity and homeomorphism",
+        "Compactness",
+        "Connectedness"
+      ]
+    },
+    {
+      "code": "HMA304",
+      "title": "Probability Theory",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Axioms of probability, conditional probability, Bayes theorem",
+        "Random variables and mathematical expectation",
+        "Binomial, Poisson and normal distribution",
+        "Moment generating function",
+        "Central limit theorem"
+      ]
+    },
+    {
+      "code": "HMA305",
+      "title": "Numerical Methods",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Errors and error analysis",
+        "Root finding: bisection method, Newton-Raphson method",
+        "Interpolation",
+        "Numerical differentiation and numerical integration: trapezoidal rule, Simpson's rule",
+        "Numerical solution of ODE: Euler's method, Runge-Kutta methods"
+      ]
+    },
+    {
+      "code": "HMA401",
+      "title": "Numerical Methods Lab (Python)",
+      "credits": 2.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Implementing bisection and Newton-Raphson in Python",
+        "Interpolation using NumPy",
+        "Numerical integration with SciPy",
+        "Plotting solutions with Matplotlib"
+      ]
+    },
+    {
+      "code": "HMA402",
+      "title": "Statistical Inference",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Sampling distribution",
+        "Point estimation, maximum likelihood",
+        "Confidence intervals",
+        "Testing of hypotheses",
+        "Analysis of variance"
+      ]
+    },
+    {
+      "code": "HMA403",
+      "title": "Partial Differential Equations",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Formation of partial differential equations",
+        "Lagrange's method",
+        "Charpit's method",
+        "Classification of second order equations",
+        "Heat equation, wave equation and Laplace equation by separation of variables"
+      ]
+    },
+    {
+      "code": "HMA404",
+      "title": "Time Series and Forecasting",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Components of a time series, trend analysis",
+        "Moving averages",
+        "Seasonal variation",
+        "ARIMA models",
+        "Forecasting"
+      ]
+    },
+    {
+      "code": "HMA405",
+      "title": "Introduction to Machine Learning",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Supervised learning: linear and logistic regression",
+        "Decision trees",
+        "Unsupervised learning: k-means clustering",
+        "Gradient descent",
+        "Model evaluation"
+      ]
+    },
+    {
+      "code": "HMA501",
+      "title": "Linear Programming",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Formulation of linear programming problems",
+        "Simplex method",
+        "Duality",
+        "Transportation problem",
+        "Assignment problem"
+      ]
+    },
+    {
+      "code": "HMA502",
+      "title": "Graph Theory",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Graphs, paths and cycles",
+        "Trees and connectivity, spanning trees",
+        "Eulerian graphs and Hamiltonian graphs",
+        "Planar graphs",
+        "Graph colouring",
+        "Shortest path algorithms"
+      ]
+    },
+    {
+      "code": "HMA503",
+      "title": "Cryptography",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Classical ciphers",
+        "Modular arithmetic",
+        "RSA public key cryptography",
+        "Coding theory basics"
+      ]
+    },
+    {
+      "code": "HMA504",
+      "title": "Number Theory",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Divisibility and the Euclidean algorithm",
+        "Prime numbers",
+        "Congruences, Chinese remainder theorem",
+        "Fermat's little theorem and Euler's totient function",
+        "Quadratic residues"
+      ]
+    },
+    {
+      "code": "HMA505",
+      "title": "Mathematical Typesetting with LaTeX",
+      "credits": 2.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Document structure in LaTeX",
+        "Typesetting equations",
+        "Beamer presentations",
+        "Technical writing"
+      ]
+    },
+    {
+      "code": "HMA601",
+      "title": "Project / Dissertation",
+      "credits": 6.0,
+      "semester": "VI",
+      "category": "Project",
+      "topics": [
+        "Research methodology",
+        "Literature review",
+        "Dissertation and viva voce"
+      ]
+    }
+  ]
+}

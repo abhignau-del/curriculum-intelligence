@@ -1,0 +1,321 @@
+{
+  "institution": "Riverside College of Science",
+  "name": "B.Sc. Mathematics (Honours)",
+  "source": "Fictional sample",
+  "year": "2025-26",
+  "courses": [
+    {
+      "code": "RMA101",
+      "title": "Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Limits and continuity",
+        "Differentiability and mean value theorems",
+        "Successive differentiation, Leibniz rule",
+        "Taylor's theorem and Maclaurin series",
+        "Maxima and minima of functions of one variable",
+        "Curve tracing"
+      ]
+    },
+    {
+      "code": "RMA102",
+      "title": "Calculus II",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Functions of several variables, partial derivatives",
+        "Double and triple integrals",
+        "Gradient, divergence and curl",
+        "Line integrals and surface integrals",
+        "Green's theorem in the plane"
+      ]
+    },
+    {
+      "code": "RMA103",
+      "title": "Vector Calculus",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Vector differentiation",
+        "Gradient, divergence and curl",
+        "Line integrals, surface integrals and volume integrals",
+        "Green's theorem in the plane",
+        "Stokes's theorem and Gauss divergence theorem"
+      ]
+    },
+    {
+      "code": "RMA104",
+      "title": "Real Analysis I",
+      "credits": 4.0,
+      "semester": "I",
+      "category": "Core",
+      "topics": [
+        "Real number system, completeness property",
+        "Sequences of real numbers, Cauchy sequences",
+        "Convergence of series, comparison and ratio tests",
+        "Continuity and uniform continuity"
+      ]
+    },
+    {
+      "code": "RMA201",
+      "title": "Linear Algebra",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Vector spaces, subspaces, basis and dimension",
+        "Linear transformations, rank-nullity theorem",
+        "Matrix of a linear transformation",
+        "Eigenvalues and eigenvectors, diagonalisation",
+        "Inner product spaces, Gram-Schmidt process"
+      ]
+    },
+    {
+      "code": "RMA202",
+      "title": "Group Theory",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Groups, subgroups and cyclic groups",
+        "Permutation groups",
+        "Cosets and Lagrange's theorem",
+        "Normal subgroups and quotient groups",
+        "Homomorphisms and isomorphism theorems"
+      ]
+    },
+    {
+      "code": "RMA203",
+      "title": "Real Analysis II",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "Riemann integration",
+        "Uniform convergence of sequences and series of functions",
+        "Power series",
+        "Improper integrals"
+      ]
+    },
+    {
+      "code": "RMA204",
+      "title": "Differential Equations",
+      "credits": 4.0,
+      "semester": "II",
+      "category": "Core",
+      "topics": [
+        "First order equations, exact equations",
+        "Linear differential equations with constant coefficients",
+        "Wronskian and variation of parameters",
+        "Mathematical modelling with differential equations"
+      ]
+    },
+    {
+      "code": "RMA301",
+      "title": "Ring Theory",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Rings, integral domains and fields",
+        "Ideals and quotient rings",
+        "Ring homomorphisms",
+        "Polynomial rings"
+      ]
+    },
+    {
+      "code": "RMA302",
+      "title": "Complex Analysis",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Analytic functions, Cauchy-Riemann equations",
+        "Contour integration, Cauchy's integral formula",
+        "Laurent series",
+        "Residue theorem and its applications",
+        "Conformal mapping"
+      ]
+    },
+    {
+      "code": "RMA303",
+      "title": "Probability and Statistics",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Measures of central tendency and dispersion",
+        "Axioms of probability, conditional probability",
+        "Binomial, Poisson and normal distribution",
+        "Correlation and regression",
+        "Tests of significance: t test and chi square test"
+      ]
+    },
+    {
+      "code": "RMA304",
+      "title": "Partial Differential Equations",
+      "credits": 4.0,
+      "semester": "III",
+      "category": "Core",
+      "topics": [
+        "Formation of partial differential equations",
+        "Lagrange's method",
+        "Charpit's method",
+        "Classification of second order equations",
+        "Heat equation, wave equation and Laplace equation by separation of variables"
+      ]
+    },
+    {
+      "code": "RMA401",
+      "title": "Mechanics",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Statics: equilibrium of forces",
+        "Kinematics in one and two dimensions",
+        "Projectile motion",
+        "Central forces",
+        "Simple harmonic motion"
+      ]
+    },
+    {
+      "code": "RMA402",
+      "title": "Numerical Methods",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Errors and error analysis",
+        "Root finding: bisection method, Newton-Raphson method",
+        "Interpolation",
+        "Numerical differentiation and numerical integration: trapezoidal rule, Simpson's rule",
+        "Numerical solution of ODE: Euler's method, Runge-Kutta methods"
+      ]
+    },
+    {
+      "code": "RMA403",
+      "title": "Numerical Methods Lab (C)",
+      "credits": 2.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Programming in C: bisection and Newton-Raphson",
+        "Gauss-Seidel iteration",
+        "Trapezoidal rule and Simpson's rule programs"
+      ]
+    },
+    {
+      "code": "RMA404",
+      "title": "Programming in C",
+      "credits": 4.0,
+      "semester": "IV",
+      "category": "Core",
+      "topics": [
+        "Algorithms and flowcharts",
+        "C programming: data types and control structures",
+        "Arrays and functions",
+        "Pointers and structures"
+      ]
+    },
+    {
+      "code": "RMA501",
+      "title": "Statistical Methods",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Measures of central tendency and dispersion",
+        "Skewness and kurtosis",
+        "Correlation and regression",
+        "Probability distributions: binomial, Poisson and normal",
+        "Tests of significance: t test, chi square test"
+      ]
+    },
+    {
+      "code": "RMA502",
+      "title": "Integral Transforms",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Laplace transform and inverse Laplace transform",
+        "Convolution theorem",
+        "Fourier series",
+        "Fourier transform",
+        "Applications to differential equations"
+      ]
+    },
+    {
+      "code": "RMA503",
+      "title": "Number Theory",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Divisibility and the Euclidean algorithm",
+        "Prime numbers",
+        "Congruences, Chinese remainder theorem",
+        "Fermat's little theorem and Euler's totient function",
+        "Quadratic residues"
+      ]
+    },
+    {
+      "code": "RMA504",
+      "title": "Graph Theory",
+      "credits": 4.0,
+      "semester": "V",
+      "category": "Core",
+      "topics": [
+        "Graphs, paths and cycles",
+        "Trees and connectivity, spanning trees",
+        "Eulerian graphs and Hamiltonian graphs",
+        "Planar graphs",
+        "Graph colouring",
+        "Shortest path algorithms"
+      ]
+    },
+    {
+      "code": "RMA601",
+      "title": "Metric Spaces",
+      "credits": 4.0,
+      "semester": "VI",
+      "category": "Core",
+      "topics": [
+        "Metric spaces, open and closed sets",
+        "Complete metric spaces",
+        "Contraction mapping, Banach fixed point theorem",
+        "Compactness in metric spaces"
+      ]
+    },
+    {
+      "code": "RMA602",
+      "title": "History of Mathematics",
+      "credits": 2.0,
+      "semester": "VI",
+      "category": "Core",
+      "topics": [
+        "Indian mathematics: Aryabhata, Brahmagupta and Bhaskara",
+        "The Kerala school",
+        "Greek mathematics",
+        "Development of calculus"
+      ]
+    },
+    {
+      "code": "RMA603",
+      "title": "Project / Dissertation",
+      "credits": 6.0,
+      "semester": "VI",
+      "category": "Project",
+      "topics": [
+        "Research methodology",
+        "Literature review",
+        "Dissertation and viva voce"
+      ]
+    }
+  ]
+}

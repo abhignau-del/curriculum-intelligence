@@ -1,0 +1,11 @@
+# Real institutional data and outputs never go in the repo
+private-data/
+out/
+*.html
+!docs/*.html
+
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.venv/
+.claude/
