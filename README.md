@@ -17,8 +17,8 @@ Give it your programme and 5–10 peer programmes. It reports:
 - **Alignment by area**, programme structure (courses, credits), and a full
   coverage matrix.
 
-See [`docs/sample-report.html`](docs/sample-report.html) for a report on the
-fictional sample data.
+**[See the sample report](https://abhignau-del.github.io/curriculum-intelligence/sample-report.html)**
+(fictional data; source in [`docs/sample-report.html`](docs/sample-report.html)).
 
 ## No AI, by design
 
