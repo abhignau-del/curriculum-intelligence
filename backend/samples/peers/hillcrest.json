@@ -256,7 +256,7 @@
       "title": "Time Series and Forecasting",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Components of a time series, trend analysis",
         "Moving averages",
@@ -270,7 +270,7 @@
       "title": "Introduction to Machine Learning",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Supervised learning: linear and logistic regression",
         "Decision trees",
@@ -298,7 +298,7 @@
       "title": "Graph Theory",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Graphs, paths and cycles",
         "Trees and connectivity, spanning trees",
@@ -313,7 +313,7 @@
       "title": "Cryptography",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Classical ciphers",
         "Modular arithmetic",
@@ -326,7 +326,7 @@
       "title": "Number Theory",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Divisibility and the Euclidean algorithm",
         "Prime numbers",
@@ -340,7 +340,7 @@
       "title": "Mathematical Typesetting with LaTeX",
       "credits": 2.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Document structure in LaTeX",
         "Typesetting equations",

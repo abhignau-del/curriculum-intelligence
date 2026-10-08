@@ -33,6 +33,9 @@ Optional keys:
   kind_codes           when course_start has `kind` and `num` groups instead of `code`:
                        kind -> prefix (CORE: DSC makes "DSC-13")
   duplicates           merge (default) or number - see below
+  category             category given to every course (default: none, i.e. core)
+  categories           rules [{match: regex on "code title", category: ...}], first match
+                       wins; a category naming elective/optional/DSE/GE marks an elective
   extra_courses        courses typed in by hand (e.g. from scanned pages); give each a
                        `note` saying where it came from. A profile may consist of these
                        alone when the source has no usable syllabus pages.
@@ -213,6 +216,17 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
     aliases = {str(k): str(v) for k, v in (prof.get("aliases") or {}).items()}
     titles = {str(k): str(v) for k, v in (prof.get("titles") or {}).items()}
     kind_codes = {str(k).upper(): str(v) for k, v in (prof.get("kind_codes") or {}).items()}
+    default_category = str(prof.get("category") or "")
+    try:
+        category_rules = [(re.compile(r["match"], re.I), str(r["category"])) for r in prof.get("categories") or []]
+    except (KeyError, TypeError) as exc:
+        raise ProfileError(f"{profile_path.name}: each 'categories' entry needs match and category ({exc})") from None
+    except re.error as exc:
+        raise ProfileError(f"{profile_path.name}: 'categories': bad regular expression ({exc})") from None
+
+    def category_for(code: str, title: str) -> str:
+        label = f"{code} {title}"
+        return next((cat for rx, cat in category_rules if rx.search(label)), default_category)
 
     # Read every file first, so the split-word vocabulary covers the whole programme.
     files = []
@@ -320,7 +334,8 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
                 continue
             try:
                 course = Course(code=code, title=title or code, credits=credits,
-                                semester=str(semester) or None, topics=topics)
+                                semester=str(semester) or None, topics=topics,
+                                category=category_for(code, title))
             except ValidationError as exc:
                 excluded.append((code, title, f"invalid: {exc.errors()[0]['msg']}"))
                 continue
@@ -329,6 +344,8 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
 
     for extra in prof.get("extra_courses") or []:
         note = extra.pop("note", "typed in by hand")
+        if "category" not in extra:
+            extra["category"] = category_for(str(extra.get("code", "")), str(extra.get("title", "")))
         try:
             course = Course(**extra)
         except (ValidationError, TypeError) as exc:

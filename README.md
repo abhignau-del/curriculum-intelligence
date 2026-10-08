@@ -37,6 +37,15 @@ Coverage levels for a skill in a programme:
 | △ mentioned once | exactly one syllabus line |
 | · not found | no evidence |
 
+**Core and electives.** A course whose category names it an option
+(elective, optional, choice, basket, DSE, GE) is an elective; anything else
+counts as core. Each programme is analysed twice, all courses and core courses
+only, so every covered skill has a basis: *core* (the compulsory courses alone
+cover it) or *elective only* (marked ○ in the matrix). Gaps are judged on
+everything a programme offers, and each finding states the split, e.g.
+"covered by 83% of programmes (5 of 6: in the core of 4, only as an elective
+in 1)". PDF profiles set categories with `category` / `categories` rules.
+
 Course overlap compares each pair of courses by the weighted vocabulary of
 their titles and topics (TF‑IDF cosine). Pairs at 40% or more are flagged,
 60% or more as High. Theory–lab pairs are labelled as expected.
@@ -152,10 +161,11 @@ institutional data in the git-ignored `private-data/` folder.
 1. **Benchmark, gaps, overlap** (v0.1).
 2. **Web interface**: programmes library, interactive benchmark with evidence (v0.2).
 3. **PDF import** with per-document profiles, tested on real syllabi (v0.3).
-4. CO/PO and outcome mapping.
-5. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
-6. Industry skill demand.
-7. More discipline taxonomies.
+4. **Core vs elective coverage** (v0.4).
+5. CO/PO and outcome mapping.
+6. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
+7. Industry skill demand.
+8. More discipline taxonomies.
 
 ## Licence
 

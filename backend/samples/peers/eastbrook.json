@@ -270,7 +270,7 @@
       "title": "Scientific Computing",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Scientific computing with Python",
         "Monte Carlo simulation",
@@ -283,7 +283,7 @@
       "title": "Functional Analysis",
       "credits": 4.0,
       "semester": "VI",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Normed linear spaces",
         "Banach spaces",
@@ -297,7 +297,7 @@
       "title": "Differential Geometry",
       "credits": 4.0,
       "semester": "VI",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Curves in space, Serret-Frenet formulae",
         "Curvature and torsion",

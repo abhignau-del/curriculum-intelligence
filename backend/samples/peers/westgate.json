@@ -176,7 +176,7 @@
       "title": "Statistical Computing with R",
       "credits": 2.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "R programming basics",
         "Data visualisation using ggplot2",
@@ -189,7 +189,7 @@
       "title": "Data Analysis with Python",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Data handling with pandas",
         "Exploratory data analysis",
@@ -217,7 +217,7 @@
       "title": "Mathematical Modelling",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Model formulation and validation",
         "Population models and logistic growth",
@@ -231,7 +231,7 @@
       "title": "Financial Mathematics",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Compound interest and present value",
         "Annuities",
@@ -244,7 +244,7 @@
       "title": "Spreadsheet Modelling",
       "credits": 2.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Spreadsheet functions in MS Excel",
         "Charts and dashboards",

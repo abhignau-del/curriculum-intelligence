@@ -203,7 +203,7 @@
       "title": "Stochastic Processes",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Markov chains",
         "Random walk",
@@ -230,7 +230,7 @@
       "title": "Mathematical Modelling",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Model formulation and validation",
         "Population models and logistic growth",
@@ -244,7 +244,7 @@
       "title": "Financial Mathematics",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Compound interest and present value",
         "Annuities",
@@ -257,7 +257,7 @@
       "title": "Data Analysis with Python",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Data handling with pandas",
         "Exploratory data analysis",
@@ -271,7 +271,7 @@
       "title": "Mathematical Typesetting with LaTeX",
       "credits": 2.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Document structure in LaTeX",
         "Typesetting equations",

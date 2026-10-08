@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, download, saveBlob } from "./api";
 import {
-  byStatus, cellEvidence, gapSentence, LEVEL_LABEL, LEVEL_MARK, parseSaved, pct, peerCourses, resolveSelection,
+  byStatus, cellEvidence, coverMark, gapSentence, parseSaved, pct, peerCourses, peersSplit, resolveSelection,
   selectionProblem, skillsByArea, splitOnTerm, toSaved,
 } from "./benchmarkops";
 import type { BenchmarkResult, Evidence, ProgrammeSummary, SkillResult, TaxonomyView } from "./types";
@@ -110,6 +110,7 @@ function Results({ r, stale, onCell, onError, selection }: {
   const distinctive = byStatus(r.skills, "distinctive");
   const flagged = r.overlaps.filter(o => !o.theory_lab_pair);
   const n = r.peers.length;
+  const split = peersSplit(r);
 
   return (
     <div style={{ opacity: stale ? 0.6 : 1, display: "flex", flexDirection: "column", gap: 14 }}>
@@ -140,7 +141,7 @@ function Results({ r, stale, onCell, onError, selection }: {
           <div className="gap" key={s.id}>
             <div>
               <b>{s.name}</b>
-              <p>{gapSentence(s, n)}</p>
+              <p>{gapSentence(s, n, split)}</p>
               {s.own_evidence.length > 0 && (
                 <details><summary>The one line found here</summary><EvidenceList evidence={s.own_evidence} /></details>
               )}
@@ -149,16 +150,17 @@ function Results({ r, stale, onCell, onError, selection }: {
             <div style={{ textAlign: "right" }}>
               <span className={`pill ${s.priority}`}>{s.priority}</span>
               <div className="muted small">{pct(100 * s.peer_share)} of peers</div>
+              {split && <div className="muted small">core {pct(100 * s.peer_core_share)}</div>}
             </div>
           </div>
         ))}
       </div>
 
       <Section id="watch" title="Watch list" hint="Covered by 30–49% of peers and not here: not yet a norm, but worth discussing." />
-      <SkillTable rows={watch} empty="Nothing on the watch list." onCell={onCell} />
+      <SkillTable rows={watch} empty="Nothing on the watch list." onCell={onCell} split={split} />
 
       <Section id="strengths" title="Distinctive strengths" hint="Covered here, and fewer than 30% of peers even mention it." />
-      <SkillTable rows={distinctive} empty="No distinctive strengths." onCell={onCell} />
+      <SkillTable rows={distinctive} empty="No distinctive strengths." onCell={onCell} split={split} />
 
       <Section id="overlap" title="Course overlap"
                hint="Pairs of this programme's courses whose topic lists share much of their vocabulary. Flagged at 40%, High at 60%. Theory–lab pairs are expected to overlap." />
@@ -208,7 +210,7 @@ function Results({ r, stale, onCell, onError, selection }: {
       </div>
 
       <Section id="matrix" title="Coverage matrix"
-               hint="✓ covered (a course title, or two or more syllabus lines) · △ mentioned in one line · · not found. Click any mark to see the syllabus lines behind it." />
+               hint="✓ covered (a course title, or two or more syllabus lines) · ○ covered, but only by elective courses · △ mentioned in one line · · not found. Click any mark to see the syllabus lines behind it." />
       <div className="card flush matrix-wrap">
         <table className="matrix">
           <thead><tr>
@@ -249,17 +251,18 @@ function Section({ id, title, hint }: { id: string; title: string; hint?: string
 }
 
 function MatrixCell({ s, peer, onCell, own }: { s: SkillResult; peer: string | null; onCell: Props2["onCell"]; own?: boolean }) {
-  const { level } = cellEvidence(s, peer);
+  const { level, basis } = cellEvidence(s, peer);
+  const m = coverMark(level, basis);
   return (
-    <button className={`cell c-${level} ${own ? "own" : ""}`} onClick={() => onCell(s, peer)}
-            aria-label={`${s.name}, ${peer ?? "programme under review"}: ${LEVEL_LABEL[level]}`}>
-      {LEVEL_MARK[level]}
+    <button className={`cell ${m.css} ${own ? "own" : ""}`} onClick={() => onCell(s, peer)}
+            aria-label={`${s.name}, ${peer ?? "programme under review"}: ${m.label}`}>
+      {m.mark}
     </button>
   );
 }
 type Props2 = { onCell: (s: SkillResult, peer: string | null) => void };
 
-function SkillTable({ rows, empty, onCell }: { rows: SkillResult[]; empty: string } & Props2) {
+function SkillTable({ rows, empty, onCell, split }: { rows: SkillResult[]; empty: string; split: boolean } & Props2) {
   if (!rows.length) return <div className="card"><p className="muted">{empty}</p></div>;
   return (
     <div className="card flush">
@@ -271,8 +274,8 @@ function SkillTable({ rows, empty, onCell }: { rows: SkillResult[]; empty: strin
               {s.own_evidence.length > 0 && <details><summary>Evidence here</summary><EvidenceList evidence={s.own_evidence} /></details>}
               {s.status === "watch" && <details><summary>Where peers cover it</summary><PeerCourses s={s} /></details>}
             </td>
-            <td><button className={`cell c-${s.own_level}`} onClick={() => onCell(s, null)}>{LEVEL_MARK[s.own_level]}</button> {LEVEL_LABEL[s.own_level]}</td>
-            <td className="n">{pct(100 * s.peer_share)}</td>
+            <td><OwnMark s={s} onCell={onCell} /></td>
+            <td className="n">{pct(100 * s.peer_share)}{split && <div className="muted small">core {pct(100 * s.peer_core_share)}</div>}</td>
             <td className="n">{pct(100 * s.peer_touched_share)}</td>
           </tr>))}
         </tbody>
@@ -281,10 +284,16 @@ function SkillTable({ rows, empty, onCell }: { rows: SkillResult[]; empty: strin
   );
 }
 
+function OwnMark({ s, onCell }: { s: SkillResult } & Props2) {
+  const m = coverMark(s.own_level, s.own_basis);
+  return <><button className={`cell ${m.css}`} onClick={() => onCell(s, null)}>{m.mark}</button> {m.label}</>;
+}
+
 function PeerCourses({ s }: { s: SkillResult }) {
   return (
     <ul className="ev">{peerCourses(s).map(([peer, titles]) => (
-      <li key={peer}><b>{peer}</b>{s.peer_levels[peer] === "touched" && <i> (mentioned once)</i>}: {titles.join(", ")}</li>
+      <li key={peer}><b>{peer}</b>{s.peer_levels[peer] === "touched" && <i> (mentioned once)</i>}
+        {s.peer_basis[peer] === "elective" && <i> (elective only)</i>}: {titles.join(", ")}</li>
     ))}</ul>
   );
 }
@@ -305,7 +314,8 @@ function EvidenceList({ evidence }: { evidence: Evidence[] }) {
 function EvidenceDialog({ r, skill, peer, terms, onClose }: {
   r: BenchmarkResult; skill: SkillResult; peer: string | null; terms: string[]; onClose: () => void;
 }) {
-  const { level, evidence } = cellEvidence(skill, peer);
+  const { level, basis, evidence } = cellEvidence(skill, peer);
+  const m = coverMark(level, basis);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -315,7 +325,7 @@ function EvidenceDialog({ r, skill, peer, terms, onClose }: {
     <div className="modal-back" onClick={onClose}>
       <div className="modal card" role="dialog" aria-label="Evidence" onClick={e => e.stopPropagation()}>
         <div className="row"><h2>{skill.name}</h2><span className="spacer" /><button className="btn small" onClick={onClose} autoFocus>Close</button></div>
-        <p><b>{peer ?? r.programme.institution}</b>{peer === null && " (under review)"}: <span className={`c-${level}`}>{LEVEL_MARK[level]}</span> {LEVEL_LABEL[level]}</p>
+        <p><b>{peer ?? r.programme.institution}</b>{peer === null && " (under review)"}: <span className={m.css}>{m.mark}</span> {m.label}</p>
         {evidence.length ? <EvidenceList evidence={evidence} />
           : <p className="muted">No syllabus line names this skill. Phrases that would count: {terms.slice(0, 12).join(", ")}{terms.length > 12 ? ", …" : ""}.</p>}
       </div>

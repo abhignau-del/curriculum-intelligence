@@ -117,6 +117,7 @@ table.matrix tr.area td { background: var(--soft); font-weight: 600; text-align:
 .c-covered { color: var(--good); font-weight: 700; }
 .c-touched { color: var(--md); }
 .c-absent { color: var(--line); }
+.c-elective { color: var(--good); }
 
 .course-table td:nth-child(3) { min-width: 220px; }
 .topics { margin: 4px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
@@ -130,3 +131,4 @@ table.matrix tr.area td { background: var(--soft); font-weight: 600; text-align:
   .select-grid { grid-template-columns: minmax(0, 1fr); }
   main { padding: 12px 16px 40px; }
 }
+.chip.elective { background: transparent; border: 1px dashed var(--line); }

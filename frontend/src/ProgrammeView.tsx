@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { api, download } from "./api";
 import type { ProgrammeDetail } from "./types";
 
+/** Mirrors Course.is_elective on the server: category words that mark an option. */
+const isElective = (category: string) => /elective|optional|choice|basket|\bDSE\b|\bGE\b/i.test(category);
+
 interface Props {
   id: string;
   skillName: (id: string) => string;
@@ -47,7 +50,7 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
 
       <div className="card flush">
         <table className="course-table">
-          <thead><tr><th>Sem</th><th>Code</th><th>Course</th><th className="n">Credits</th><th>Skills found</th></tr></thead>
+          <thead><tr><th>Sem</th><th>Code</th><th>Course</th><th>Type</th><th className="n">Credits</th><th>Skills found</th></tr></thead>
           <tbody>
             {p.courses.map(c => (
               <tr key={c.code}>
@@ -60,6 +63,7 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
                     </details>
                   ) : c.title}
                 </td>
+                <td>{c.category ? <span className={`chip ${isElective(c.category) ? "elective" : ""}`}>{c.category}</span> : ""}</td>
                 <td className="n">{c.credits ?? ""}</td>
                 <td>
                   <div className="chips">

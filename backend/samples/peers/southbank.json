@@ -93,7 +93,7 @@
       "title": "Graph Theory",
       "credits": 4.0,
       "semester": "II",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Graphs, paths and cycles",
         "Trees and connectivity, spanning trees",
@@ -163,7 +163,7 @@
       "title": "Data Analysis with Python",
       "credits": 4.0,
       "semester": "III",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Data handling with pandas",
         "Exploratory data analysis",
@@ -177,7 +177,7 @@
       "title": "Databases for Data Science",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Relational database concepts",
         "SQL queries",
@@ -203,7 +203,7 @@
       "title": "Introduction to Machine Learning",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Supervised learning: linear and logistic regression",
         "Decision trees",
@@ -231,7 +231,7 @@
       "title": "Operations Research",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Queueing theory",
         "Game theory",
@@ -244,7 +244,7 @@
       "title": "Mathematical Modelling",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Model formulation and validation",
         "Population models and logistic growth",
@@ -258,7 +258,7 @@
       "title": "Scientific Computing",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Scientific computing with Python",
         "Monte Carlo simulation",

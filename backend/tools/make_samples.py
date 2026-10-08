@@ -211,6 +211,18 @@ PEERS = [
 ]
 
 
+# Courses every sample programme offers as options rather than compulsory core.
+ELECTIVES = {"ml", "data", "finance", "crypto", "stochastic", "timeseries", "r_stats", "sql", "excel",
+             "latex", "sci_comp", "diffgeo", "functional", "or", "number", "graph", "history", "transforms",
+             "modelling", "seminar"}
+
+
+def category(key: str) -> str:
+    if key in ("project", "internship"):
+        return "Project"
+    return "Elective" if key in ELECTIVES else "Core"
+
+
 def build(name: str, prefix: str, keys: list[str]) -> Programme:
     library = {**LIBRARY, **OWN_EXTRA}
     courses = []
@@ -221,7 +233,7 @@ def build(name: str, prefix: str, keys: list[str]) -> Programme:
         sem = min(i // per_sem, 5)
         courses.append(Course(
             code=f"{prefix}MA{sem + 1}{i % per_sem + 1:02d}", title=title, credits=credits,
-            semester=roman[sem], category="Project" if key in ("project", "internship") else "Core",
+            semester=roman[sem], category=category(key),
             topics=topics))
     return Programme(institution=name, name="B.Sc. Mathematics (Honours)",
                      source="Fictional sample", year="2025-26", courses=courses)

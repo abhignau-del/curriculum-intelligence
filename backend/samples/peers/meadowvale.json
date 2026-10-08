@@ -175,7 +175,7 @@
       "title": "Integral Transforms",
       "credits": 4.0,
       "semester": "IV",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Laplace transform and inverse Laplace transform",
         "Convolution theorem",
@@ -229,7 +229,7 @@
       "title": "Number Theory",
       "credits": 4.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Divisibility and the Euclidean algorithm",
         "Prime numbers",
@@ -243,7 +243,7 @@
       "title": "History of Mathematics",
       "credits": 2.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Indian mathematics: Aryabhata, Brahmagupta and Bhaskara",
         "The Kerala school",
@@ -256,7 +256,7 @@
       "title": "Seminar",
       "credits": 2.0,
       "semester": "V",
-      "category": "Core",
+      "category": "Elective",
       "topics": [
         "Seminar presentation",
         "Mathematical writing"

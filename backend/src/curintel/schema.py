@@ -8,10 +8,15 @@ that is all a course needs. AcadDoc courses are converted into this shape by
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+# Category words that mark a course as an option rather than part of the compulsory core.
+ELECTIVE = re.compile(r"elective|optional|choice|basket|\bDSE\b|\bGE\b", re.I)
 
 
 class _Model(BaseModel):
@@ -26,6 +31,11 @@ class Course(_Model):
     category: str = ""                     # Core / Elective / Skill / ...
     topics: list[str] = Field(default_factory=list)    # one syllabus line each
     outcomes: list[str] = Field(default_factory=list)
+
+    @property
+    def is_elective(self) -> bool:
+        """An option the student chooses, judged from `category`; anything else counts as core."""
+        return bool(ELECTIVE.search(self.category))
 
 
 class Programme(_Model):

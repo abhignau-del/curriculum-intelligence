@@ -1,5 +1,7 @@
 export type Level = "covered" | "touched" | "absent";
 export type Status = "gap" | "watch" | "distinctive" | "aligned" | "uncommon";
+/** How a covered skill is covered: by compulsory courses, or only by electives. */
+export type Basis = "core" | "elective";
 
 export interface ProgrammeSummary {
   id: string; institution: string; name: string; year: string; source: string;
@@ -37,6 +39,9 @@ export interface SkillResult {
   peer_share: number; peer_touched_share: number;
   peer_levels: Record<string, Level>;           // peer institution -> level
   peer_evidence: Record<string, Evidence[]>;
+  own_basis: Basis | null;
+  peer_basis: Record<string, Basis>;          // peers that cover it -> basis
+  peer_core_share: number;
 }
 
 export interface Overlap {
@@ -51,6 +56,7 @@ export interface BenchmarkResult {
   unmapped: { course: string; line: string }[];
   taxonomy: string;
   alignment: number | null;
+  records_electives: string[];               // programmes that mark any course as elective
   areas: { id: string; name: string; alignment: number | null; core_skills: number }[];
   skills: SkillResult[];
   overlaps: Overlap[];
