@@ -82,6 +82,20 @@ def cmd_template(args) -> None:
     print(f"Blank programme workbook written to {args.output}")
 
 
+def cmd_serve(args) -> None:
+    import uvicorn
+
+    from .api import create_app, seed
+    from .store import DEFAULT_DB, Store
+
+    store = Store(args.db or DEFAULT_DB)
+    if args.seed and store.is_empty():
+        print(f"Loaded {seed(store)} sample programmes")
+    print(f"Curriculum Intelligence on http://{args.host}:{args.port}  (library: {store.path})")
+    uvicorn.run(create_app(store, _taxonomy(args.taxonomy)), host=args.host, port=args.port,
+                log_level="warning")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="curintel", description=__doc__)
     parser.add_argument("--version", action="version", version=f"curintel {__version__}")
@@ -111,6 +125,14 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("template", help="write a blank Excel workbook for entering a programme")
     p.add_argument("-o", "--output", default="programme-template.xlsx")
     p.set_defaults(func=cmd_template)
+
+    p = sub.add_parser("serve", help="run the web interface")
+    p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--host", default="127.0.0.1", help="no sign-in: keep 127.0.0.1 unless the network is trusted")
+    p.add_argument("--db", help="library database file (default: backend/curintel.db)")
+    p.add_argument("--seed", action="store_true", help="load the sample programmes into an empty library")
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_serve)
 
     args = parser.parse_args(argv)
     try:

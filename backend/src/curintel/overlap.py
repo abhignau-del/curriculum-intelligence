@@ -101,14 +101,14 @@ def find_overlaps(programme: Programme, taxonomy: Taxonomy | None = None,
     pairs = []
     for i, j in combinations(range(n), 2):
         vi, vj = vectors[i], vectors[j]
-        shared = vi.keys() & vj.keys()
+        shared = sorted(vi.keys() & vj.keys())
         contributions = {t: vi[t] * vj[t] for t in shared}
         sim = sum(contributions.values())
         if sim < threshold:
             continue
         # Phrases first, then single words; skip a term that shares a word
         # with one already listed, so fragments like "rule simpson" drop out.
-        top = sorted(contributions, key=lambda t: (" " not in t, -contributions[t]))
+        top = sorted(contributions, key=lambda t: (" " not in t, -round(contributions[t], 9), t))
         listed: list[str] = []
         used: set[str] = set()
         for t in top:

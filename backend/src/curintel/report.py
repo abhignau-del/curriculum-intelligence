@@ -33,6 +33,7 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
         "generated_by": f"curintel {__version__}",
         "programme": {"institution": b.own.institution, "name": b.own.name, "year": b.own.year},
         "peers": [{"institution": p.institution, "name": p.name, "year": p.year} for p in b.peers],
+        "unmapped": [{"course": c, "line": line} for c, line in unmapped_lines(b.own, b.taxonomy)],
         "taxonomy": b.taxonomy.name,
         "alignment": b.alignment,
         "areas": [{"id": a.area, "name": a.name, "alignment": a.alignment, "core_skills": a.core_skills}
@@ -42,6 +43,7 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
             "own_level": r.own.level, "own_evidence": [ev(e) for e in r.own.evidence],
             "peer_share": r.peer_share, "peer_touched_share": r.peer_touched_share,
             "peer_levels": r.peer_levels,
+            "peer_evidence": {p: [ev(e) for e in evs] for p, evs in r.peer_evidence.items() if evs},
         } for r in b.rows],
         "overlaps": [o.__dict__ for o in overlaps],
         "structure": [s.__dict__ for s in b.structure],
@@ -104,11 +106,9 @@ def _own_evidence(row: SkillRow) -> str:
 def _peer_evidence(b: Benchmark, row: SkillRow) -> str:
     items = []
     for peer in b.peers:
-        if row.peer_levels[peer.label] == "absent":
+        courses = row.peer_courses.get(peer.label)
+        if not courses:
             continue
-        courses = sorted({c.title for c in peer.courses
-                          if any(h.skill == row.skill for line in [c.title, *c.topics, *c.outcomes]
-                                 for h in b.taxonomy.match(line))})
         mark = "" if row.peer_levels[peer.label] == "covered" else " <i>(mentioned once)</i>"
         items.append(f"<b>{escape(peer.label)}</b>{mark}: {escape(', '.join(courses))}")
     return _evidence_list(items)

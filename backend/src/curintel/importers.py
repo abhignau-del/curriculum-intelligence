@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import json
 import re
+from io import BytesIO
 from pathlib import Path
+from typing import BinaryIO
 
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -59,16 +61,23 @@ def from_acaddoc(paths: list[Path], institution: str, name: str,
     files: list[Path] = []
     for p in paths:
         files.extend(sorted(p.glob("*.json")) if p.is_dir() else [p])
+    return from_acaddoc_texts([(f.name, f.read_text(encoding="utf-8")) for f in files],
+                              institution, name, programme_code)
+
+
+def from_acaddoc_texts(files: list[tuple[str, str]], institution: str, name: str,
+                       programme_code: str | None = None) -> Programme:
+    """As `from_acaddoc`, from (file name, JSON text) pairs, e.g. browser uploads."""
     courses = []
-    for f in files:
+    for fname, text in files:
         try:
-            data = json.loads(f.read_text(encoding="utf-8"))
+            data = json.loads(text)
             if programme_code and not any(programme_code in o.get("programmes", [])
                                           for o in data.get("offerings", [])):
                 continue
             courses.append(course_from_acaddoc(data))
-        except (KeyError, TypeError, json.JSONDecodeError, ValidationError) as exc:
-            raise ImportError_(f"{f.name}: not an AcadDoc course file ({exc})") from exc
+        except (KeyError, TypeError, AttributeError, json.JSONDecodeError, ValidationError) as exc:
+            raise ImportError_(f"{fname}: not an AcadDoc course file ({exc})") from exc
     if not courses:
         raise ImportError_("no courses found" + (f" for programme {programme_code}" if programme_code else ""))
     return Programme(institution=institution, name=name, source="AcadDoc", courses=courses)
@@ -82,15 +91,20 @@ def _split(cell) -> list[str]:
     return [part.strip(" \t-•") for part in re.split(r"[\n;]", str(cell)) if part.strip(" \t-•")]
 
 
-def from_workbook(path: str | Path) -> Programme:
-    path = Path(path)
+def from_workbook(source: str | Path | bytes | BinaryIO, filename: str | None = None) -> Programme:
+    """Read the template workbook from a path, bytes or a binary file object."""
+    if isinstance(source, (str, Path)):
+        filename = filename or Path(source).name
+    elif isinstance(source, bytes):
+        source = BytesIO(source)
+    fname = filename or "workbook"
     try:
-        wb = load_workbook(path, read_only=True, data_only=True)
+        wb = load_workbook(source, read_only=True, data_only=True)
     except Exception as exc:  # openpyxl raises several unrelated types
-        raise ImportError_(f"{path.name}: can't open as an Excel workbook ({exc})") from exc
+        raise ImportError_(f"{fname}: can't open as an Excel workbook ({exc})") from exc
     for sheet in ("Programme", "Courses"):
         if sheet not in wb.sheetnames:
-            raise ImportError_(f"{path.name}: no sheet named {sheet!r} (use `curintel template`)")
+            raise ImportError_(f"{fname}: no sheet named {sheet!r} (use `curintel template`)")
 
     meta = {}
     labels = dict(PROGRAMME_FIELDS)
@@ -102,7 +116,7 @@ def from_workbook(path: str | Path) -> Programme:
     header = [str(h).strip() if h is not None else "" for h in next(rows, [])]
     missing = [c for c in ("Code", "Title") if c not in header]
     if missing:
-        raise ImportError_(f"{path.name}: Courses sheet has no {', '.join(missing)} column")
+        raise ImportError_(f"{fname}: Courses sheet has no {', '.join(missing)} column")
     col = {name: header.index(name) for name in COURSE_COLUMNS if name in header}
 
     def get(row, name):
@@ -126,13 +140,13 @@ def from_workbook(path: str | Path) -> Programme:
             ))
         except (ValidationError, ValueError) as exc:
             first = exc.errors()[0] if isinstance(exc, ValidationError) else {"loc": ("Credits",), "msg": str(exc)}
-            raise ImportError_(f"{path.name}: Courses row {n}, {first['loc'][0]}: {first['msg']}") from exc
+            raise ImportError_(f"{fname}: Courses row {n}, {first['loc'][0]}: {first['msg']}") from exc
     try:
         return Programme(**meta, courses=courses)
     except ValidationError as exc:
         first = exc.errors()[0]
         where = "Courses sheet" if first["loc"][0] == "courses" else f"Programme sheet, {first['loc'][0]}"
-        raise ImportError_(f"{path.name}: {where}: {first['msg']}") from exc
+        raise ImportError_(f"{fname}: {where}: {first['msg']}") from exc
 
 
 def write_template(path: str | Path) -> None:

@@ -46,7 +46,7 @@ on real syllabi.
 
 ## Getting started
 
-Requires Python 3.11+.
+Requires Python 3.11+ and, for the web interface, Node.js 20+.
 
 ```bash
 cd backend
@@ -56,6 +56,34 @@ pip install -e ".[dev]"
 python -m curintel report samples/riverside.json samples/peers -o report.html
 ```
 
+### Web interface
+
+```bash
+cd frontend
+npm install
+npm run build
+cd ../backend
+python -m curintel serve --seed     # then open http://127.0.0.1:8000
+```
+
+`--seed` loads the sample programmes into an empty library. The library is
+kept in `backend/curintel.db` (`--db` to use another file).
+
+- **Programmes**: upload `.xlsx` (from the template) or `.json` programmes, or
+  import AcadDoc course files; open one to see the skills found in each course
+  and the syllabus lines nothing matched.
+- **Benchmark**: pick the programme under review and tick its peers; the
+  results update as you change the selection. Click any mark in the coverage
+  matrix to see the syllabus lines behind it, with the matched phrase
+  highlighted. Download the HTML report or the JSON data.
+
+There is no sign-in: it is meant to run on your own computer and listens on
+127.0.0.1 only. Don't expose it on a network unless everyone who can reach it
+may change the library.
+
+For development, run `npm run dev` in `frontend/` (port 5173, proxies `/api`
+to the server on port 8000).
+
 ### Commands
 
 | Command | What it does |
@@ -64,6 +92,7 @@ python -m curintel report samples/riverside.json samples/peers -o report.html
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
+| `curintel serve [--seed] [--port 8000] [--db FILE]` | run the web interface |
 
 ### Programme files
 
@@ -88,8 +117,8 @@ institutional data in the git-ignored `private-data/` folder.
 
 ## Roadmap
 
-1. **Benchmark, gaps, overlap** (this release).
-2. Web interface: upload programmes, browse findings.
+1. **Benchmark, gaps, overlap** (v0.1).
+2. **Web interface**: programmes library, interactive benchmark with evidence.
 3. CO/PO and outcome mapping.
 4. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
 5. Industry skill demand.

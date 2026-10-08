@@ -105,6 +105,12 @@ class SkillRow:
     peer_touched_share: float              # fraction at "touched"
     status: Status
     priority: Optional[Literal["High", "Medium"]] = None
+    peer_evidence: dict[str, list[Evidence]] = field(default_factory=dict)
+
+    @property
+    def peer_courses(self) -> dict[str, list[str]]:
+        """Peer label -> titles of its courses with evidence (peers with none omitted)."""
+        return {p: sorted({e.course_title for e in ev}) for p, ev in self.peer_evidence.items() if ev}
 
     @property
     def peers_covering(self) -> list[str]:
@@ -182,8 +188,9 @@ def benchmark(own: Programme, peers: list[Programme], taxonomy: Taxonomy) -> Ben
         share = sum(lv == "covered" for lv in levels.values()) / len(peers)
         touched = sum(lv == "touched" for lv in levels.values()) / len(peers)
         status, priority = _classify(own_profile[skill.id].level, share, share + touched)
+        evidence = {label: prof[skill.id].evidence for label, prof in peer_profiles.items()}
         rows.append(SkillRow(skill.id, skill.name, skill.area, own_profile[skill.id],
-                             levels, share, touched, status, priority))
+                             levels, share, touched, status, priority, evidence))
     areas = []
     for area in taxonomy.areas:
         area_rows = [r for r in rows if r.area == area.id]

@@ -3,9 +3,14 @@ private-data/
 out/
 *.html
 !docs/*.html
+!frontend/index.html
 
 __pycache__/
 *.egg-info/
 .pytest_cache/
 .venv/
 .claude/
+
+*.db
+node_modules/
+frontend/dist/
