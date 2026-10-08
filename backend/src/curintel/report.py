@@ -204,8 +204,8 @@ def _section_structure(b: Benchmark) -> str:
                    for i, s in enumerate(b.structure))
     rows += (f"<tr><td><i>Peer median</i></td><td class='n'>{_num(b.peer_median_courses)}</td>"
              f"<td class='n'>{_num(b.peer_median_credits)}</td></tr>")
-    return ("<h2>Programme structure</h2><div class='card'><table><tr><th>Programme</th>"
-            "<th class='n'>Courses</th><th class='n'>Credits</th></tr>" + rows + "</table></div>")
+    return ("<h2>Programme structure</h2><p class='muted'>Everything listed for each programme, including every elective alternative, so these are not the credits a student earns. A dash means some courses have no credits recorded.</p><div class='card'><table><tr><th>Programme</th>"
+            "<th class='n'>Courses offered</th><th class='n'>Credits offered</th></tr>" + rows + "</table></div>")
 
 
 def _section_matrix(b: Benchmark) -> str:

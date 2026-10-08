@@ -149,7 +149,8 @@ def from_workbook(source: str | Path | bytes | BinaryIO, filename: str | None = 
         raise ImportError_(f"{fname}: {where}: {first['msg']}") from exc
 
 
-def write_template(path: str | Path) -> None:
+def write_template(path: str | Path | BinaryIO, programme: Programme | None = None) -> None:
+    """A blank template, or (with `programme`) one filled in for review and editing."""
     wb = Workbook()
     head = Font(bold=True, color="FFFFFF")
     fill = PatternFill("solid", fgColor="2F4A6D")
@@ -157,8 +158,8 @@ def write_template(path: str | Path) -> None:
     ws = wb.active
     ws.title = "Programme"
     ws.append(["Field", "Value"])
-    for label, _ in PROGRAMME_FIELDS:
-        ws.append([label, None])
+    for label, attr in PROGRAMME_FIELDS:
+        ws.append([label, getattr(programme, attr) if programme else None])
     ws.append([])
     ws.append(["Institution and Programme are required. Source: the URL or document the syllabus came from."])
     ws.column_dimensions["A"].width = 18
@@ -166,6 +167,11 @@ def write_template(path: str | Path) -> None:
 
     cs = wb.create_sheet("Courses")
     cs.append(COURSE_COLUMNS)
+    for c in (programme.courses if programme else []):
+        cs.append([c.code, c.title, c.semester, c.credits, c.category,
+                   "\n".join(c.topics), "\n".join(c.outcomes)])
+        for cell in cs[cs.max_row]:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
     widths = [10, 34, 10, 8, 12, 70, 50]
     for i, w in enumerate(widths):
         cs.column_dimensions[chr(65 + i)].width = w

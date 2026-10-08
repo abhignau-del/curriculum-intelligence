@@ -48,3 +48,11 @@ def test_threshold_is_respected(tax, riverside):
 
 def test_too_few_courses():
     assert find_overlaps(prog("X", ("Only", ["one"]))) == []
+
+
+def test_problems_and_exercises_course_is_a_practical_companion(tax):
+    topics = ["Exact differential equations", "Integrating factors", "Clairaut's equation"]
+    p = prog("X", ("Ordinary Differential Equations", topics),
+             ("Problems and Exercises in Ordinary Differential Equations", topics), ("Groups", ["Cosets"]))
+    (pair,) = find_overlaps(p, tax)
+    assert pair.theory_lab_pair

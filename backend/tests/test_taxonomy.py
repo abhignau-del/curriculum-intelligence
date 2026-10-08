@@ -59,3 +59,11 @@ def test_duplicate_skill_id_rejected():
 def test_missing_field_rejected():
     with pytest.raises(TaxonomyError):
         Taxonomy.from_dict({"name": "t", "areas": [{"id": "a", "skills": []}]})
+
+
+def test_terms_found_missing_in_real_syllabi(tax):
+    # added after surveying eight real B.Sc. Mathematics syllabi (2026-10-08)
+    assert "real_analysis" in skills(tax, "Ratio test and root test for infinite series")
+    assert "linear_algebra" in skills(tax, "Eigen values and the Cayley-Hamilton theorem")
+    assert "ode" in skills(tax, "Phase plane analysis of dynamical systems")
+    assert "probability" in skills(tax, "Weak law of large numbers")

@@ -96,3 +96,13 @@ def test_samples_tell_the_intended_story(tax, riverside, peers):
 def test_unmapped_lines(tax):
     p = prog("X", ("Calculus", ["Limits and continuity", "Arrays and functions"]))
     assert unmapped_lines(p, tax) == [("C0", "Arrays and functions")]
+
+
+def test_structure_credits_unknown_when_any_course_lacks_them(tax):
+    from curintel.schema import Course, Programme
+    full = prog("Full", ("Calculus", []), ("Algebra", []))
+    part = Programme(institution="Part", name="B.Sc.", courses=[
+        Course(code="A", title="Calculus", credits=4), Course(code="B", title="Algebra")])
+    b = benchmark(full, [part, prog("Other", ("Topology", []))], tax)
+    assert [s.credits for s in b.structure] == [8, None, 4]
+    assert b.peer_median_credits == 4          # unknown totals are left out of the median

@@ -23,34 +23,40 @@ areas:
                 differentiability, differentiation, integration, mean value theorem,
                 taylor series, taylor s theorem, maclaurin series, partial derivative,
                 multiple integral, double integral, triple integral, maxima and minima,
-                successive differentiation, improper integral, curve tracing, jacobian]
+                successive differentiation, improper integral, curve tracing, jacobian,
+                chain rule, polar coordinates, arc length, l hospital s rule, l hospital rule, beta and gamma functions, beta function, gamma function, reduction formula, curvature, asymptote, rolle s theorem]
       - id: real_analysis
         name: Real Analysis
         terms: [real analysis, sequences and series, sequence of real numbers, cauchy sequence,
                 convergence of series, uniform convergence, riemann integral, riemann integration,
                 completeness property, supremum and infimum, bolzano weierstrass, pointwise convergence,
-                mathematical analysis, uniform continuity, power series]
+                mathematical analysis, uniform continuity, power series,
+                infinite series, ratio test, root test, integral test, comparison test, alternating series, cauchy criterion, conditional convergence, absolute convergence, convergent sequence, monotone sequence, archimedean property, limit superior]
       - id: linear_algebra
         name: Linear Algebra
         terms: [linear algebra, vector space, linear transformation, linear map, eigenvalue,
                 eigenvector, matrix, matrices, rank of a matrix, inner product space,
                 basis and dimension, determinant, diagonalisation, diagonalization,
-                system of linear equations, systems of linear equations, gram schmidt]
+                system of linear equations, systems of linear equations, gram schmidt,
+                eigen value, eigen vector, cayley hamilton, gaussian elimination, rank nullity, characteristic polynomial, orthogonal matrix]
       - id: abstract_algebra
         name: Abstract Algebra
         terms: [abstract algebra, group theory, group, subgroup, ring theory, ring, ideal,
                 field theory, integral domain, homomorphism, isomorphism theorem, coset,
                 lagrange s theorem, permutation group, cyclic group, normal subgroup,
-                quotient group, algebraic structure]
+                quotient group, algebraic structure,
+                unique factorization domain, unique factorization, eisenstein criterion, class equation, cycle notation, sylow, polynomial ring, galois theory, field extension]
       - id: complex_analysis
         name: Complex Analysis
         terms: [complex analysis, complex variable, analytic function, cauchy riemann equation,
                 contour integration, contour integral, residue theorem, residue, conformal mapping,
-                laurent series, cauchy s integral formula, theory of complex functions]
+                laurent series, cauchy s integral formula, theory of complex functions,
+                cauchy integral formula, complex plane, liouville s theorem, mobius transformation, bilinear transformation, taylor and laurent series]
       - id: topology
         name: Topology
         terms: [topology, topological space, open set, compactness, connectedness, homeomorphism,
-                point set topology]
+                point set topology,
+                closed set, limit point, connected subset, interior point, closure of a set]
       - id: metric_spaces
         name: Metric Spaces
         terms: [metric space, complete metric space, contraction mapping, banach fixed point]
@@ -58,7 +64,8 @@ areas:
         name: Number Theory
         terms: [number theory, divisibility, congruence, prime number, diophantine equation,
                 fermat s little theorem, chinese remainder theorem, quadratic residue,
-                euler s totient, arithmetic function, euclidean algorithm, division algorithm, modular arithmetic]
+                euler s totient, arithmetic function, euclidean algorithm, division algorithm, modular arithmetic,
+                quadratic reciprocity, fundamental theorem of arithmetic, wilson s theorem]
       - id: discrete_mathematics
         name: Discrete Mathematics & Combinatorics
         terms: [discrete mathematics, discrete structure, combinatorics, recurrence relation,
@@ -91,7 +98,8 @@ areas:
         terms: [ordinary differential equation, differential equation, first order equation,
                 linear differential equation, wronskian, initial value problem, exact equation,
                 higher order linear equation, series solution, method of undetermined coefficients,
-                variation of parameters]
+                variation of parameters,
+                phase plane, boundary value problem, dynamical system, picard, successive approximation, constant coefficients, euler cauchy equation, cauchy euler equation]
       - id: pde
         name: Partial Differential Equations
         terms: [partial differential equation, heat equation, wave equation, laplace equation,
@@ -101,12 +109,14 @@ areas:
         name: Mechanics
         terms: [mechanics, statics, dynamics, kinematics, newton s laws, rigid body, projectile,
                 central force, equilibrium of forces, simple harmonic motion, lagrangian mechanics,
-                hamiltonian mechanics]
+                hamiltonian mechanics,
+                motion of a particle, moment of a force, virtual work, centre of gravity, center of gravity, friction]
       - id: modelling
         name: Mathematical Modelling
         terms: [mathematical modelling, mathematical modeling, modelling, modeling,
                 population model, epidemic model, compartmental model, predator prey,
-                model formulation, sir model, logistic growth, population dynamics]
+                model formulation, sir model, logistic growth, population dynamics,
+                growth and decay]
       - id: optimisation
         name: Optimisation
         terms: [optimisation, optimization, linear programming, simplex method, duality,
@@ -180,7 +190,8 @@ areas:
         terms: [probability, random variable, probability distribution, binomial distribution,
                 poisson distribution, normal distribution, bayes theorem, bayes s theorem,
                 conditional probability, mathematical expectation, central limit theorem,
-                moment generating function]
+                moment generating function,
+                law of large numbers, cumulative distribution, negative binomial, distribution function, joint distribution, chebyshev s inequality]
       - id: inference
         name: Statistical Inference
         terms: [statistical inference, inferential statistics, hypothesis testing,

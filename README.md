@@ -92,6 +92,7 @@ to the server on port 8000).
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
+| `curintel extract-pdf PROFILE.yaml -o draft.xlsx` | draft a programme from syllabus PDFs (see below); review the draft before benchmarking |
 | `curintel serve [--seed] [--port 8000] [--db FILE]` | run the web interface |
 
 ### Programme files
@@ -101,10 +102,41 @@ A programme is JSON (see `backend/samples/`) or an Excel workbook made from
 category, topics (one per line in the cell, or separated by `;`) and
 optional outcomes.
 
+### Importing syllabus PDFs
+
+Every university lays out its syllabus differently, so there is no single
+parser. Instead, a short **profile** (YAML) describes one document: where each
+course starts, where its topic content begins and ends, and which courses
+belong to the programme. `extract-pdf` turns the PDF into a draft, writes it to
+the Excel template (or JSON), and lists every course it found or left out so
+you can check it against the document. Install the PDF support first:
+`pip install -e ".[pdf]"`.
+
+```yaml
+institution: Example University
+name: B.Sc. (Hons.) Mathematics
+source: https://example.edu/syllabus.pdf
+files:
+  - {path: syllabus.pdf, pages: "11-63"}
+course_start: '^(?P<code>MA[CES]\d{3}):\s*(?P<title>.+)$'   # e.g. "MAC151: Real Analysis-1"
+content_start: 'Course Contents:'
+content_end: '(?m)^Books Recommended'
+include: '^MA[CES]'          # leave out courses meant for other departments
+```
+
+Profiles can also merge parts of one course, number elective alternatives that
+share a label, correct typos and garbled titles, drop page furniture, and add
+courses typed in by hand (for scanned pages), each with a note saying where it
+came from. The full list of options is at the top of
+[`pdfimport.py`](backend/src/curintel/pdfimport.py).
+
+Scanned PDFs (images without a text layer) are not read; type those courses in
+by hand or use the Excel template.
+
 ### Taxonomy
 
 The built-in taxonomy is `backend/src/curintel/taxonomies/mathematics.yaml`
-(undergraduate mathematics, 48 skills in 6 areas). Copy and extend it, or
+(undergraduate mathematics, 48 skills in 6 areas, extended after a survey of real syllabi). Copy and extend it, or
 write one for another discipline, and pass it with `-t`.
 
 ## Sample data
@@ -118,11 +150,12 @@ institutional data in the git-ignored `private-data/` folder.
 ## Roadmap
 
 1. **Benchmark, gaps, overlap** (v0.1).
-2. **Web interface**: programmes library, interactive benchmark with evidence.
-3. CO/PO and outcome mapping.
-4. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
-5. Industry skill demand.
-6. More discipline taxonomies.
+2. **Web interface**: programmes library, interactive benchmark with evidence (v0.2).
+3. **PDF import** with per-document profiles, tested on real syllabi (v0.3).
+4. CO/PO and outcome mapping.
+5. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
+6. Industry skill demand.
+7. More discipline taxonomies.
 
 ## Licence
 

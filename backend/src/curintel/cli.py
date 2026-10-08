@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
+from .pdfimport import ProfileError
 from .overlap import find_overlaps
 from .report import render_html, to_dict
 from .schema import load_programme, save_programme
@@ -77,6 +78,31 @@ def cmd_import_acaddoc(args) -> None:
     print(f"{len(prog.courses)} courses written to {args.output}")
 
 
+def cmd_extract_pdf(args) -> None:
+    from .importers import write_template
+    from .pdfimport import extract
+
+    tax = _taxonomy(args.taxonomy)
+    words = {w for s in tax.skills.values() for t in s.terms for w in t.split() if len(w) > 2}
+    draft = extract(args.profile, extra_vocab=words)
+    out = Path(args.output)
+    if out.suffix.lower() == ".xlsx":
+        write_template(out, draft.programme)
+    else:
+        save_programme(draft.programme, out)
+    print(f"{len(draft.courses)} courses written to {out} - review before benchmarking")
+    for d in draft.courses:
+        flag = f"  ! {'; '.join(d.warnings)}" if d.warnings else ""
+        print(f"  {d.course.code:<14} {d.course.title[:50]:<50} {len(d.course.topics):>3} topics  "
+              f"({d.file} p{d.page}){flag}")
+    for code, where in draft.merged:
+        print(f"  (merged another part of {code} from {where})")
+    if draft.excluded:
+        print(f"\nLeft out ({len(draft.excluded)}):")
+        for code, title, why in draft.excluded:
+            print(f"  {code:<14} {title[:50]:<50} {why}")
+
+
 def cmd_template(args) -> None:
     write_template(args.output)
     print(f"Blank programme workbook written to {args.output}")
@@ -97,6 +123,10 @@ def cmd_serve(args) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Windows consoles default to a code page that cannot show every syllabus character.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
     parser = argparse.ArgumentParser(prog="curintel", description=__doc__)
     parser.add_argument("--version", action="version", version=f"curintel {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -122,6 +152,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", required=True)
     p.set_defaults(func=cmd_import_acaddoc)
 
+    p = sub.add_parser("extract-pdf", help="draft a programme from syllabus PDFs using a profile (review it after)")
+    p.add_argument("profile", help="YAML profile describing the PDF layout (see pdfimport.py)")
+    p.add_argument("-o", "--output", required=True, help=".xlsx (for review in Excel) or .json")
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_extract_pdf)
+
     p = sub.add_parser("template", help="write a blank Excel workbook for entering a programme")
     p.add_argument("-o", "--output", default="programme-template.xlsx")
     p.set_defaults(func=cmd_template)
@@ -137,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         args.func(args)
-    except (ImportError_, TaxonomyError, ValueError, OSError) as exc:
+    except (ImportError_, ProfileError, TaxonomyError, ValueError, OSError) as exc:
         # ValidationError is a ValueError; show the first problem plainly.
         if isinstance(exc, ValidationError):
             err = exc.errors()[0]

@@ -20,7 +20,7 @@ from .taxonomy import Taxonomy, normalise
 
 HIGH = 0.6
 MODERATE = 0.4
-LAB_WORDS = ("lab", "laboratory", "practical", "workshop")
+LAB_WORDS = ("lab", "laboratory", "practical", "practicals", "workshop", "exercises", "tutorial")
 
 # English function words, plus words every syllabus uses.
 STOPWORDS = frozenset("""

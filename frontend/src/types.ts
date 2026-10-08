@@ -54,5 +54,5 @@ export interface BenchmarkResult {
   areas: { id: string; name: string; alignment: number | null; core_skills: number }[];
   skills: SkillResult[];
   overlaps: Overlap[];
-  structure: { label: string; courses: number; credits: number }[];
+  structure: { label: string; courses: number; credits: number | null }[];
 }

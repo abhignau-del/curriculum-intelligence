@@ -129,7 +129,7 @@ class AreaScore:
 class StructureRow:
     label: str
     courses: int
-    credits: float
+    credits: Optional[float]                # None when any course has no credits recorded
 
 
 @dataclass
@@ -144,7 +144,7 @@ class Benchmark:
 
     @property
     def peer_median_credits(self) -> Optional[float]:
-        values = [s.credits for s in self.structure[1:] if s.credits]
+        values = [s.credits for s in self.structure[1:] if s.credits is not None]
         return median(values) if values else None
 
     @property
@@ -196,5 +196,7 @@ def benchmark(own: Programme, peers: list[Programme], taxonomy: Taxonomy) -> Ben
         area_rows = [r for r in rows if r.area == area.id]
         areas.append(AreaScore(area.id, area.name, _alignment(area_rows),
                                sum(r.peer_share >= GAP_SHARE for r in area_rows)))
-    structure = [StructureRow(p.label, len(p.courses), p.total_credits) for p in [own, *peers]]
+    structure = [StructureRow(p.label, len(p.courses),
+                              p.total_credits if all(c.credits is not None for c in p.courses) else None)
+                 for p in [own, *peers]]
     return Benchmark(own, peers, taxonomy, rows, areas, _alignment(rows), structure)

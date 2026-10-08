@@ -196,12 +196,13 @@ function Results({ r, stale, onCell, onError, selection }: {
         </table>
       </div>
 
-      <Section id="structure" title="Programme structure" />
+      <Section id="structure" title="Programme structure"
+               hint="Everything listed for each programme, including every elective alternative, so these are not the credits a student earns. A dash means some courses have no credits recorded." />
       <div className="card flush">
         <table>
-          <thead><tr><th>Programme</th><th className="n">Courses</th><th className="n">Credits</th></tr></thead>
+          <thead><tr><th>Programme</th><th className="n">Courses offered</th><th className="n">Credits offered</th></tr></thead>
           <tbody>{r.structure.map((s, i) => (
-            <tr key={s.label}><td>{s.label}{i === 0 && <b> (under review)</b>}</td><td className="n">{s.courses}</td><td className="n">{s.credits}</td></tr>))}
+            <tr key={s.label}><td>{s.label}{i === 0 && <b> (under review)</b>}</td><td className="n">{s.courses}</td><td className="n">{s.credits ?? "–"}</td></tr>))}
           </tbody>
         </table>
       </div>
