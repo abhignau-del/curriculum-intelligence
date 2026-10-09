@@ -33,6 +33,7 @@ Coverage levels for a skill in a programme:
 
 | Level | Rule |
 |---|---|
+| ● a core course on it | a compulsory course is on the skill (see below) |
 | ✓ covered | a course title names it, or two or more syllabus lines do |
 | △ mentioned once | exactly one syllabus line |
 | · not found | no evidence |
@@ -45,6 +46,16 @@ cover it) or *elective only* (marked ○ in the matrix). Gaps are judged on
 everything a programme offers, and each finding states the split, e.g.
 "covered by 83% of programmes (5 of 6: in the core of 4, only as an elective
 in 1)". PDF profiles set categories with `category` / `categories` rules.
+
+**Courses on a skill.** Covering a skill can mean a whole course on it, or a
+few examples inside a course about something else (growth-and-decay models
+in a differential-equations course are not a modelling course). A course
+counts as *on* a skill when its title names the skill, or when the skill
+appears in at least half of its topic lines (and in at least three). Each
+gap then says how many of the covering peers have such a course, and whether
+it is core: *"5 of them have a course on it (1 core, 4 elective)"*. A core
+course on a skill is marked ● in the matrix. Like the core/elective split,
+this is reported alongside the gap rules and does not change them.
 
 Course overlap compares each pair of courses by the weighted vocabulary of
 their titles and topics (TF‑IDF cosine). Pairs at 40% or more are flagged,
@@ -162,10 +173,11 @@ institutional data in the git-ignored `private-data/` folder.
 2. **Web interface**: programmes library, interactive benchmark with evidence (v0.2).
 3. **PDF import** with per-document profiles, tested on real syllabi (v0.3).
 4. **Core vs elective coverage** (v0.4).
-5. CO/PO and outcome mapping.
-6. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
-7. Industry skill demand.
-8. More discipline taxonomies.
+5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
+6. CO/PO and outcome mapping.
+7. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
+8. Industry skill demand.
+9. More discipline taxonomies.
 
 ## Licence
 

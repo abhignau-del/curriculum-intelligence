@@ -24,6 +24,13 @@ is profiled twice - all courses, and core courses only - so a covered skill has
 a *basis*: ``core`` if the compulsory courses alone cover it, otherwise
 ``elective`` (a student may graduate without it). Classification above uses all
 courses (what the programme offers); the basis is reported alongside it.
+
+Courses on a skill: covering a skill can mean a whole course on it or a few
+lines inside courses about something else. A course is *on* a skill when its
+title names the skill, or when the skill appears in at least half of its topic
+lines (and in at least three). For each programme that covers a skill, the
+report says whether it has a course on it, and whether that course is core.
+This, too, is reported alongside the classification and does not change it.
 """
 from __future__ import annotations
 
@@ -42,6 +49,8 @@ GAP_SHARE = 0.5
 HIGH_SHARE = 0.7
 WATCH_SHARE = 0.3
 LEVEL_SCORE = {"covered": 1.0, "touched": 0.5, "absent": 0.0}
+COURSE_ON_SHARE = 0.5          # share of a course's topic lines that makes it a course on the skill
+COURSE_ON_MIN_LINES = 3
 
 
 @dataclass(frozen=True)
@@ -53,11 +62,32 @@ class Evidence:
     term: str
 
 
+@dataclass(frozen=True)
+class CourseOn:
+    """A course whose subject is the skill (see the module notes)."""
+    code: str
+    title: str
+    elective: bool
+    by: Literal["title", "topics"]         # named in the title, or most topic lines
+
+
+def course_basis(courses_on: list[CourseOn]) -> Optional[Basis]:
+    """``core`` if a core course is on the skill, ``elective`` if only electives are, else None."""
+    if not courses_on:
+        return None
+    return "elective" if all(c.elective for c in courses_on) else "core"
+
+
 @dataclass
 class SkillCoverage:
     skill: str
     level: Level
     evidence: list[Evidence]
+    courses_on: list[CourseOn] = field(default_factory=list)
+
+    @property
+    def course_basis(self) -> Optional[Basis]:
+        return course_basis(self.courses_on)
 
     @property
     def courses(self) -> list[str]:
@@ -85,6 +115,24 @@ def profile(programme: Programme, taxonomy: Taxonomy, *, core_only: bool = False
                 continue
             seen.add(hit.skill)
             evidence[hit.skill].append(Evidence(course.code, course.title, fld, line, hit.term))
+    courses_on: dict[str, list[CourseOn]] = {s: [] for s in taxonomy.skills}
+    for course in programme.courses:
+        if core_only and course.is_elective:
+            continue
+        in_title = {h.skill for h in taxonomy.match(course.title)}
+        lines: dict[str, int] = {}
+        for topic in course.topics:
+            for skill in {h.skill for h in taxonomy.match(topic)}:
+                lines[skill] = lines.get(skill, 0) + 1
+        for skill in taxonomy.skills:
+            if skill in in_title:
+                by: Optional[str] = "title"
+            elif (lines.get(skill, 0) >= COURSE_ON_MIN_LINES
+                  and lines[skill] >= COURSE_ON_SHARE * len(course.topics)):
+                by = "topics"
+            else:
+                continue
+            courses_on[skill].append(CourseOn(course.code, course.title, course.is_elective, by))
     result = {}
     for skill, ev in evidence.items():
         distinct_lines = {(e.course_code, e.field, e.line) for e in ev}
@@ -94,7 +142,7 @@ def profile(programme: Programme, taxonomy: Taxonomy, *, core_only: bool = False
             level = "touched"
         else:
             level = "absent"
-        result[skill] = SkillCoverage(skill, level, ev)
+        result[skill] = SkillCoverage(skill, level, ev, courses_on[skill])
     return result
 
 
@@ -118,6 +166,26 @@ class SkillRow:
     peer_evidence: dict[str, list[Evidence]] = field(default_factory=dict)
     own_basis: Optional[Basis] = None             # set when covered here
     peer_basis: dict[str, Basis] = field(default_factory=dict)   # peers that cover it -> basis
+    peer_courses_on: dict[str, list[CourseOn]] = field(default_factory=dict)  # peers with a course on it
+
+    @property
+    def own_course_basis(self) -> Optional[Basis]:
+        return self.own.course_basis
+
+    @property
+    def peer_course_basis(self) -> dict[str, Basis]:
+        """Peers with a course on the skill -> ``core`` if one of those courses is core."""
+        return {p: course_basis(cs) for p, cs in self.peer_courses_on.items()}  # type: ignore[misc]
+
+    @property
+    def peer_course_share(self) -> float:
+        """Fraction of peers with a course on the skill."""
+        return len(self.peer_courses_on) / max(1, len(self.peer_levels))
+
+    @property
+    def peer_core_course_share(self) -> float:
+        """Fraction of peers with a core course on the skill."""
+        return sum(b == "core" for b in self.peer_course_basis.values()) / max(1, len(self.peer_levels))
 
     @property
     def peer_core_share(self) -> float:
@@ -179,7 +247,8 @@ class Benchmark:
 
     def by_status(self, status: Status) -> list[SkillRow]:
         rows = [r for r in self.rows if r.status == status]
-        return sorted(rows, key=lambda r: (-r.peer_share, -r.peer_core_share, r.name))
+        return sorted(rows, key=lambda r: (-r.peer_share, -r.peer_core_share,
+                                           -r.peer_core_course_share, r.name))
 
     @property
     def records_electives(self) -> list[str]:
@@ -229,9 +298,11 @@ def benchmark(own: Programme, peers: list[Programme], taxonomy: Taxonomy) -> Ben
         evidence = {label: prof[skill.id].evidence for label, prof in peer_profiles.items()}
         peer_basis = {label: b for label in levels
                       if (b := basis(peer_profiles[label][skill.id], peer_core[label][skill.id]))}
+        courses_on = {label: prof[skill.id].courses_on for label, prof in peer_profiles.items()
+                      if prof[skill.id].courses_on}
         rows.append(SkillRow(skill.id, skill.name, skill.area, own_profile[skill.id],
                              levels, share, touched, status, priority, evidence,
-                             basis(own_profile[skill.id], own_core[skill.id]), peer_basis))
+                             basis(own_profile[skill.id], own_core[skill.id]), peer_basis, courses_on))
     areas = []
     for area in taxonomy.areas:
         area_rows = [r for r in rows if r.area == area.id]

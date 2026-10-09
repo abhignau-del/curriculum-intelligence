@@ -114,6 +114,7 @@ table.matrix tr.area td { background: var(--soft); font-weight: 600; text-align:
 .cell { width: 28px; height: 24px; border: 1px solid transparent; border-radius: 4px; background: none; cursor: pointer; }
 .cell:hover { border-color: var(--accent); }
 .cell.own { background: var(--soft); }
+.c-course { color: var(--good); font-weight: 700; }
 .c-covered { color: var(--good); font-weight: 700; }
 .c-touched { color: var(--md); }
 .c-absent { color: var(--line); }

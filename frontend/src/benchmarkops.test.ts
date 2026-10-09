@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  basisCounts, byStatus, cellEvidence, coverMark, gapSentence, parseSaved, peerCourses, peersSplit, resolveSelection,
+  basisCounts, byStatus, cellEvidence, courseOnNote, coursesOnSentence, coverMark, gapSentence, parseSaved, peerCourses, peersSplit, resolveSelection,
   selectionProblem, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, ProgrammeSummary, SkillResult } from "./types";
+import type { BenchmarkResult, CourseOn, ProgrammeSummary, SkillResult } from "./types";
 
 const prog = (id: string, institution = `Inst ${id}`): ProgrammeSummary =>
   ({ id, institution, name: "B.Sc.", year: "", source: "", courses: 1, credits: 4, updated_at: "" });
@@ -13,7 +13,9 @@ const skill = (over: Partial<SkillResult> = {}): SkillResult => ({
   id: "python", name: "Python", area: "computational", status: "gap", priority: "High",
   own_level: "absent", own_evidence: [], peer_share: 0.75, peer_touched_share: 0,
   peer_levels: { P1: "covered", P2: "covered", P3: "covered", P4: "absent" },
-  peer_evidence: {}, own_basis: null, peer_basis: {}, peer_core_share: 0, ...over,
+  peer_evidence: {}, own_basis: null, peer_basis: {}, peer_core_share: 0,
+  own_courses_on: [], own_course_basis: null, peer_courses_on: {}, peer_course_basis: {},
+  peer_course_share: 0, peer_core_course_share: 0, ...over,
 });
 
 describe("selection", () => {
@@ -57,16 +59,17 @@ describe("results", () => {
 
   it("writes the gap sentence", () => {
     expect(gapSentence(skill(), 4)).toBe(
-      "Python is covered by 75% of benchmarked programmes (3 of 4) but is not found in this curriculum.");
-    expect(gapSentence(skill({ own_level: "touched" }), 4)).toMatch(/only one syllabus line here\.$/);
+      "Python is covered by 75% of benchmarked programmes (3 of 4) but is not found in this curriculum."
+      + " None of them has a course on it: they teach it inside other courses.");
+    expect(gapSentence(skill({ own_level: "touched" }), 4)).toMatch(/only one syllabus line here\. None/);
   });
 
   it("finds the evidence behind a matrix cell", () => {
     const ev = { course: "X1", course_title: "Python Lab", field: "title" as const, line: "Python Lab", term: "python" };
     const s = skill({ own_evidence: [ev], own_level: "covered", peer_evidence: { P1: [ev] } });
-    expect(cellEvidence(s, null)).toEqual({ level: "covered", basis: null, evidence: [ev] });
+    expect(cellEvidence(s, null)).toEqual({ level: "covered", basis: null, courseBasis: null, coursesOn: [], evidence: [ev] });
     expect(cellEvidence(s, "P1").evidence).toEqual([ev]);
-    expect(cellEvidence(s, "P4")).toEqual({ level: "absent", basis: null, evidence: [] });
+    expect(cellEvidence(s, "P4")).toEqual({ level: "absent", basis: null, courseBasis: null, coursesOn: [], evidence: [] });
     expect(cellEvidence(s, "unknown").level).toBe("absent");
   });
 
@@ -123,5 +126,48 @@ describe("core and electives", () => {
       records_electives: records } as unknown as BenchmarkResult);
     expect(peersSplit(r(["Peer U"]))).toBe(true);
     expect(peersSplit(r(["Own U"]))).toBe(false);     // only the programme under review records them
+  });
+});
+
+describe("courses on a skill", () => {
+  const on = (title: string, elective: boolean): CourseOn => ({ course: title.slice(0, 3), course_title: title, elective, by: "title" });
+  const s = skill({
+    peer_levels: { P1: "covered", P2: "covered", P3: "covered", P4: "absent" },
+    peer_courses_on: { P1: [on("Modelling", false)], P2: [on("Modelling Lab", true)] },
+    peer_course_basis: { P1: "core", P2: "elective" }, peer_course_share: 0.5, peer_core_course_share: 0.25,
+  });
+
+  it("says how many covering peers have a course on it", () => {
+    expect(coursesOnSentence(s)).toBe(" 2 of them have a course on it.");
+    expect(coursesOnSentence(s, true)).toBe(" 2 of them have a course on it (1 core, 1 elective).");
+    const one = skill({ peer_courses_on: { P1: [on("Python", false)] }, peer_course_basis: { P1: "core" } });
+    expect(coursesOnSentence(one, true)).toBe(" 1 of them has a course on it (core).");
+    const allE = skill({ peer_courses_on: { P1: [on("A", true)], P2: [on("B", true)] },
+                         peer_course_basis: { P1: "elective", P2: "elective" } });
+    expect(coursesOnSentence(allE, true)).toBe(" 2 of them have a course on it (all elective).");
+    expect(coursesOnSentence(skill({ peer_levels: { P1: "touched" } }))).toBe("");   // nobody covers it
+    expect(gapSentence(s, 4, true)).toMatch(/curriculum\. 2 of them have a course on it \(1 core, 1 elective\)\.$/);
+  });
+
+  it("names the core courses in the note", () => {
+    const mixed = [on("Probability Theory", true), on("Probability and Statistics", false), on("Probability and Statistics", false)];
+    expect(courseOnNote(mixed, true)).toBe("a core course on it: Probability and Statistics");
+    expect(courseOnNote([on("LaTeX", true)], true)).toBe("an elective course on it: LaTeX");
+    expect(courseOnNote(mixed)).toBe("a course on it: Probability Theory, Probability and Statistics");
+  });
+
+  it("marks a core course on it with its own glyph", () => {
+    expect(coverMark("covered", "core", "core")).toEqual({ mark: "●", label: "A core course on it", css: "c-course" });
+    expect(coverMark("covered", "elective", "elective").label).toBe("Covered only by electives (an elective course on it)");
+    expect(coverMark("covered", "core", "elective")).toEqual({ mark: "✓", label: "Covered (an elective course on it)", css: "c-covered" });
+    expect(cellEvidence(s, "P1").courseBasis).toBe("core");
+    expect(cellEvidence(s, "P2").coursesOn.map(c => c.course_title)).toEqual(["Modelling Lab"]);
+    expect(cellEvidence(s, "P3").courseBasis).toBeNull();
+  });
+
+  it("breaks ties between equal gaps by core-course share", () => {
+    const a = skill({ name: "A", peer_share: 0.5, peer_core_share: 0.4, peer_core_course_share: 0 });
+    const b = skill({ name: "B", peer_share: 0.5, peer_core_share: 0.4, peer_core_course_share: 0.2 });
+    expect(byStatus([a, b], "gap").map(x => x.name)).toEqual(["B", "A"]);
   });
 });

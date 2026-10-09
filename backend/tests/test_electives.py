@@ -60,10 +60,11 @@ def test_reports_show_the_split(tax):
     b = benchmark(own, peers, tax)
     html = render_html(b, [])
     assert "(2 of 2: in the core of 1, only as an elective in 1)" in html
-    assert "<i>(elective only)</i>" in html
+    assert "<i>(elective only; an elective course on it: Python Programming)</i>" in html
     # the cell itself, not the legend (which always shows ○)
-    assert "<td class='c-elective' title='B: Covered only by electives'>○</td>" in html
-    assert "<td class='c-covered' title='A: Covered'>✓</td>" in html
+    assert ("<td class='c-elective' title='B: Covered only by electives (an elective course on it)'>○</td>"
+            in html)
+    assert "<td class='c-course' title='A: A core course on it'>●</td>" in html
     assert "Programmes that record no electives" in html and "Own, A" in html
     d = to_dict(b, [])
     py = next(s for s in d["skills"] if s["id"] == "python")

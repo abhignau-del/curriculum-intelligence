@@ -14,13 +14,18 @@ from .overlap import OverlapPair
 
 LEVEL_MARK = {"covered": ("✓", "Covered"), "touched": ("△", "Mentioned once"), "absent": ("·", "Not found")}
 ELECTIVE_MARK = ("○", "Covered only by electives")
+COURSE_MARK = ("●", "A core course on it")
 
 
-def _mark(level: str, basis: str | None) -> tuple[str, str, str]:
+def _mark(level: str, basis: str | None, course_basis: str | None = None) -> tuple[str, str, str]:
     """(glyph, label, css class) for one coverage cell."""
+    if course_basis == "core":
+        return (*COURSE_MARK, "c-course")
+    note = " (an elective course on it)" if course_basis == "elective" else ""
     if level == "covered" and basis == "elective":
-        return (*ELECTIVE_MARK, "c-elective")
-    return (*LEVEL_MARK[level], f"c-{level}")
+        return ELECTIVE_MARK[0], ELECTIVE_MARK[1] + note, "c-elective"
+    glyph, label = LEVEL_MARK[level]
+    return glyph, label + note, f"c-{level}"
 
 
 def _peers_split(b: Benchmark) -> bool:
@@ -43,6 +48,9 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
     def ev(e):
         return {"course": e.course_code, "course_title": e.course_title, "field": e.field,
                 "line": e.line, "term": e.term}
+
+    def on(cs):
+        return [{"course": c.code, "course_title": c.title, "elective": c.elective, "by": c.by} for c in cs]
     return {
         "generated_by": f"curintel {__version__}",
         "programme": {"institution": b.own.institution, "name": b.own.name, "year": b.own.year},
@@ -59,6 +67,10 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
             "peer_share": r.peer_share, "peer_touched_share": r.peer_touched_share,
             "peer_levels": r.peer_levels,
             "own_basis": r.own_basis, "peer_basis": r.peer_basis, "peer_core_share": r.peer_core_share,
+            "own_courses_on": on(r.own.courses_on), "own_course_basis": r.own_course_basis,
+            "peer_courses_on": {p: on(cs) for p, cs in r.peer_courses_on.items()},
+            "peer_course_basis": r.peer_course_basis, "peer_course_share": r.peer_course_share,
+            "peer_core_course_share": r.peer_core_course_share,
             "peer_evidence": {p: [ev(e) for e in evs] for p, evs in r.peer_evidence.items() if evs},
         } for r in b.rows],
         "overlaps": [o.__dict__ for o in overlaps],
@@ -100,7 +112,7 @@ table.matrix td:first-child,table.matrix th:first-child{text-align:left;white-sp
 table.matrix th.peer{writing-mode:vertical-rl;transform:rotate(180deg);text-transform:none;letter-spacing:0;height:150px;font-weight:500}
 table.matrix th.own{writing-mode:vertical-rl;transform:rotate(180deg);text-transform:none;letter-spacing:0;color:var(--ink)}
 table.matrix tr.area td{background:var(--soft);font-weight:600;text-align:left}
-.c-covered{color:var(--ok);font-weight:700}.c-elective{color:var(--ok)}.small{font-size:12px;white-space:nowrap}.c-touched{color:var(--md)}.c-absent{color:var(--line)}
+.c-course{color:var(--ok);font-weight:700}.c-covered{color:var(--ok);font-weight:700}.c-elective{color:var(--ok)}.small{font-size:12px;white-space:nowrap}.c-touched{color:var(--md)}.c-absent{color:var(--line)}
 td.ownc{background:var(--soft)}
 @media (max-width:640px){table.gaps tr{display:grid;grid-template-columns:1fr auto auto;column-gap:8px}
 table.gaps tr:first-child{display:none}table.gaps td{border:0;padding:6px 0}
@@ -119,20 +131,54 @@ def _own_evidence(row: SkillRow) -> str:
                            f"“{escape(e.line)}”" for e in row.own.evidence])
 
 
+def _course_on_note(b: Benchmark, cs) -> str:
+    """'a core course on it: Title', naming the core courses when there are any."""
+    if not _peers_split(b):
+        kind, titles = "", [c.title for c in cs]
+    elif all(c.elective for c in cs):
+        kind, titles = "elective ", [c.title for c in cs]
+    else:
+        kind, titles = "core ", [c.title for c in cs if not c.elective]
+    article = "an" if kind.startswith("e") else "a"
+    return f"{article} {kind}course on it: {', '.join(dict.fromkeys(titles))}"
+
+
 def _peer_evidence(b: Benchmark, row: SkillRow) -> str:
     items = []
     for peer in b.peers:
         courses = row.peer_courses.get(peer.label)
         if not courses:
             continue
+        notes = []
         if row.peer_levels[peer.label] != "covered":
-            mark = " <i>(mentioned once)</i>"
+            notes.append("mentioned once")
         elif row.peer_basis.get(peer.label) == "elective":
-            mark = " <i>(elective only)</i>"
-        else:
-            mark = ""
+            notes.append("elective only")
+        if peer.label in row.peer_courses_on:
+            notes.append(_course_on_note(b, row.peer_courses_on[peer.label]))
+        mark = f" <i>({escape('; '.join(notes))})</i>" if notes else ""
         items.append(f"<b>{escape(peer.label)}</b>{mark}: {escape(', '.join(courses))}")
     return _evidence_list(items)
+
+
+def _courses_on_sentence(b: Benchmark, r: SkillRow) -> str:
+    """How many of the covering peers have a whole course on the skill."""
+    if not r.peers_covering:
+        return ""
+    n = len(r.peer_courses_on)
+    if n == 0:
+        return " None of them has a course on it: they teach it inside other courses."
+    has = "has" if n == 1 else "have"
+    if not _peers_split(b):
+        return f" {n} of them {has} a course on it."
+    core = sum(v == "core" for v in r.peer_course_basis.values())
+    if core == n:
+        kind = "all core" if n > 1 else "core"
+    elif core == 0:
+        kind = "all elective" if n > 1 else "elective"
+    else:
+        kind = f"{core} core, {n - core} elective"
+    return f" {n} of them {has} a course on it ({kind})."
 
 
 def _gap_sentence(b: Benchmark, r: SkillRow) -> str:
@@ -142,12 +188,17 @@ def _gap_sentence(b: Benchmark, r: SkillRow) -> str:
     if _peers_split(b):
         split = f": in the core of {len(r.peers_core)}, only as an elective in {len(r.peers_elective_only)}"
     return (f"{escape(r.name)} is covered by {_pct(100 * r.peer_share)} of benchmarked programmes "
-            f"({len(r.peers_covering)} of {len(b.peers)}{split}) but {here}.")
+            f"({len(r.peers_covering)} of {len(b.peers)}{split}) but {here}."
+            + _courses_on_sentence(b, r))
 
 
 def _share_cell(b: Benchmark, r: SkillRow) -> str:
-    core = f"<br><span class='muted small'>core {_pct(100 * r.peer_core_share)}</span>" if _peers_split(b) else ""
-    return f"<td class='n'>{_pct(100 * r.peer_share)}{core}</td>"
+    if _peers_split(b):
+        extra = (f"core {_pct(100 * r.peer_core_share)}"
+                 f"<br>core course {_pct(100 * r.peer_core_course_share)}")
+    else:
+        extra = f"course {_pct(100 * r.peer_course_share)}"
+    return f"<td class='n'>{_pct(100 * r.peer_share)}<br><span class='muted small'>{extra}</span></td>"
 
 
 def _section_gaps(b: Benchmark) -> str:
@@ -185,7 +236,7 @@ def _section_list(b: Benchmark, status: str, title: str, intro: str, own_ev: boo
             detail += f"<details><summary>{label_ev}</summary>{_own_evidence(r)}</details>"
         if not own_ev:
             detail += f"<details><summary>Where peers cover it</summary>{_peer_evidence(b, r)}</details>"
-        mark, label, css = _mark(r.own.level, r.own_basis)
+        mark, label, css = _mark(r.own.level, r.own_basis, r.own_course_basis)
         body.append(f"<tr><td><b>{escape(r.name)}</b>{detail}</td>"
                     f"<td><span class='{css}'>{mark}</span> {label}</td>"
                     f"{_share_cell(b, r)}"
@@ -245,13 +296,15 @@ def _section_matrix(b: Benchmark) -> str:
     for area in b.taxonomy.areas:
         body.append(f"<tr class='area'><td colspan='{len(b.peers) + 3}'>{escape(area.name)}</td></tr>")
         for r in [r for r in b.rows if r.area == area.id]:
-            g, lab, css = _mark(r.own.level, r.own_basis)
+            g, lab, css = _mark(r.own.level, r.own_basis, r.own_course_basis)
             cells = [f"<td class='ownc {css}' title='{lab}'>{g}</td>"]
             for p in b.peers:
-                g, lab, css = _mark(r.peer_levels[p.label], r.peer_basis.get(p.label))
+                g, lab, css = _mark(r.peer_levels[p.label], r.peer_basis.get(p.label),
+                                    r.peer_course_basis.get(p.label))
                 cells.append(f"<td class='{css}' title='{escape(p.label)}: {lab}'>{g}</td>")
             body.append(f"<tr><td>{escape(r.name)}</td>{''.join(cells)}<td class='n'>{_pct(100 * r.peer_share)}</td></tr>")
-    return ("<h2>Coverage matrix</h2><p class='muted'>✓ covered (a course title, or two or more syllabus lines) · "
+    return ("<h2>Coverage matrix</h2><p class='muted'><span class='c-course'>●</span> a core course on it · "
+            "✓ covered (a course title, or two or more syllabus lines) · "
             "<span class='c-elective'>○</span> covered, but only by elective courses · "
             "△ mentioned in one line · <span class='c-absent'>·</span> not found.</p>"
             "<div class='card'><table class='matrix'>" + head + "".join(body) + "</table></div>")
@@ -272,6 +325,9 @@ AI or statistics are involved: each mark in this report traces back to a phrase 
 <p>Limits: a syllabus can teach a skill without naming it, and naming it does not show depth. Treat a gap as a
 question for the committee, not a verdict. Peer findings are only as good as the peer syllabi supplied.</p>
 <p>{_electives_note(b)}</p>
+<p>Courses on a skill: a course counts as <i>on</i> a skill when its title names the skill, or when the skill
+appears in at least half of its topic lines (and in at least three). A programme without one teaches the skill
+inside courses about something else, which may mean a few examples rather than a unit of study.</p>
 <p class="muted">Not yet analysed: regulatory (NEP/UGC) alignment and industry skill demand.</p>{um}"""
 
 

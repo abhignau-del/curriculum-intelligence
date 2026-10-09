@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, download, saveBlob } from "./api";
 import {
-  byStatus, cellEvidence, coverMark, gapSentence, parseSaved, pct, peerCourses, peersSplit, resolveSelection,
+  byStatus, cellEvidence, courseOnNote, coverMark, gapSentence, parseSaved, pct, peerCourses, peersSplit, resolveSelection,
   selectionProblem, skillsByArea, splitOnTerm, toSaved,
 } from "./benchmarkops";
 import type { BenchmarkResult, Evidence, ProgrammeSummary, SkillResult, TaxonomyView } from "./types";
@@ -145,12 +145,12 @@ function Results({ r, stale, onCell, onError, selection }: {
               {s.own_evidence.length > 0 && (
                 <details><summary>The one line found here</summary><EvidenceList evidence={s.own_evidence} /></details>
               )}
-              <details><summary>Where peers cover it</summary><PeerCourses s={s} /></details>
+              <details><summary>Where peers cover it</summary><PeerCourses s={s} split={split} /></details>
             </div>
             <div style={{ textAlign: "right" }}>
               <span className={`pill ${s.priority}`}>{s.priority}</span>
               <div className="muted small">{pct(100 * s.peer_share)} of peers</div>
-              {split && <div className="muted small">core {pct(100 * s.peer_core_share)}</div>}
+              <ShareDetail s={s} split={split} />
             </div>
           </div>
         ))}
@@ -210,7 +210,7 @@ function Results({ r, stale, onCell, onError, selection }: {
       </div>
 
       <Section id="matrix" title="Coverage matrix"
-               hint="✓ covered (a course title, or two or more syllabus lines) · ○ covered, but only by elective courses · △ mentioned in one line · · not found. Click any mark to see the syllabus lines behind it." />
+               hint="● a core course on it · ✓ covered (a course title, or two or more syllabus lines) · ○ covered, but only by elective courses · △ mentioned in one line · · not found. Click any mark to see the syllabus lines behind it." />
       <div className="card flush matrix-wrap">
         <table className="matrix">
           <thead><tr>
@@ -251,8 +251,8 @@ function Section({ id, title, hint }: { id: string; title: string; hint?: string
 }
 
 function MatrixCell({ s, peer, onCell, own }: { s: SkillResult; peer: string | null; onCell: Props2["onCell"]; own?: boolean }) {
-  const { level, basis } = cellEvidence(s, peer);
-  const m = coverMark(level, basis);
+  const { level, basis, courseBasis } = cellEvidence(s, peer);
+  const m = coverMark(level, basis, courseBasis);
   return (
     <button className={`cell ${m.css} ${own ? "own" : ""}`} onClick={() => onCell(s, peer)}
             aria-label={`${s.name}, ${peer ?? "programme under review"}: ${m.label}`}>
@@ -272,10 +272,10 @@ function SkillTable({ rows, empty, onCell, split }: { rows: SkillResult[]; empty
           <tr key={s.id}>
             <td><b>{s.name}</b>
               {s.own_evidence.length > 0 && <details><summary>Evidence here</summary><EvidenceList evidence={s.own_evidence} /></details>}
-              {s.status === "watch" && <details><summary>Where peers cover it</summary><PeerCourses s={s} /></details>}
+              {s.status === "watch" && <details><summary>Where peers cover it</summary><PeerCourses s={s} split={split} /></details>}
             </td>
             <td><OwnMark s={s} onCell={onCell} /></td>
-            <td className="n">{pct(100 * s.peer_share)}{split && <div className="muted small">core {pct(100 * s.peer_core_share)}</div>}</td>
+            <td className="n">{pct(100 * s.peer_share)}<ShareDetail s={s} split={split} /></td>
             <td className="n">{pct(100 * s.peer_touched_share)}</td>
           </tr>))}
         </tbody>
@@ -284,17 +284,27 @@ function SkillTable({ rows, empty, onCell, split }: { rows: SkillResult[]; empty
   );
 }
 
+function ShareDetail({ s, split }: { s: SkillResult; split: boolean }) {
+  return split
+    ? <><div className="muted small">core {pct(100 * s.peer_core_share)}</div>
+        <div className="muted small">core course {pct(100 * s.peer_core_course_share)}</div></>
+    : <div className="muted small">course {pct(100 * s.peer_course_share)}</div>;
+}
+
 function OwnMark({ s, onCell }: { s: SkillResult } & Props2) {
-  const m = coverMark(s.own_level, s.own_basis);
+  const m = coverMark(s.own_level, s.own_basis, s.own_course_basis);
   return <><button className={`cell ${m.css}`} onClick={() => onCell(s, null)}>{m.mark}</button> {m.label}</>;
 }
 
-function PeerCourses({ s }: { s: SkillResult }) {
+function PeerCourses({ s, split }: { s: SkillResult; split: boolean }) {
   return (
-    <ul className="ev">{peerCourses(s).map(([peer, titles]) => (
-      <li key={peer}><b>{peer}</b>{s.peer_levels[peer] === "touched" && <i> (mentioned once)</i>}
-        {s.peer_basis[peer] === "elective" && <i> (elective only)</i>}: {titles.join(", ")}</li>
-    ))}</ul>
+    <ul className="ev">{peerCourses(s).map(([peer, titles]) => {
+      const notes = [];
+      if (s.peer_levels[peer] === "touched") notes.push("mentioned once");
+      else if (s.peer_basis[peer] === "elective") notes.push("elective only");
+      if (s.peer_courses_on[peer]) notes.push(courseOnNote(s.peer_courses_on[peer], split));
+      return <li key={peer}><b>{peer}</b>{notes.length > 0 && <i> ({notes.join("; ")})</i>}: {titles.join(", ")}</li>;
+    })}</ul>
   );
 }
 
@@ -314,8 +324,8 @@ function EvidenceList({ evidence }: { evidence: Evidence[] }) {
 function EvidenceDialog({ r, skill, peer, terms, onClose }: {
   r: BenchmarkResult; skill: SkillResult; peer: string | null; terms: string[]; onClose: () => void;
 }) {
-  const { level, basis, evidence } = cellEvidence(skill, peer);
-  const m = coverMark(level, basis);
+  const { level, basis, courseBasis, coursesOn, evidence } = cellEvidence(skill, peer);
+  const m = coverMark(level, basis, courseBasis);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -326,6 +336,10 @@ function EvidenceDialog({ r, skill, peer, terms, onClose }: {
       <div className="modal card" role="dialog" aria-label="Evidence" onClick={e => e.stopPropagation()}>
         <div className="row"><h2>{skill.name}</h2><span className="spacer" /><button className="btn small" onClick={onClose} autoFocus>Close</button></div>
         <p><b>{peer ?? r.programme.institution}</b>{peer === null && " (under review)"}: <span className={m.css}>{m.mark}</span> {m.label}</p>
+        {coursesOn.length > 0 && (
+          <p className="small">Courses on it: {coursesOn.map(c =>
+            `${c.course_title} (${c.course}${c.elective ? ", elective" : ""}; ${c.by === "title" ? "named in the title" : "most topic lines"})`).join("; ")}</p>
+        )}
         {evidence.length ? <EvidenceList evidence={evidence} />
           : <p className="muted">No syllabus line names this skill. Phrases that would count: {terms.slice(0, 12).join(", ")}{terms.length > 12 ? ", …" : ""}.</p>}
       </div>

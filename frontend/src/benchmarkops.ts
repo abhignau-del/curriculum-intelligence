@@ -1,4 +1,4 @@
-import type { Basis, BenchmarkResult, Evidence, Level, ProgrammeSummary, SkillResult, Status } from "./types";
+import type { Basis, BenchmarkResult, CourseOn, Evidence, Level, ProgrammeSummary, SkillResult, Status } from "./types";
 
 /** What the user picked last time. Peers are stored as exclusions, so programmes
  * added later are included by default. */
@@ -42,7 +42,8 @@ export function selectionProblem(own: string, peers: string[], programmes: Progr
 
 export function byStatus(skills: SkillResult[], status: Status): SkillResult[] {
   return skills.filter(s => s.status === status)
-    .sort((a, b) => b.peer_share - a.peer_share || b.peer_core_share - a.peer_core_share || a.name.localeCompare(b.name));
+    .sort((a, b) => b.peer_share - a.peer_share || b.peer_core_share - a.peer_core_share
+      || b.peer_core_course_share - a.peer_core_course_share || a.name.localeCompare(b.name));
 }
 
 export const pct = (x: number | null | undefined) => (x == null ? "–" : `${Math.round(x)}%`);
@@ -62,19 +63,50 @@ export function gapSentence(s: SkillResult, peerCount: number, split = false): s
   const here = s.own_level === "touched" ? "is mentioned in only one syllabus line here" : "is not found in this curriculum";
   const { core, elective } = basisCounts(s);
   const detail = split ? `: in the core of ${core}, only as an elective in ${elective}` : "";
-  return `${s.name} is covered by ${pct(100 * s.peer_share)} of benchmarked programmes (${covering} of ${peerCount}${detail}) but ${here}.`;
+  return `${s.name} is covered by ${pct(100 * s.peer_share)} of benchmarked programmes (${covering} of ${peerCount}${detail}) but ${here}.`
+    + coursesOnSentence(s, split);
+}
+
+/** How many of the covering peers have a whole course on the skill (same wording as the HTML report). */
+export function coursesOnSentence(s: SkillResult, split = false): string {
+  if (!Object.values(s.peer_levels).includes("covered")) return "";
+  const n = Object.keys(s.peer_courses_on).length;
+  if (n === 0) return " None of them has a course on it: they teach it inside other courses.";
+  const has = n === 1 ? "has" : "have";
+  if (!split) return ` ${n} of them ${has} a course on it.`;
+  const core = Object.values(s.peer_course_basis).filter(b => b === "core").length;
+  const kind = core === n ? (n > 1 ? "all core" : "core")
+    : core === 0 ? (n > 1 ? "all elective" : "elective")
+    : `${core} core, ${n - core} elective`;
+  return ` ${n} of them ${has} a course on it (${kind}).`;
+}
+
+/** "a core course on it: Title", naming the core courses when there are any. */
+export function courseOnNote(cs: CourseOn[], split = false): string {
+  let kind = "", titles = cs.map(c => c.course_title);
+  if (split && cs.every(c => c.elective)) kind = "elective ";
+  else if (split) { kind = "core "; titles = cs.filter(c => !c.elective).map(c => c.course_title); }
+  return `${kind === "elective " ? "an" : "a"} ${kind}course on it: ${[...new Set(titles)].join(", ")}`;
 }
 
 /** The evidence behind one matrix cell: this programme (column null) or a peer. */
-export function cellEvidence(s: SkillResult, peer: string | null): { level: Level; basis: Basis | null; evidence: Evidence[] } {
-  if (peer === null) return { level: s.own_level, basis: s.own_basis, evidence: s.own_evidence };
-  return { level: s.peer_levels[peer] ?? "absent", basis: s.peer_basis[peer] ?? null, evidence: s.peer_evidence[peer] ?? [] };
+export function cellEvidence(s: SkillResult, peer: string | null): {
+  level: Level; basis: Basis | null; courseBasis: Basis | null; coursesOn: CourseOn[]; evidence: Evidence[];
+} {
+  if (peer === null) return { level: s.own_level, basis: s.own_basis, courseBasis: s.own_course_basis,
+                              coursesOn: s.own_courses_on, evidence: s.own_evidence };
+  return { level: s.peer_levels[peer] ?? "absent", basis: s.peer_basis[peer] ?? null,
+           courseBasis: s.peer_course_basis[peer] ?? null, coursesOn: s.peer_courses_on[peer] ?? [],
+           evidence: s.peer_evidence[peer] ?? [] };
 }
 
-/** Glyph, label and CSS class for a coverage mark; elective-only coverage gets its own. */
-export function coverMark(level: Level, basis: Basis | null): { mark: string; label: string; css: string } {
-  if (level === "covered" && basis === "elective") return { mark: "○", label: "Covered only by electives", css: "c-elective" };
-  return { mark: LEVEL_MARK[level], label: LEVEL_LABEL[level], css: `c-${level}` };
+/** Glyph, label and CSS class for a coverage mark: a core course on the skill and
+ * elective-only coverage get their own. */
+export function coverMark(level: Level, basis: Basis | null, courseBasis: Basis | null = null): { mark: string; label: string; css: string } {
+  if (courseBasis === "core") return { mark: "●", label: "A core course on it", css: "c-course" };
+  const note = courseBasis === "elective" ? " (an elective course on it)" : "";
+  if (level === "covered" && basis === "elective") return { mark: "○", label: "Covered only by electives" + note, css: "c-elective" };
+  return { mark: LEVEL_MARK[level], label: LEVEL_LABEL[level] + note, css: `c-${level}` };
 }
 
 /** Course titles per peer that carry evidence for a skill. */

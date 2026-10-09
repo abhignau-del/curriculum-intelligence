@@ -33,6 +33,9 @@ export interface Evidence {
   course: string; course_title: string; field: "title" | "topic" | "outcome"; line: string; term: string;
 }
 
+/** A course whose subject is the skill: its title names it, or most of its topic lines do. */
+export interface CourseOn { course: string; course_title: string; elective: boolean; by: "title" | "topics" }
+
 export interface SkillResult {
   id: string; name: string; area: string; status: Status; priority: "High" | "Medium" | null;
   own_level: Level; own_evidence: Evidence[];
@@ -42,6 +45,12 @@ export interface SkillResult {
   own_basis: Basis | null;
   peer_basis: Record<string, Basis>;          // peers that cover it -> basis
   peer_core_share: number;
+  own_courses_on: CourseOn[];
+  own_course_basis: Basis | null;
+  peer_courses_on: Record<string, CourseOn[]>;   // peers with a course on it
+  peer_course_basis: Record<string, Basis>;      // core if one of those courses is core
+  peer_course_share: number;
+  peer_core_course_share: number;
 }
 
 export interface Overlap {
