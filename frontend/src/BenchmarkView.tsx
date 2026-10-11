@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, download, saveBlob } from "./api";
+import type { Selection } from "./api";
 import {
-  byStatus, cellEvidence, courseOnNote, coverMark, gapSentence, parseSaved, pct, peerCourses, peersSplit, resolveSelection,
+  byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coverMark, degreeOptions,
+  gapSentence, parseSaved, parseSavedRegulatory, pct, peerCourses, peersSplit, resolveSelection, RULE_STATUS,
   selectionProblem, skillsByArea, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, Evidence, ProgrammeSummary, SkillResult, TaxonomyView } from "./types";
+import type { BenchmarkResult, Checklist, Evidence, ProgrammeSummary, RulesInfo, SkillResult, TaxonomyView } from "./types";
 
 const STORAGE_KEY = "curintel.selection";
+const REG_KEY = "curintel.regulatory";
 
 function loadSaved() {
   try { return parseSaved(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
+}
+
+function loadRegulatory() {
+  try { return parseSavedRegulatory(localStorage.getItem(REG_KEY)); } catch { return { rules: [], degree: "" }; }
 }
 
 interface Props { programmes: ProgrammeSummary[]; taxonomy: TaxonomyView | null; onError: (msg: string) => void }
@@ -21,7 +28,15 @@ export default function BenchmarkView({ programmes, taxonomy, onError }: Props) 
   const [result, setResult] = useState<BenchmarkResult | null>(null);
   const [running, setRunning] = useState(false);
   const [cell, setCell] = useState<{ skill: SkillResult; peer: string | null } | null>(null);
+  const [rulesList, setRulesList] = useState<RulesInfo[]>([]);
+  const [reg, setReg] = useState(loadRegulatory);
   const request = useRef(0);
+
+  useEffect(() => { api.rules().then(setRulesList, e => onError(e.message)); }, []);
+  // Forget rules the server no longer has, and a degree none of the chosen rules know.
+  const chosenRules = reg.rules.filter(id => rulesList.some(r => r.id === id));
+  const degrees = degreeOptions(rulesList, chosenRules);
+  const degree = degrees.includes(reg.degree) ? reg.degree : "";
 
   // Keep the selection valid when the library changes (uploads, deletions).
   useEffect(() => {
@@ -42,13 +57,17 @@ export default function BenchmarkView({ programmes, taxonomy, onError }: Props) 
   useEffect(() => {
     try { if (own) localStorage.setItem(STORAGE_KEY, JSON.stringify(toSaved(own, peers, programmes))); } catch { /* private mode */ }
     if (problem) { setResult(null); return; }
+    try { localStorage.setItem(REG_KEY, JSON.stringify(reg)); } catch { /* private mode */ }
     const mine = ++request.current;
     setRunning(true);
-    api.benchmark({ own, peers })
+    api.benchmark({ own, peers, rules: chosenRules, degree: degree || undefined })
       .then(r => { if (mine === request.current) setResult(r); })
       .catch(e => { if (mine === request.current) { setResult(null); onError(e.message); } })
       .finally(() => { if (mine === request.current) setRunning(false); });
-  }, [own, peers.join(","), problem]);
+  }, [own, peers.join(","), problem, chosenRules.join(","), degree]);
+
+  const toggleRules = (id: string) =>
+    setReg(r => ({ ...r, rules: r.rules.includes(id) ? r.rules.filter(x => x !== id) : [...r.rules, id] }));
 
   function chooseOwn(id: string) {
     // The previous programme under review becomes a peer; the new one stops being one.
@@ -90,11 +109,30 @@ export default function BenchmarkView({ programmes, taxonomy, onError }: Props) 
           </div>
         </div>
         {problem && <p className="hint" role="status">{problem}</p>}
+        {rulesList.length > 0 && (
+          <div className="regcontrols">
+            <span className="muted small">Regulatory checklist</span>
+            {rulesList.map(r => (
+              <label key={r.id} title={r.source}>
+                <input type="checkbox" checked={chosenRules.includes(r.id)} onChange={() => toggleRules(r.id)} />
+                {r.name}
+              </label>
+            ))}
+            {chosenRules.length > 0 && (
+              <label>Degree
+                <select value={degree} onChange={e => setReg(r => ({ ...r, degree: e.target.value }))}>
+                  <option value="">as the programme records it</option>
+                  {degrees.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </label>
+            )}
+          </div>
+        )}
       </div>
 
       {running && !result && <p className="muted">Working…</p>}
       {result && !problem && <Results r={result} stale={running} onCell={(skill, peer) => setCell({ skill, peer })}
-                                      onError={onError} selection={{ own, peers }} />}
+                                      onError={onError} selection={{ own, peers, rules: chosenRules, degree: degree || undefined }} />}
       {cell && result && <EvidenceDialog r={result} skill={cell.skill} peer={cell.peer} onClose={() => setCell(null)}
                                    terms={taxonomy?.areas.flatMap(a => a.skills).find(s => s.id === cell.skill.id)?.terms ?? []} />}
     </>
@@ -102,7 +140,7 @@ export default function BenchmarkView({ programmes, taxonomy, onError }: Props) 
 }
 
 function Results({ r, stale, onCell, onError, selection }: {
-  r: BenchmarkResult; stale: boolean; selection: { own: string; peers: string[] };
+  r: BenchmarkResult; stale: boolean; selection: Selection;
   onCell: (s: SkillResult, peer: string | null) => void; onError: (m: string) => void;
 }) {
   const gaps = byStatus(r.skills, "gap");
@@ -117,6 +155,7 @@ function Results({ r, stale, onCell, onError, selection }: {
       <nav className="toolbar" aria-label="Sections">
         <a href="#gaps">Gaps</a><a href="#watch">Watch</a><a href="#strengths">Strengths</a>
         <a href="#overlap">Overlap</a><a href="#areas">Areas</a><a href="#structure">Structure</a><a href="#matrix">Matrix</a>
+        {r.regulatory.length > 0 && <a href="#regulatory">Rules</a>}
         <span className="spacer" />
         <button className="btn small" onClick={() => download("/api/benchmark/report", "benchmark.html", selection).catch(e => onError(e.message))}>
           Download report (.html)
@@ -131,7 +170,11 @@ function Results({ r, stale, onCell, onError, selection }: {
         <div className="tile"><b>{gaps.length}</b><span>Priority gaps ({gaps.filter(g => g.priority === "High").length} high)</span></div>
         <div className="tile"><b>{distinctive.length}</b><span>Distinctive strengths</span></div>
         <div className="tile"><b>{flagged.length}</b><span>Course pairs flagged for overlap</span></div>
-        <div className="tile na"><b>Not yet analysed</b><span>Regulatory &amp; industry alignment</span></div>
+        {r.regulatory.flatMap(cl => checklistTiles(cl)).map(t => (
+          <div key={t.label} className={`tile ${t.na ? "na" : ""}`}><b>{t.value}</b><span>{t.label}</span></div>
+        ))}
+        <div className="tile na"><b>Not yet analysed</b>
+          <span>{r.regulatory.length ? "Industry alignment" : <>Regulatory &amp; industry alignment</>}</span></div>
       </div>
 
       <Section id="gaps" title="Priority gaps" hint="Skills that at least half of the peers cover and this programme does not. High = 70% or more of peers." />
@@ -234,6 +277,8 @@ function Results({ r, stale, onCell, onError, selection }: {
         </table>
       </div>
 
+      {r.regulatory.map((cl, i) => <ChecklistSection key={cl.id} cl={cl} first={i === 0} />)}
+
       {r.unmapped.length > 0 && (
         <details className="card">
           <summary>{r.unmapped.length} syllabus line{r.unmapped.length > 1 ? "s" : ""} in the programme under review with no recognised skill</summary>
@@ -243,6 +288,36 @@ function Results({ r, stale, onCell, onError, selection }: {
       <p className="muted small">{r.generated_by} · taxonomy: {r.taxonomy}. Matching is by listed syllabus phrases, not AI;
         a gap is a question for the committee, not a verdict.</p>
     </div>
+  );
+}
+
+function ChecklistSection({ cl, first }: { cl: Checklist; first: boolean }) {
+  const summary = checklistSummary(cl);
+  return (
+    <>
+      <Section id={first ? "regulatory" : `regulatory-${cl.id}`} title={`Regulatory checklist: ${cl.name}`}
+               hint={[cl.variant_name && `Checked as a ${cl.variant_name} (${cl.variant_basis}).`,
+                      cl.source && `Source: ${cl.source}`].filter(Boolean).join(" ")} />
+      {checklistNotes(cl).map((n, i) => <p key={i} className="hint">{n}</p>)}
+      {summary && <p>{summary}</p>}
+      <div className="card flush">
+        <table className="rules">
+          <thead><tr><th>Requirement</th><th>This programme</th><th>Expected</th><th>Status</th></tr></thead>
+          <tbody>{cl.results.map(res => (
+            <tr key={res.id}>
+              <td className="req">{res.text}{res.page && <span className="muted small"> p. {res.page}</span>}
+                {res.level === "advisory" && <> <span className="pill soft">Advisory</span></>}
+                {res.note && <div className="muted small">{res.note}</div>}</td>
+              <td data-label="This programme">{res.found}
+                {res.evidence.length > 0 && <details><summary>Evidence</summary>
+                  <ul className="ev">{res.evidence.map((e, i) => <li key={i}>{e}</li>)}</ul></details>}</td>
+              <td data-label="Expected">{res.expected}</td>
+              <td><span className={`pill ${RULE_STATUS[res.status].css}`}>{RULE_STATUS[res.status].label}</span></td>
+            </tr>))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 

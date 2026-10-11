@@ -16,11 +16,13 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from pydantic import ValidationError
 
-from .schema import Course, Programme
+from .schema import Course, Programme, SchemeItem
 
 PROGRAMME_FIELDS = [("Institution", "institution"), ("Programme", "name"),
-                    ("Source", "source"), ("Syllabus year", "year")]
+                    ("Source", "source"), ("Syllabus year", "year"), ("Degree", "degree")]
 COURSE_COLUMNS = ["Code", "Title", "Semester", "Credits", "Category", "Topics", "Outcomes"]
+SCHEME_SHEET = "Credit scheme"
+SCHEME_COLUMNS = ["Semester", "Category", "Credits", "Note"]
 
 
 class ImportError_(ValueError):
@@ -141,8 +143,28 @@ def from_workbook(source: str | Path | bytes | BinaryIO, filename: str | None = 
         except (ValidationError, ValueError) as exc:
             first = exc.errors()[0] if isinstance(exc, ValidationError) else {"loc": ("Credits",), "msg": str(exc)}
             raise ImportError_(f"{fname}: Courses row {n}, {first['loc'][0]}: {first['msg']}") from exc
+    scheme = []
+    if SCHEME_SHEET in wb.sheetnames:          # optional: older workbooks have no such sheet
+        srows = wb[SCHEME_SHEET].iter_rows(values_only=True)
+        shead = [str(h).strip() if h is not None else "" for h in next(srows, [])]
+        scol = {name: shead.index(name) for name in SCHEME_COLUMNS if name in shead}
+        for n, row in enumerate(srows, start=2):
+            if not any(v not in (None, "") for v in row):
+                continue
+            val = {name: (row[i] if i < len(row) else None) for name, i in scol.items()}
+            try:
+                scheme.append(SchemeItem(
+                    semester=None if val.get("Semester") in (None, "") else str(val["Semester"]).strip(),
+                    category=str(val.get("Category") or "").strip(),
+                    credits=float(val.get("Credits")),          # TypeError when empty
+                    note=str(val.get("Note") or "").strip()))
+            except (ValidationError, ValueError, TypeError) as exc:
+                first = exc.errors()[0] if isinstance(exc, ValidationError) else {"loc": ("credits",)}
+                what = {"category": "Category", "credits": "Credits"}.get(first["loc"][0], first["loc"][0])
+                msg = "needed" if what == "Category" else "must be a number, 0 or more"
+                raise ImportError_(f"{fname}: {SCHEME_SHEET} row {n}, {what}: {msg}") from exc
     try:
-        return Programme(**meta, courses=courses)
+        return Programme(**meta, courses=courses, scheme=scheme)
     except ValidationError as exc:
         first = exc.errors()[0]
         where = "Courses sheet" if first["loc"][0] == "courses" else f"Programme sheet, {first['loc'][0]}"
@@ -175,7 +197,13 @@ def write_template(path: str | Path | BinaryIO, programme: Programme | None = No
     widths = [10, 34, 10, 8, 12, 70, 50]
     for i, w in enumerate(widths):
         cs.column_dimensions[chr(65 + i)].width = w
-    for sheet in (ws, cs):
+    ss = wb.create_sheet(SCHEME_SHEET)
+    ss.append(SCHEME_COLUMNS)
+    for item in (programme.scheme if programme else []):
+        ss.append([item.semester, item.category, item.credits, item.note])
+    for i, w in enumerate([10, 26, 8, 60]):
+        ss.column_dimensions[chr(65 + i)].width = w
+    for sheet in (ws, cs, ss):
         for c in sheet[1]:
             c.font, c.fill = head, fill
         sheet.freeze_panes = "A2"
@@ -186,6 +214,11 @@ def write_template(path: str | Path | BinaryIO, programme: Programme | None = No
         "Topics: one syllabus line per line in the cell (Alt+Enter), or separate them with ;",
         "Copy the topic lines as written in the syllabus - the analysis looks for subject terms in them.",
         "Outcomes are optional. Credits must be a number.",
+        "Credit scheme (optional, for the regulatory checklist): the credits a student earns, one row per "
+        "category and semester, from the programme's regulations - e.g. I | Major | 8. Use the "
+        "university's own category names (Major, Minor, AEC, SEC, VAC, ...).",
+        "Degree (Programme sheet, optional): e.g. 3-year or 4-year (Honours); it decides which credit "
+        "minimums apply.",
     ]:
         notes.append([line])
     notes.append([])

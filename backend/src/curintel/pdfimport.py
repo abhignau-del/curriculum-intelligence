@@ -36,6 +36,10 @@ Optional keys:
   category             category given to every course (default: none, i.e. core)
   categories           rules [{match: regex on "code title", category: ...}], first match
                        wins; a category naming elective/optional/DSE/GE marks an elective
+  degree               "3-year" / "4-year (Honours)" ...: which variant of a framework applies
+  scheme               the credit scheme: [{category, credits, semester, note}], one row per
+                       category and semester, typed from the university's regulations (see
+                       schema.SchemeItem); regulatory credit rules read it
   extra_courses        courses typed in by hand (e.g. from scanned pages); give each a
                        `note` saying where it came from. A profile may consist of these
                        alone when the source has no usable syllabus pages.
@@ -357,7 +361,13 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
 
     if not drafts:
         raise ProfileError(f"{profile_path.name}: no courses found - check course_start and include")
-    programme = Programme(institution=prof["institution"], name=prof["name"],
-                          source=prof.get("source", ""), year=str(prof.get("year", "")),
-                          courses=[d.course for d in drafts])
+    try:
+        programme = Programme(institution=prof["institution"], name=prof["name"],
+                              source=prof.get("source", ""), year=str(prof.get("year", "")),
+                              degree=str(prof.get("degree", "")), scheme=prof.get("scheme") or [],
+                              courses=[d.course for d in drafts])
+    except ValidationError as exc:
+        err = exc.errors()[0]
+        where = ".".join(map(str, err["loc"]))
+        raise ProfileError(f"{profile_path.name}: {where}: {err['msg']}") from None
     return Draft(programme, drafts, excluded, merged)

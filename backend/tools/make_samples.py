@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from curintel.schema import Course, Programme, save_programme  # noqa: E402
+from curintel.schema import Course, Programme, SchemeItem, save_programme  # noqa: E402
 
 # key: (title, credits, topics)
 LIBRARY: dict[str, tuple[str, float, list[str]]] = {
@@ -239,10 +239,27 @@ def build(name: str, prefix: str, keys: list[str]) -> Programme:
                      source="Fictional sample", year="2025-26", courses=courses)
 
 
+# Riverside's credit scheme: what a student earns per category and semester (20 a semester,
+# 120 in all). It falls a little short of the UGC minimums for skill enhancement (6 of 9)
+# and value-added courses (5 of 6), so the sample checklist shows what a shortfall looks like.
+OWN_SCHEME = {
+    "I": {"Major": 8, "Minor": 4, "Multidisciplinary": 3, "AEC": 2, "SEC": 3},
+    "II": {"Major": 8, "Minor": 4, "Multidisciplinary": 3, "AEC": 2, "VAC": 3},
+    "III": {"Major": 8, "Minor": 4, "Multidisciplinary": 3, "AEC": 2, "SEC": 3},
+    "IV": {"Major": 12, "Minor": 4, "AEC": 2, "VAC": 2},
+    "V": {"Major": 14, "Minor": 4, "Internship": 2},
+    "VI": {"Major": 16, "Minor": 4},
+}
+
+
 def main() -> None:
     out = Path(__file__).resolve().parents[1] / "samples"
     (out / "peers").mkdir(parents=True, exist_ok=True)
-    save_programme(build(*OWN), out / "riverside.json")
+    own = build(*OWN)
+    own.degree = "3-year"
+    own.scheme = [SchemeItem(category=cat, credits=cr, semester=sem)
+                  for sem, cats in OWN_SCHEME.items() for cat, cr in cats.items()]
+    save_programme(own, out / "riverside.json")
     for name, prefix, keys in PEERS:
         slug = name.split()[0].lower()
         save_programme(build(name, prefix, keys), out / "peers" / f"{slug}.json")

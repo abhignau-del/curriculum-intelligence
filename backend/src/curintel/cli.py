@@ -13,6 +13,7 @@ from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
 from .pdfimport import ProfileError
 from .overlap import find_overlaps
+from .regulatory import Rules, check
 from .report import render_html, to_dict
 from .schema import load_programme, save_programme
 from .taxonomy import Taxonomy, TaxonomyError
@@ -41,11 +42,12 @@ def cmd_report(args) -> None:
     peers = [load_programme(f) for f in _programme_files(args.peers)]
     b = benchmark(own, peers, tax)
     overlaps = find_overlaps(own, tax)
+    checklists = [check(own, Rules.resolve(r), tax, args.degree) for r in args.rules or []]
     out = Path(args.output)
-    out.write_text(render_html(b, overlaps), encoding="utf-8")
+    out.write_text(render_html(b, overlaps, checklists), encoding="utf-8")
     print(f"Report written to {out}")
     if args.json:
-        Path(args.json).write_text(json.dumps(to_dict(b, overlaps), indent=2), encoding="utf-8")
+        Path(args.json).write_text(json.dumps(to_dict(b, overlaps, checklists), indent=2), encoding="utf-8")
         print(f"Data written to {args.json}")
     gaps = b.by_status("gap")
     print(f"Alignment with {len(peers)} peers: {b.alignment:.0f}%" if b.alignment is not None
@@ -70,6 +72,35 @@ def cmd_check(args) -> None:
         print("\nTopic lines with no recognised skill (add terms to the taxonomy if they matter):")
         for code, line in missing:
             print(f"  {code}: {line}")
+
+
+STATUS_WORD = {"met": "met", "partly": "partly", "not_met": "NOT MET", "not_checked": "not checked"}
+
+
+def cmd_regcheck(args) -> None:
+    """Check one programme against regulatory rules, without peers."""
+    tax = _taxonomy(args.taxonomy)
+    prog = load_programme(args.programme)
+    for name in args.rules or ["ugc-ccfup-2022"]:
+        cl = check(prog, Rules.resolve(name), tax, args.degree)
+        print(f"{cl.rules.name}")
+        if cl.variant:
+            print(f"  as a {cl.variant.name} ({cl.variant_basis})")
+        if any(r.status == "not_checked" for r in cl.results):
+            print("  no credit scheme recorded: credit rules not checked")
+        for r in cl.results:
+            page = f" (p. {r.rule.page})" if r.rule.page else ""
+            adv = " [advisory]" if r.rule.level == "advisory" else ""
+            print(f"  [{STATUS_WORD[r.status]:<11}] {r.rule.text}{page}{adv}")
+            print(f"                here: {r.found} | expected: {r.expected}")
+        if cl.missing_semesters:
+            print(f"  the credit scheme has no credits for semester(s) {', '.join(map(str, cl.missing_semesters))}: "
+                  "credit totals are incomplete")
+        for sem, credits in cl.beyond.items():
+            print(f"  not counted for this degree: semester {sem} ({credits:g} credits)")
+        for label, credits in cl.unmapped.items():
+            print(f"  scheme label not matched to a category: {label} ({credits:g} credits)")
+        print()
 
 
 def cmd_import_acaddoc(args) -> None:
@@ -137,7 +168,18 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("-o", "--output", default="benchmark-report.html")
     p.add_argument("--json", help="also write the findings as JSON to this file")
     p.add_argument("-t", "--taxonomy", help="taxonomy YAML (default: built-in mathematics)")
+    p.add_argument("-r", "--rules", action="append",
+                   help="also check the programme against these rules: a built-in name such as "
+                        "ugc-ccfup-2022, or a rules YAML file (repeatable)")
+    p.add_argument("--degree", help='check as this degree, e.g. "3-year" (default: the one the programme records)')
     p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("regcheck", help="check a programme against regulatory rules (default: ugc-ccfup-2022)")
+    p.add_argument("programme")
+    p.add_argument("-r", "--rules", action="append", help="built-in rules name or rules YAML file (repeatable)")
+    p.add_argument("--degree", help='check as this degree, e.g. "3-year" (default: the one the programme records)')
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_regcheck)
 
     p = sub.add_parser("check", help="list the skills found in each course of a programme")
     p.add_argument("programme")

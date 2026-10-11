@@ -1,0 +1,102 @@
+# UGC Curriculum and Credit Framework for Undergraduate Programmes (CCFUP), 2022.
+# Page numbers are those printed in the UGC PDF. Credit minimums are Table 2 (pp. 19-20);
+# the degree credit totals and the 50% major rule are section 3.2.3 (p. 10).
+# Format: see curintel/regulatory.py.
+id: ugc-ccfup-2022
+name: UGC Curriculum and Credit Framework for Undergraduate Programmes (2022)
+source: https://www.ugc.gov.in/pdfnews/7193743_FYUGP.pdf
+
+variants:
+  # Honours with Research needs 75% marks in the first six semesters (p. 10), so it is
+  # never assumed: set the programme's degree to choose it.
+  - {id: 4-year-research, name: 4-year UG degree (Honours with Research), match: 'research', semesters: 8, auto: false}
+  - {id: 4-year, name: 4-year UG degree (Honours), match: '\b4\b|four|hon', semesters: 8}
+  - {id: 3-year, name: 3-year UG degree, match: '\b3\b|three', semesters: 6}
+
+# A university's own labels for its course types, mapped onto Table 2's categories.
+# First match wins, so the specific categories come before Major.
+categories:
+  - {id: research, name: Research project / dissertation, match: 'research|dissertation|thesis'}
+  - {id: internship, name: Summer internship, match: 'internship|apprenticeship'}
+  # Value-added courses include understanding India and the Indian knowledge systems (p. 22).
+  - {id: vac, name: Value-added courses (VAC), match: 'value[- ]?added|\bVAC\b|\bIKS\b|indian knowledge'}
+  - {id: aec, name: Ability enhancement courses (AEC), match: 'ability enhancement|\bAECC?\b|\bMIL\b|language'}
+  - {id: sec, name: Skill enhancement courses (SEC), match: 'skill enhancement|\bSECC?\b'}
+  - {id: multidisciplinary, name: Multidisciplinary, match: 'multi\W*(inter\W*)?disciplinary|inter\W*disciplinary|\bMDC\b|\bIDC?\b'}
+  # Vocational courses form part of the Minor stream (p. 21).
+  - {id: minor, name: Minor stream, match: 'minor|vocational'}
+  - {id: major, name: Major (Core), match: 'major|\bcore\b|\bDSC\b|\bDSE\b|discipline[- ]specific'}
+
+rules:
+  - id: total-credits
+    kind: total_credits
+    text: A 3-year UG degree needs 120 credits; a 4-year degree (Honours, or Honours with Research) needs 160.
+    page: 10
+    min: {3-year: 120, 4-year: 160, 4-year-research: 160}
+
+  - id: major-share
+    kind: category_share
+    category: major
+    text: A single-major degree needs at least 50% of its credits from the major discipline.
+    page: 10
+    min: 0.5
+    note: UGC's examples put this as 60 of 120 credits (3-year) and 80 of 160 (4-year); a programme with more credits than the minimum can meet those figures yet fall under 50%.
+
+  - id: major-credits
+    kind: category_credits
+    category: major
+    text: "Table 2: Major (Core), minimum 60 credits (3-year) or 80 (4-year)."
+    page: 19
+    min: {3-year: 60, 4-year: 80, 4-year-research: 80}
+
+  - id: minor-credits
+    kind: category_credits
+    category: minor
+    text: "Table 2: Minor stream, minimum 24 credits (3-year) or 32 (4-year)."
+    page: 19
+    min: {3-year: 24, 4-year: 32, 4-year-research: 32}
+
+  - id: multidisciplinary-credits
+    kind: category_credits
+    category: multidisciplinary
+    text: "Table 2: Multidisciplinary, minimum 9 credits."
+    page: 19
+    min: 9
+
+  - id: aec-credits
+    kind: category_credits
+    category: aec
+    text: "Table 2: Ability Enhancement Courses (AEC), minimum 8 credits."
+    page: 20
+    min: 8
+
+  - id: sec-credits
+    kind: category_credits
+    category: sec
+    text: "Table 2: Skill Enhancement Courses (SEC), minimum 9 credits."
+    page: 20
+    min: 9
+
+  - id: vac-credits
+    kind: category_credits
+    category: vac
+    text: "Table 2: Value Added Courses common for all UG, 6-8 credits."
+    page: 20
+    min: 6
+    range: 6-8 in the framework
+
+  - id: internship-credits
+    kind: category_credits
+    category: internship
+    text: "Table 2: Summer Internship, 2-4 credits."
+    page: 20
+    min: 2
+    range: 2-4 in the framework
+
+  - id: research-credits
+    kind: category_credits
+    category: research
+    text: "Table 2: Research Project / Dissertation, 12 credits (4-year Honours with Research)."
+    page: 20
+    min: {4-year-research: 12}
+    note: Honours students not undertaking research take three courses for 12 credits instead (Table 2, note).

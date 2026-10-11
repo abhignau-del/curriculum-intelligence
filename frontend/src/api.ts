@@ -1,4 +1,4 @@
-import type { BenchmarkResult, ProgrammeDetail, ProgrammeSummary, TaxonomyView } from "./types";
+import type { BenchmarkResult, ProgrammeDetail, ProgrammeSummary, RulesInfo, TaxonomyView } from "./types";
 
 const BASE = import.meta.env.VITE_API_URL ?? "";
 
@@ -24,10 +24,12 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 
 const json = (method: string, body: unknown): RequestInit => ({ method, body: JSON.stringify(body) });
 
-export interface Selection { own: string; peers: string[] }
+/** What to benchmark; `rules` and `degree` add regulatory checklists for the programme under review. */
+export interface Selection { own: string; peers: string[]; rules?: string[]; degree?: string }
 
 export const api = {
   taxonomy: () => call<TaxonomyView>("/api/taxonomy"),
+  rules: () => call<RulesInfo[]>("/api/rules"),
   programmes: () => call<ProgrammeSummary[]>("/api/programmes"),
   programme: (id: string) => call<ProgrammeDetail>(`/api/programmes/${id}`),
   remove: (id: string) => call<void>(`/api/programmes/${id}`, { method: "DELETE" }),

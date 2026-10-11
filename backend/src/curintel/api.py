@@ -22,6 +22,7 @@ from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc_texts, from_workbook, write_template
 from .overlap import find_overlaps
+from .regulatory import Rules, RulesError, builtin_rules, check
 from .report import render_html, to_dict
 from .schema import Programme
 from .store import Store
@@ -34,6 +35,8 @@ MAX_UPLOAD = 10 * 1024 * 1024
 class BenchmarkRequest(BaseModel):
     own: str
     peers: list[str] = Field(min_length=1)
+    rules: list[str] = Field(default_factory=list)   # built-in rules names (no file paths over HTTP)
+    degree: Optional[str] = None                     # overrides the programme's recorded degree
 
 
 class AcadDocFile(BaseModel):
@@ -90,6 +93,16 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
             {"id": a.id, "name": a.name, "skills": [{"id": s.id, "name": s.name, "terms": list(s.terms)}
                                                     for s in a.skills]}
             for a in tax.areas]}
+
+    @app.get("/api/rules")
+    def rules_list():
+        """The built-in regulatory rules, with their degree variants."""
+        out = []
+        for name in builtin_rules():
+            r = Rules.builtin(name)
+            out.append({"id": r.id, "name": r.name, "source": r.source,
+                        "variants": [{"id": v.id, "name": v.name} for v in r.variants]})
+        return out
 
     # ----- library -----------------------------------------------------
     @app.get("/api/programmes")
@@ -174,12 +187,21 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
             b = benchmark(own, peers, tax)
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from None
-        return b, find_overlaps(own, tax)
+        available = set(builtin_rules())
+        checklists = []
+        for name in dict.fromkeys(req.rules):
+            if name not in available:
+                raise HTTPException(400, f"No built-in rules named {name!r}")
+            try:
+                checklists.append(check(own, Rules.builtin(name), tax, req.degree or None))
+            except RulesError as exc:
+                raise HTTPException(400, str(exc)) from None
+        return b, find_overlaps(own, tax), checklists
 
     @app.post("/api/benchmark")
     def run_benchmark(req: BenchmarkRequest):
-        b, overlaps = run(req)
-        out = to_dict(b, overlaps)
+        b, overlaps, checklists = run(req)
+        out = to_dict(b, overlaps, checklists)
         out["programme"]["id"] = req.own
         for peer, pid in zip(out["peers"], dict.fromkeys(req.peers)):
             peer["id"] = pid
@@ -187,8 +209,8 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
 
     @app.post("/api/benchmark/report")
     def benchmark_report(req: BenchmarkRequest):
-        b, overlaps = run(req)
-        return Response(render_html(b, overlaps), media_type="text/html; charset=utf-8",
+        b, overlaps, checklists = run(req)
+        return Response(render_html(b, overlaps, checklists), media_type="text/html; charset=utf-8",
                         headers=_attachment(f"{b.own.institution} benchmark.html"))
 
     if FRONTEND.is_dir():

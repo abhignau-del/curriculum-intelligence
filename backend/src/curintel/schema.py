@@ -38,12 +38,27 @@ class Course(_Model):
         return bool(ELECTIVE.search(self.category))
 
 
+class SchemeItem(_Model):
+    """Credits a student earns in one category of course, as the programme's credit scheme sets out.
+
+    The scheme is the university's own table of credits per category (Major, Minor, AEC, ...)
+    and semester. Courses list what the department offers, including every elective
+    alternative and none of other departments' courses, so credit rules read the scheme.
+    """
+    category: str = Field(min_length=1)    # the university's own label: "Major", "DSC", "AEC", ...
+    credits: float = Field(ge=0)
+    semester: Optional[str] = None
+    note: str = ""
+
+
 class Programme(_Model):
     institution: str = Field(min_length=1)
     name: str = Field(min_length=1)        # "B.Sc. Mathematics (Honours)"
     source: str = ""                       # where the syllabus came from
     year: str = ""                         # syllabus edition, e.g. "2024-25"
+    degree: str = ""                       # "3-year", "4-year (Honours)", ...: picks the rules that apply
     courses: list[Course] = Field(min_length=1)
+    scheme: list[SchemeItem] = Field(default_factory=list)
 
     @property
     def label(self) -> str:

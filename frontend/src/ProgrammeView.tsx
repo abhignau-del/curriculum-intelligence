@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, download } from "./api";
+import { schemeBySemester } from "./benchmarkops";
 import type { ProgrammeDetail } from "./types";
 
 /** Mirrors Course.is_elective on the server: category words that mark an option. */
@@ -32,7 +33,7 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
       <div className="row">
         <div>
           <h2>{p.institution}</h2>
-          <div className="muted">{[p.name, p.year, p.source].filter(Boolean).join(" · ")}</div>
+          <div className="muted">{[p.name, p.degree, p.year, p.source].filter(Boolean).join(" · ")}</div>
         </div>
         <span className="spacer" />
         <button className="btn" onClick={() => download(`/api/programmes/${id}/download`, "programme.json").catch(e => onError(e.message))}>
@@ -76,6 +77,22 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
           </tbody>
         </table>
       </div>
+
+      {(p.scheme ?? []).length > 0 && (
+        <div className="card flush">
+          <table className="scheme-table">
+            <caption className="hint">Credit scheme: the credits a student earns, by semester and category
+              ({(p.scheme ?? []).reduce((t, s) => t + s.credits, 0)} in all). The regulatory checklist reads this.</caption>
+            <thead><tr><th>Sem</th><th>Category</th><th className="n">Credits</th><th>Note</th></tr></thead>
+            <tbody>{schemeBySemester(p.scheme ?? []).flatMap(g => g.items.map((s, i) => (
+              <tr key={`${g.semester}-${i}`}>
+                <td>{i === 0 ? g.semester : ""}</td><td>{s.category}</td><td className="n">{s.credits}</td>
+                <td className="muted small">{s.note}</td>
+              </tr>)))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {d.unmapped.length > 0 && (
         <div className="card">

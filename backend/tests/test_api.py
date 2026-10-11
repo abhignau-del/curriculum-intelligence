@@ -142,3 +142,37 @@ def test_report_identical_across_hash_seeds(tmp_path):
 def test_upload_size_limit(client):
     r = client.post("/api/programmes/upload", params={"filename": "big.json"}, content=b" " * (10 * 1024 * 1024 + 1))
     assert r.status_code == 413
+
+
+def test_rules_listing_and_checklist_in_benchmark(client):
+    rules = client.get("/api/rules").json()
+    ugc = next(r for r in rules if r["id"] == "ugc-ccfup-2022")
+    assert [v["id"] for v in ugc["variants"]] == ["4-year-research", "4-year", "3-year"]
+    own, peers = ids(client)
+    d = client.post("/api/benchmark", json={"own": own, "peers": peers}).json()
+    assert d["regulatory"] == []                                  # only when asked
+    d = client.post("/api/benchmark", json={"own": own, "peers": peers, "rules": ["ugc-ccfup-2022"]}).json()
+    reg = d["regulatory"][0]
+    assert reg["variant"] == "3-year" and {r["status"] for r in reg["results"]} == {"met", "partly"}
+    d = client.post("/api/benchmark", json={"own": own, "peers": peers, "rules": ["ugc-ccfup-2022"],
+                                            "degree": "4-year"}).json()
+    assert d["regulatory"][0]["variant"] == "4-year" and d["regulatory"][0]["missing_semesters"] == [7, 8]
+    html = client.post("/api/benchmark/report", json={"own": own, "peers": peers, "rules": ["ugc-ccfup-2022"]}).text
+    assert "Regulatory checklist" in html
+
+
+@pytest.mark.parametrize("body,message", [
+    ({"rules": ["nope"]}, "No built-in rules named 'nope'"),
+    ({"rules": ["../../etc/passwd.yaml"]}, "No built-in rules named"),        # no file paths over HTTP
+    ({"rules": ["ugc-ccfup-2022"], "degree": "diploma"}, "matches none of"),
+])
+def test_bad_rules_requests_are_400(client, body, message):
+    own, peers = ids(client)
+    r = client.post("/api/benchmark", json={"own": own, "peers": peers, **body})
+    assert r.status_code == 400 and message in r.json()["detail"]
+
+
+def test_programme_detail_includes_scheme(client):
+    own, _ = ids(client)
+    p = client.get(f"/api/programmes/{own}").json()["programme"]
+    assert p["degree"] == "3-year" and len(p["scheme"]) == 24

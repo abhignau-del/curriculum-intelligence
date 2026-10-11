@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  basisCounts, byStatus, cellEvidence, courseOnNote, coursesOnSentence, coverMark, gapSentence, parseSaved, peerCourses, peersSplit, resolveSelection,
+  basisCounts, byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coursesOnSentence,
+  coverMark, degreeOptions, gapSentence, parseSavedRegulatory, RULE_STATUS, schemeBySemester, parseSaved, peerCourses, peersSplit, resolveSelection,
   selectionProblem, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, CourseOn, ProgrammeSummary, SkillResult } from "./types";
+import type { BenchmarkResult, Checklist, CourseOn, ProgrammeSummary, RuleResult, SkillResult } from "./types";
 
 const prog = (id: string, institution = `Inst ${id}`): ProgrammeSummary =>
   ({ id, institution, name: "B.Sc.", year: "", source: "", courses: 1, credits: 4, updated_at: "" });
@@ -169,5 +170,69 @@ describe("courses on a skill", () => {
     const a = skill({ name: "A", peer_share: 0.5, peer_core_share: 0.4, peer_core_course_share: 0 });
     const b = skill({ name: "B", peer_share: 0.5, peer_core_share: 0.4, peer_core_course_share: 0.2 });
     expect(byStatus([a, b], "gap").map(x => x.name)).toEqual(["B", "A"]);
+  });
+});
+
+describe("regulatory checklist", () => {
+  const res = (id: string, status: RuleResult["status"], level: RuleResult["level"] = "required"): RuleResult =>
+    ({ id, kind: "category_credits", text: id, page: "19", level, note: "", status, found: "", expected: "", evidence: [] });
+  const cl = (over: Partial<Checklist> = {}): Checklist => ({
+    id: "ugc", name: "UGC", source: "", variant: "3-year", variant_name: "3-year UG degree", variant_basis: "x",
+    has_scheme: true, category_credits: {}, unmapped: {}, beyond: {}, missing_semesters: [],
+    results: [res("a", "met"), res("b", "met"), res("c", "partly"), res("d", "not_met", "advisory")], ...over,
+  });
+
+  it("summarises by level, in status order", () => {
+    expect(checklistSummary(cl())).toBe("Required (3): 2 met, 1 partly met; Advisory (1): 1 not met.");
+    expect(checklistSummary(cl({ results: [] }))).toBe("");
+  });
+
+  it("makes tiles for required and advisory rules, and says when nothing could be checked", () => {
+    expect(checklistTiles(cl())).toEqual([
+      { value: "2 of 3", label: "Requirements met: ugc", na: false },
+      { value: "0 of 1", label: "Advisory points met: ugc", na: false },
+    ]);
+    const unchecked = cl({ has_scheme: false, results: [res("a", "not_checked"), res("b", "not_checked")] });
+    expect(checklistTiles(unchecked)).toEqual([{ value: "Not checked", label: "ugc: no credit scheme recorded", na: true }]);
+    // advisory-only rules never claim a missing credit scheme
+    expect(checklistTiles(cl({ results: [res("p", "met", "advisory")] }))).toEqual([
+      { value: "1 of 1", label: "Advisory points met: ugc", na: false }]);
+  });
+
+  it("lists the caveats", () => {
+    expect(checklistNotes(cl())).toEqual([]);
+    const notes = checklistNotes(cl({ has_scheme: false, results: [res("a", "not_checked")], missing_semesters: [7, 8],
+                                      beyond: { VII: 16 }, unmapped: { Sports: 2 } }));
+    expect(notes[0]).toMatch(/^No credit scheme is recorded/);
+    expect(notes[1]).toBe("The credit scheme has no credits for semesters 7, 8, so credit totals for this degree are incomplete.");
+    expect(notes[2]).toBe("Not counted for this degree: credits in later semesters, VII (16 credits).");
+    expect(notes[3]).toMatch(/count only towards the total: Sports \(2 credits\)\.$/);
+    expect(checklistNotes(cl({ missing_semesters: [8] }))[0]).toMatch(/for semester 8,/);
+  });
+
+  it("offers each degree variant of the chosen rules once", () => {
+    const rules = [{ id: "a", variants: [{ id: "3", name: "3-year" }, { id: "4", name: "4-year" }] },
+                   { id: "b", variants: [{ id: "4", name: "4-year" }, { id: "5", name: "5-year" }] }];
+    expect(degreeOptions(rules, ["a", "b"])).toEqual(["3-year", "4-year", "5-year"]);
+    expect(degreeOptions(rules, ["b"])).toEqual(["4-year", "5-year"]);
+    expect(degreeOptions(rules, [])).toEqual([]);
+  });
+
+  it("groups a credit scheme by semester", () => {
+    const g = schemeBySemester([{ category: "Major", credits: 8, semester: "I" }, { category: "AEC", credits: 2, semester: "I" },
+                                { category: "Major", credits: 12, semester: "II" }, { category: "Project", credits: 4 }]);
+    expect(g.map(x => [x.semester, x.items.length, x.total])).toEqual([["I", 2, 10], ["II", 1, 12], ["", 1, 4]]);
+  });
+
+  it("reads saved choices defensively", () => {
+    expect(parseSavedRegulatory('{"rules": ["ugc"], "degree": "3-year"}')).toEqual({ rules: ["ugc"], degree: "3-year" });
+    expect(parseSavedRegulatory("{bad")).toEqual({ rules: [], degree: "" });
+    expect(parseSavedRegulatory('{"rules": [1], "degree": ""}')).toEqual({ rules: [], degree: "" });
+    expect(parseSavedRegulatory(null)).toEqual({ rules: [], degree: "" });
+  });
+
+  it("labels statuses like the HTML report", () => {
+    expect(RULE_STATUS.not_met).toEqual({ label: "Not met", css: "High" });
+    expect(RULE_STATUS.partly.css).toBe("Medium");
   });
 });

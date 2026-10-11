@@ -91,6 +91,19 @@ td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space:
 .pill.High { background: var(--hi-bg); color: var(--hi); }
 .pill.Medium, .pill.Moderate { background: var(--md-bg); color: var(--md); }
 .pill.soft { background: var(--soft); color: var(--muted); }
+.pill.ok { background: var(--ok-bg); color: var(--good); }
+.regcontrols { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.regcontrols label { display: inline-flex; gap: 6px; align-items: center; }
+.regcontrols select { max-width: 100%; }
+table.rules td:nth-child(2), table.rules td:nth-child(3) { min-width: 140px; }
+@media (max-width: 640px) {
+  table.rules tr { display: grid; grid-template-columns: 1fr 1fr auto; column-gap: 10px; }
+  table.rules thead { display: none; }
+  table.rules td { border: 0; padding: 3px 0; min-width: 0; }
+  table.rules td.req { grid-column: 1 / -1; font-weight: 600; padding-top: 8px; }
+  table.rules tr + tr { border-top: 1px solid var(--line); padding-bottom: 6px; }
+  table.rules td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+}
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .chip { display: inline-block; padding: 0 8px; border-radius: 10px; font-size: 12px; background: var(--soft); }
 

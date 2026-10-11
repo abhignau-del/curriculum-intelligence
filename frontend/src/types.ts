@@ -13,8 +13,12 @@ export interface Course {
   topics: string[]; outcomes: string[];
 }
 
+/** Credits a student earns in one category of course, from the programme's regulations. */
+export interface SchemeItem { category: string; credits: number; semester?: string | null; note?: string }
+
 export interface Programme {
   institution: string; name: string; source: string; year: string; courses: Course[];
+  degree?: string; scheme?: SchemeItem[];
 }
 
 export interface ProgrammeDetail {
@@ -70,4 +74,26 @@ export interface BenchmarkResult {
   skills: SkillResult[];
   overlaps: Overlap[];
   structure: { label: string; courses: number; credits: number | null }[];
+  regulatory: Checklist[];                   // one per rules set asked for
 }
+
+export type RuleStatus = "met" | "partly" | "not_met" | "not_checked";
+
+export interface RuleResult {
+  id: string; kind: string; text: string; page: string; level: "required" | "advisory"; note: string;
+  status: RuleStatus; found: string; expected: string; evidence: string[];
+}
+
+export interface Checklist {
+  id: string; name: string; source: string;
+  variant: string | null; variant_name: string | null; variant_basis: string;
+  has_scheme: boolean;
+  category_credits: Record<string, number>;
+  unmapped: Record<string, number>;          // scheme labels no category matched -> credits
+  beyond: Record<string, number>;            // later semesters left out -> credits
+  missing_semesters: number[];
+  results: RuleResult[];
+}
+
+/** A built-in rules set the server can check against. */
+export interface RulesInfo { id: string; name: string; source: string; variants: { id: string; name: string }[] }

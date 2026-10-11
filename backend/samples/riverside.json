@@ -3,6 +3,7 @@
   "name": "B.Sc. Mathematics (Honours)",
   "source": "Fictional sample",
   "year": "2025-26",
+  "degree": "3-year",
   "courses": [
     {
       "code": "RMA101",
@@ -316,6 +317,128 @@
         "Literature review",
         "Dissertation and viva voce"
       ]
+    }
+  ],
+  "scheme": [
+    {
+      "category": "Major",
+      "credits": 8.0,
+      "semester": "I"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "I"
+    },
+    {
+      "category": "Multidisciplinary",
+      "credits": 3.0,
+      "semester": "I"
+    },
+    {
+      "category": "AEC",
+      "credits": 2.0,
+      "semester": "I"
+    },
+    {
+      "category": "SEC",
+      "credits": 3.0,
+      "semester": "I"
+    },
+    {
+      "category": "Major",
+      "credits": 8.0,
+      "semester": "II"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "II"
+    },
+    {
+      "category": "Multidisciplinary",
+      "credits": 3.0,
+      "semester": "II"
+    },
+    {
+      "category": "AEC",
+      "credits": 2.0,
+      "semester": "II"
+    },
+    {
+      "category": "VAC",
+      "credits": 3.0,
+      "semester": "II"
+    },
+    {
+      "category": "Major",
+      "credits": 8.0,
+      "semester": "III"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "III"
+    },
+    {
+      "category": "Multidisciplinary",
+      "credits": 3.0,
+      "semester": "III"
+    },
+    {
+      "category": "AEC",
+      "credits": 2.0,
+      "semester": "III"
+    },
+    {
+      "category": "SEC",
+      "credits": 3.0,
+      "semester": "III"
+    },
+    {
+      "category": "Major",
+      "credits": 12.0,
+      "semester": "IV"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "IV"
+    },
+    {
+      "category": "AEC",
+      "credits": 2.0,
+      "semester": "IV"
+    },
+    {
+      "category": "VAC",
+      "credits": 2.0,
+      "semester": "IV"
+    },
+    {
+      "category": "Major",
+      "credits": 14.0,
+      "semester": "V"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "V"
+    },
+    {
+      "category": "Internship",
+      "credits": 2.0,
+      "semester": "V"
+    },
+    {
+      "category": "Major",
+      "credits": 16.0,
+      "semester": "VI"
+    },
+    {
+      "category": "Minor",
+      "credits": 4.0,
+      "semester": "VI"
     }
   ]
 }

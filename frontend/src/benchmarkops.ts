@@ -1,4 +1,6 @@
-import type { Basis, BenchmarkResult, CourseOn, Evidence, Level, ProgrammeSummary, SkillResult, Status } from "./types";
+import type {
+  Basis, BenchmarkResult, Checklist, CourseOn, Evidence, Level, ProgrammeSummary, RuleStatus, SchemeItem, SkillResult, Status,
+} from "./types";
 
 /** What the user picked last time. Peers are stored as exclusions, so programmes
  * added later are included by default. */
@@ -132,4 +134,86 @@ export function splitOnTerm(line: string, term: string): [string, string, string
   const m = re.exec(line);
   if (!m) return [line, "", ""];
   return [line.slice(0, m.index), m[0], line.slice(m.index + m[0].length)];
+}
+
+// ----- regulatory checklist ------------------------------------------------
+
+/** Label and pill class per status, as in the HTML report. */
+export const RULE_STATUS: Record<RuleStatus, { label: string; css: string }> = {
+  met: { label: "Met", css: "ok" }, partly: { label: "Partly met", css: "Medium" },
+  not_met: { label: "Not met", css: "High" }, not_checked: { label: "Not checked", css: "soft" },
+};
+
+const num = (x: number) => String(Math.round(x * 100) / 100);
+
+/** "Required (9): 7 met, 2 partly met; Advisory (1): 1 not met." - the report's summary line. */
+export function checklistSummary(cl: Checklist): string {
+  const parts: string[] = [];
+  for (const level of ["required", "advisory"] as const) {
+    const rs = cl.results.filter(r => r.level === level);
+    if (!rs.length) continue;
+    const counts = (Object.keys(RULE_STATUS) as RuleStatus[])
+      .filter(st => rs.some(r => r.status === st))
+      .map(st => `${rs.filter(r => r.status === st).length} ${RULE_STATUS[st].label.toLowerCase()}`);
+    parts.push(`${level[0].toUpperCase()}${level.slice(1)} (${rs.length}): ${counts.join(", ")}`);
+  }
+  return parts.length ? parts.join("; ") + "." : "";
+}
+
+/** Tiles for the summary row: "7 of 9" requirements (or advisory points) met, per checklist. */
+export function checklistTiles(cl: Checklist): { value: string; label: string; na: boolean }[] {
+  const tiles = [];
+  for (const [level, label] of [["required", "Requirements met"], ["advisory", "Advisory points met"]] as const) {
+    const rs = cl.results.filter(r => r.level === level);
+    const done = rs.filter(r => r.status !== "not_checked");
+    if (done.length) tiles.push({ value: `${done.filter(r => r.status === "met").length} of ${done.length}`, label: `${label}: ${cl.id}`, na: false });
+    else if (rs.length) tiles.push({ value: "Not checked", label: `${cl.id}: no credit scheme recorded`, na: true });
+  }
+  return tiles;
+}
+
+/** The caveats the report prints above a checklist. */
+export function checklistNotes(cl: Checklist): string[] {
+  const notes: string[] = [];
+  if (!cl.has_scheme && cl.results.some(r => r.status === "not_checked"))
+    notes.push("No credit scheme is recorded for this programme, so its credit rules are not checked. "
+      + "Add the credits a student earns in each category (the Credit scheme sheet of the template).");
+  if (cl.missing_semesters.length) {
+    const s = cl.missing_semesters.length > 1 ? "s" : "";
+    notes.push(`The credit scheme has no credits for semester${s} ${cl.missing_semesters.join(", ")}, so credit totals for this degree are incomplete.`);
+  }
+  const beyond = Object.entries(cl.beyond);
+  if (beyond.length)
+    notes.push(`Not counted for this degree: credits in later semesters, ${beyond.map(([k, v]) => `${k} (${num(v)} credits)`).join(", ")}.`);
+  const unmapped = Object.entries(cl.unmapped);
+  if (unmapped.length)
+    notes.push("Credit scheme labels that match none of the framework's categories, so count only towards the total: "
+      + unmapped.map(([k, v]) => `${k} (${num(v)} credits)`).join(", ") + ".");
+  return notes;
+}
+
+/** Degree choices for the selected rules: every variant name once, in order. */
+export function degreeOptions(rules: { id: string; variants: { id: string; name: string }[] }[], chosen: string[]): string[] {
+  return [...new Set(rules.filter(r => chosen.includes(r.id)).flatMap(r => r.variants.map(v => v.name)))];
+}
+
+/** A credit scheme grouped by semester, in the order given, with each semester's total. */
+export function schemeBySemester(scheme: SchemeItem[]): { semester: string; items: SchemeItem[]; total: number }[] {
+  const groups = new Map<string, SchemeItem[]>();
+  for (const item of scheme) {
+    const key = item.semester ?? "";
+    groups.set(key, [...(groups.get(key) ?? []), item]);
+  }
+  return [...groups].map(([semester, items]) => ({ semester, items, total: items.reduce((t, i) => t + i.credits, 0) }));
+}
+
+export interface SavedRegulatory { rules: string[]; degree: string }
+
+export function parseSavedRegulatory(raw: string | null): SavedRegulatory {
+  try {
+    const v = JSON.parse(raw ?? "null");
+    if (v && Array.isArray(v.rules) && v.rules.every((x: unknown) => typeof x === "string") && typeof v.degree === "string")
+      return v;
+  } catch { /* corrupt storage */ }
+  return { rules: [], degree: "" };
 }

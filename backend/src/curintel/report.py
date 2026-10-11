@@ -11,6 +11,7 @@ from html import escape
 from . import __version__
 from .analysis import Benchmark, SkillRow, unmapped_lines
 from .overlap import OverlapPair
+from .regulatory import Checklist
 
 LEVEL_MARK = {"covered": ("✓", "Covered"), "touched": ("△", "Mentioned once"), "absent": ("·", "Not found")}
 ELECTIVE_MARK = ("○", "Covered only by electives")
@@ -44,7 +45,20 @@ def _num(x: float | None) -> str:
 
 # ----- JSON --------------------------------------------------------------
 
-def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
+def checklist_dict(cl: Checklist) -> dict:
+    return {
+        "id": cl.rules.id, "name": cl.rules.name, "source": cl.rules.source,
+        "variant": cl.variant.id if cl.variant else None,
+        "variant_name": cl.variant.name if cl.variant else None, "variant_basis": cl.variant_basis,
+        "has_scheme": cl.has_scheme, "category_credits": cl.category_credits, "unmapped": cl.unmapped,
+        "beyond": cl.beyond, "missing_semesters": cl.missing_semesters,
+        "results": [{"id": r.rule.id, "kind": r.rule.kind, "text": r.rule.text, "page": r.rule.page,
+                     "level": r.rule.level, "note": r.rule.note, "status": r.status, "found": r.found,
+                     "expected": r.expected, "evidence": r.evidence} for r in cl.results],
+    }
+
+
+def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = ()) -> dict:
     def ev(e):
         return {"course": e.course_code, "course_title": e.course_title, "field": e.field,
                 "line": e.line, "term": e.term}
@@ -75,6 +89,7 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair]) -> dict:
         } for r in b.rows],
         "overlaps": [o.__dict__ for o in overlaps],
         "structure": [s.__dict__ for s in b.structure],
+        "regulatory": [checklist_dict(cl) for cl in checklists],
     }
 
 
@@ -117,7 +132,12 @@ td.ownc{background:var(--soft)}
 @media (max-width:640px){table.gaps tr{display:grid;grid-template-columns:1fr auto auto;column-gap:8px}
 table.gaps tr:first-child{display:none}table.gaps td{border:0;padding:6px 0}
 table.gaps td.finding{grid-column:1/-1;order:4;padding-top:0}table.gaps tr+tr{border-top:1px solid var(--line);padding:6px 0}
-table.matrix th.peer{height:120px}}
+table.matrix th.peer{height:120px}
+table.rules tr{display:grid;grid-template-columns:1fr 1fr auto;column-gap:10px}table.rules tr:first-child{display:none}
+table.rules td{border:0;padding:3px 0}table.rules td.req{grid-column:1/-1;font-weight:600;padding-top:8px}
+table.rules tr+tr{border-top:1px solid var(--line);padding-bottom:6px}
+table.rules td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}}
+a{color:var(--accent)}
 code{font-size:13px}footer{margin-top:48px;color:var(--muted);font-size:13px}
 """
 
@@ -288,6 +308,58 @@ def _section_structure(b: Benchmark) -> str:
             "<th class='n'>Courses offered</th><th class='n'>Credits offered</th></tr>" + rows + "</table></div>")
 
 
+STATUS_PILL = {"met": ("Met", "ok"), "partly": ("Partly met", "Medium"),
+               "not_met": ("Not met", "High"), "not_checked": ("Not checked", "soft")}
+
+
+def _section_checklist(cl: Checklist) -> str:
+    src = (f" Source: <a href='{escape(cl.rules.source)}'>{escape(cl.rules.source)}</a>."
+           if cl.rules.source.startswith("http") else
+           (f" Source: {escape(cl.rules.source)}." if cl.rules.source else ""))
+    variant = (f"Checked as a <b>{escape(cl.variant.name)}</b> ({escape(cl.variant_basis)})."
+               if cl.variant else "")
+    counts = []
+    for level in ("required", "advisory"):
+        rs = [r for r in cl.results if r.rule.level == level]
+        if rs:
+            parts = [f"{sum(r.status == st for r in rs)} {STATUS_PILL[st][0].lower()}"
+                     for st in STATUS_PILL if any(r.status == st for r in rs)]
+            counts.append(f"{level.capitalize()} ({len(rs)}): {', '.join(parts)}")
+    notes = []
+    if not cl.has_scheme and any(r.status == "not_checked" for r in cl.results):
+        notes.append("No credit scheme is recorded for this programme, so its credit rules are not checked. "
+                     "Add the credits a student earns in each category (from the programme's regulations) "
+                     "as the programme's <code>scheme</code>.")
+    if cl.missing_semesters:
+        sems = ", ".join(map(str, cl.missing_semesters))
+        notes.append(f"The credit scheme has no credits for semester{'s' if len(cl.missing_semesters) > 1 else ''} "
+                     f"{sems}, so credit totals for this degree are incomplete.")
+    if cl.beyond:
+        sems = ", ".join(f"{escape(k)} ({_num(v)} credits)" for k, v in cl.beyond.items())
+        notes.append(f"Not counted for this degree: credits in later semesters, {sems}.")
+    if cl.unmapped:
+        labels = ", ".join(f"{escape(k)} ({_num(v)} credits)" for k, v in cl.unmapped.items())
+        notes.append(f"Credit scheme labels that match none of the framework's categories, so count only "
+                     f"towards the total: {labels}.")
+    rows = []
+    for r in cl.results:
+        label, css = STATUS_PILL[r.status]
+        page = f" <span class='muted small'>p. {escape(r.rule.page)}</span>" if r.rule.page else ""
+        level = " <span class='pill soft'>Advisory</span>" if r.rule.level == "advisory" else ""
+        note = f"<br><span class='muted small'>{escape(r.rule.note)}</span>" if r.rule.note else ""
+        ev = (f"<details><summary>Evidence</summary>{_evidence_list([escape(e) for e in r.evidence])}</details>"
+              if r.evidence else "")
+        rows.append(f"<tr><td class='req'>{escape(r.rule.text)}{page}{level}{note}</td>"
+                    f"<td data-label='This programme'>{escape(r.found)}{ev}</td>"
+                    f"<td data-label='Expected'>{escape(r.expected)}</td>"
+                    f"<td><span class='pill {css}'>{label}</span></td></tr>")
+    return (f"<h2>Regulatory checklist: {escape(cl.rules.name)}</h2><p class='muted'>{variant}{src}</p>"
+            + "".join(f"<p class='muted'>{n}</p>" for n in notes)
+            + (f"<p>{'; '.join(counts)}.</p>" if counts else "")
+            + "<div class='card'><table class='rules'><tr><th>Requirement</th><th>This programme</th>"
+              "<th>Expected</th><th>Status</th></tr>" + "".join(rows) + "</table></div>")
+
+
 def _section_matrix(b: Benchmark) -> str:
     head = ("<tr><th>Skill</th><th class='own'>This programme</th>"
             + "".join(f"<th class='peer' title='{escape(p.label)}'>{escape(p.label)}</th>" for p in b.peers)
@@ -310,7 +382,7 @@ def _section_matrix(b: Benchmark) -> str:
             "<div class='card'><table class='matrix'>" + head + "".join(body) + "</table></div>")
 
 
-def _section_method(b: Benchmark) -> str:
+def _section_method(b: Benchmark, regulatory: bool = False) -> str:
     unmapped = unmapped_lines(b.own, b.taxonomy)
     um = ""
     if unmapped:
@@ -328,7 +400,7 @@ question for the committee, not a verdict. Peer findings are only as good as the
 <p>Courses on a skill: a course counts as <i>on</i> a skill when its title names the skill, or when the skill
 appears in at least half of its topic lines (and in at least three). A programme without one teaches the skill
 inside courses about something else, which may mean a few examples rather than a unit of study.</p>
-<p class="muted">Not yet analysed: regulatory (NEP/UGC) alignment and industry skill demand.</p>{um}"""
+<p class="muted">Not yet analysed: {"industry skill demand" if regulatory else "regulatory (NEP/UGC) alignment and industry skill demand"}.</p>{um}"""
 
 
 def _electives_note(b: Benchmark) -> str:
@@ -344,7 +416,24 @@ def _electives_note(b: Benchmark) -> str:
     return base + tail
 
 
-def render_html(b: Benchmark, overlaps: list[OverlapPair]) -> str:
+def _regulatory_tiles(checklists) -> str:
+    if not checklists:
+        return '<div class="tile na"><b>Not yet analysed</b><span>Regulatory &amp; industry alignment</span></div>'
+    tiles = []
+    for cl in checklists:
+        for level, label in (("required", "Requirements met"), ("advisory", "Advisory points met")):
+            rs = [r for r in cl.results if r.rule.level == level]
+            done = [r for r in rs if r.status != "not_checked"]
+            if done:
+                tiles.append(f'<div class="tile"><b>{sum(r.status == "met" for r in done)} of {len(done)}</b>'
+                             f'<span>{label}: {escape(cl.rules.id)}</span></div>')
+            elif rs:
+                tiles.append(f'<div class="tile na"><b>Not checked</b><span>{escape(cl.rules.id)}: '
+                             f'no credit scheme recorded</span></div>')
+    return "".join(tiles) + '<div class="tile na"><b>Not yet analysed</b><span>Industry alignment</span></div>'
+
+
+def render_html(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = ()) -> str:
     gaps = b.by_status("gap")
     high = sum(r.priority == "High" for r in gaps)
     flagged = [o for o in overlaps if not o.theory_lab_pair]
@@ -353,7 +442,7 @@ def render_html(b: Benchmark, overlaps: list[OverlapPair]) -> str:
 <div class="tile"><b>{len(gaps)}</b><span>Priority gaps ({high} high)</span></div>
 <div class="tile"><b>{len(b.by_status('distinctive'))}</b><span>Distinctive strengths</span></div>
 <div class="tile"><b>{len(flagged)}</b><span>Course pairs flagged for overlap</span></div>
-<div class="tile na"><b>Not yet analysed</b><span>Regulatory &amp; industry alignment</span></div>
+{_regulatory_tiles(checklists)}
 </div>"""
     peers = ", ".join(escape(p.label) for p in b.peers)
     title = f"{escape(b.own.name)}: Curriculum Benchmark"
@@ -372,6 +461,7 @@ benchmarked against {len(b.peers)} peer programmes</p>
 {_section_areas(b)}
 {_section_structure(b)}
 {_section_matrix(b)}
-{_section_method(b)}
+{"".join(_section_checklist(cl) for cl in checklists)}
+{_section_method(b, bool(checklists))}
 <footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}.</footer>
 </main></body></html>"""

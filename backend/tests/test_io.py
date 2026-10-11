@@ -117,4 +117,42 @@ def test_cli_check_and_template(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "Calculus" in out and "C0: Arrays and functions" in out
     assert main(["template", "-o", str(tmp_path / "t.xlsx")]) == 0
-    assert set(load_workbook(tmp_path / "t.xlsx").sheetnames) == {"Programme", "Courses", "How to fill"}
+    assert set(load_workbook(tmp_path / "t.xlsx").sheetnames) == {"Programme", "Courses", "Credit scheme", "How to fill"}
+
+
+def test_workbook_round_trip_keeps_degree_and_scheme(tmp_path):
+    p = load_programme(SAMPLES / "riverside.json")
+    assert p.degree == "3-year" and p.scheme
+    write_template(tmp_path / "r.xlsx", p)
+    back = from_workbook(tmp_path / "r.xlsx")
+    assert back.degree == "3-year"
+    assert [(s.semester, s.category, s.credits) for s in back.scheme] == \
+           [(s.semester, s.category, s.credits) for s in p.scheme]
+    assert back.courses == p.courses
+
+
+def test_workbook_without_scheme_sheet_still_loads(tmp_path):
+    from openpyxl import load_workbook as lw
+    write_template(tmp_path / "t.xlsx", load_programme(SAMPLES / "riverside.json"))
+    wb = lw(tmp_path / "t.xlsx")
+    del wb["Credit scheme"]
+    wb.save(tmp_path / "old.xlsx")
+    assert from_workbook(tmp_path / "old.xlsx").scheme == []
+
+
+@pytest.mark.parametrize("row,message", [
+    (["I", "Major", "eight", ""], "Credit scheme row 2, Credits: must be a number, 0 or more"),
+    (["I", "Major", None, ""], "Credit scheme row 2, Credits: must be a number, 0 or more"),
+    (["I", "Major", -2, ""], "Credit scheme row 2, Credits: must be a number, 0 or more"),
+    (["I", None, 4, ""], "Credit scheme row 2, Category: needed"),
+])
+def test_bad_scheme_rows_are_explained(tmp_path, row, message):
+    from openpyxl import load_workbook as lw
+    write_template(tmp_path / "t.xlsx", load_programme(SAMPLES / "riverside.json"))
+    wb = lw(tmp_path / "t.xlsx")
+    ws = wb["Credit scheme"]
+    for i, v in enumerate(row, start=1):
+        ws.cell(row=2, column=i).value = v      # cell(value=None) would leave the old value
+    wb.save(tmp_path / "bad.xlsx")
+    with pytest.raises(ImportError_, match=message):
+        from_workbook(tmp_path / "bad.xlsx")

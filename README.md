@@ -64,6 +64,35 @@ their titles and topics (TF‑IDF cosine). Pairs at 40% or more are flagged,
 These thresholds were tuned on the fictional samples. Expect to adjust them
 on real syllabi.
 
+### Regulatory checklist
+
+`curintel regcheck PROGRAMME` checks a programme against the rules of a
+framework. The built-in rules are UGC's *Curriculum and Credit Framework for
+Undergraduate Programmes* (2022): total credits (120 for 3 years, 160 for 4),
+the Table 2 minimums per category (Major, Minor, Multidisciplinary, AEC, SEC,
+value-added, internship, research), and at least half of all credits from the
+major. Each rule quotes the requirement and its page, and each result reads
+*met*, *partly met*, *not met* or *not checked*. Add `--rules ugc-ccfup-2022`
+to `report` to put the checklist in the benchmark report.
+
+- **Credit rules read a credit scheme**, not the course list. A course list
+  holds one department's courses and every elective alternative, so a
+  programme records the credits a student earns per category and semester as
+  its `scheme` (in the JSON, or in a PDF profile). The framework maps each
+  university's own labels (DSC, MDC, IKS, …) onto its categories, and names any
+  label it cannot place. Without a scheme, credit rules are *not checked*.
+- **The degree decides which minimums apply.** Set it on the programme
+  (`"degree": "3-year"`) or with `--degree`. Otherwise the checker goes by the
+  number of semesters and says so. A 3-year check leaves out semesters 7 and 8,
+  and a 4-year check names any semester the scheme lacks.
+- **Course rules** ("a core course on probability") use the same course
+  detection as the benchmark, so a model curriculum's core papers can be written
+  as rules too. Mark such rules `level: advisory`.
+
+Write your own rules file in YAML (format at the top of
+[`regulatory.py`](backend/src/curintel/regulatory.py)) and pass it with
+`--rules my-rules.yaml`.
+
 ## Getting started
 
 Requires Python 3.11+ and, for the web interface, Node.js 20+.
@@ -95,7 +124,8 @@ kept in `backend/curintel.db` (`--db` to use another file).
 - **Benchmark**: pick the programme under review and tick its peers; the
   results update as you change the selection. Click any mark in the coverage
   matrix to see the syllabus lines behind it, with the matched phrase
-  highlighted. Download the HTML report or the JSON data.
+  highlighted. Tick a regulatory framework to add its checklist (and pick the
+  degree to check against). Download the HTML report or the JSON data.
 
 There is no sign-in: it is meant to run on your own computer and listens on
 127.0.0.1 only. Don't expose it on a network unless everyone who can reach it
@@ -108,7 +138,8 @@ to the server on port 8000).
 
 | Command | What it does |
 |---|---|
-| `curintel report OWN PEERS... [-o file.html] [--json file.json] [-t taxonomy.yaml]` | the benchmark report; PEERS can be files or folders |
+| `curintel report OWN PEERS... [-o file.html] [--json file.json] [-t taxonomy.yaml] [-r RULES]` | the benchmark report; PEERS can be files or folders |
+| `curintel regcheck PROGRAMME [-r RULES] [--degree 3-year]` | the regulatory checklist (default rules: `ugc-ccfup-2022`) |
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
@@ -120,7 +151,8 @@ to the server on port 8000).
 A programme is JSON (see `backend/samples/`) or an Excel workbook made from
 `curintel template`: one row per course with code, title, semester, credits,
 category, topics (one per line in the cell, or separated by `;`) and
-optional outcomes.
+optional outcomes. For the regulatory checklist, fill in the optional
+*Credit scheme* sheet (semester, category, credits) and the *Degree* field.
 
 ### Importing syllabus PDFs
 
@@ -174,8 +206,8 @@ institutional data in the git-ignored `private-data/` folder.
 3. **PDF import** with per-document profiles, tested on real syllabi (v0.3).
 4. **Core vs elective coverage** (v0.4).
 5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
-6. CO/PO and outcome mapping.
-7. Regulatory alignment: NEP/UGC requirements as machine-readable rules.
+6. **Regulatory checklist**: UGC credit framework rules, credit schemes, course rules (v0.6).
+7. CO/PO and outcome mapping.
 8. Industry skill demand.
 9. More discipline taxonomies.
 
