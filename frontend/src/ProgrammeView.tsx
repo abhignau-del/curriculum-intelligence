@@ -94,6 +94,15 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
         </div>
       )}
 
+      {(p.programme_outcomes ?? []).length > 0 && (
+        <div className="card">
+          <h3>Programme outcomes</h3>
+          <p className="hint">Course outcomes are mapped to these in the CO–PO section of the benchmark.</p>
+          <ul className="ev">{(p.programme_outcomes ?? []).map(o => (
+            <li key={o.code}><b>{o.code}</b>{o.name && ` ${o.name}`}: {o.text}</li>))}</ul>
+        </div>
+      )}
+
       {d.unmapped.length > 0 && (
         <div className="card">
           <h3>Syllabus lines with no recognised skill</h3>

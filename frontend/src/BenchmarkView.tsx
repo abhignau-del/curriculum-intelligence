@@ -3,12 +3,12 @@ import { api, download, saveBlob } from "./api";
 import type { Selection } from "./api";
 import {
   byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coverMark, degreeOptions,
-  gapSentence, levelSegments, outcomesSummary, parseSaved, parseSavedRegulatory, pct, peerCourses, peersSplit,
+  cosByCourse, gapSentence, levelSegments, outcomesSummary, parseSaved, unservedPos, parseSavedRegulatory, pct, peerCourses, peersSplit,
   resolveSelection, RULE_STATUS,
   selectionProblem, skillsByArea, splitOnTerm, toSaved,
 } from "./benchmarkops";
 import type {
-  BenchmarkResult, Checklist, Evidence, OutcomesResult, ProgrammeSummary, RulesInfo, SkillResult, TaxonomyView,
+  BenchmarkResult, Checklist, CopoResult, Evidence, OutcomesResult, ProgrammeSummary, RulesInfo, SkillResult, TaxonomyView,
 } from "./types";
 
 const STORAGE_KEY = "curintel.selection";
@@ -160,6 +160,7 @@ function Results({ r, stale, onCell, onError, selection }: {
         <a href="#overlap">Overlap</a><a href="#areas">Areas</a><a href="#structure">Structure</a><a href="#matrix">Matrix</a>
         {r.regulatory.length > 0 && <a href="#regulatory">Rules</a>}
         {r.outcomes && <a href="#outcomes">Outcomes</a>}
+        {r.copo && <a href="#copo">CO–PO</a>}
         <span className="spacer" />
         <button className="btn small" onClick={() => download("/api/benchmark/report", "benchmark.html", selection).catch(e => onError(e.message))}>
           Download report (.html)
@@ -283,6 +284,7 @@ function Results({ r, stale, onCell, onError, selection }: {
 
       {r.regulatory.map((cl, i) => <ChecklistSection key={cl.id} cl={cl} first={i === 0} />)}
       {r.outcomes && <OutcomesSection o={r.outcomes} courseCount={r.structure[0]?.courses ?? 0} />}
+      {r.copo && <CopoSection c={r.copo} />}
 
       {r.unmapped.length > 0 && (
         <details className="card">
@@ -327,6 +329,63 @@ function ChecklistSection({ cl, first }: { cl: Checklist; first: boolean }) {
 }
 
 const plural = (n: number) => (n === 1 ? "" : "s");
+
+function CopoSection({ c }: { c: CopoResult }) {
+  const unserved = unservedPos(c);
+  return (
+    <>
+      <Section id="copo" title={`CO–PO mapping: ${c.framework.name}`}
+               hint="Which programme outcomes each course outcome serves, on the 1–3 scale of NAAC and NBA matrices (1 slight, 2 moderate, 3 substantial). An outcome serves a PO when its verbs, the skills it names or its words match the PO's indicators; it maps more strongly when two kinds match and when its Bloom level reaches the PO's. A course's cell is the rounded mean over its outcomes that serve the PO." />
+      {unserved.length > 0 && <p><b>{unserved.join(", ")}</b> {unserved.length === 1 ? "is" : "are"} served by no course outcome.</p>}
+      <div className="card flush">
+        <table>
+          <thead><tr><th>PO</th><th>Outcome</th><th className="n">Courses</th><th className="n">Mean</th></tr></thead>
+          <tbody>{c.pos.map(p => (
+            <tr key={p.code}>
+              <td><b>{p.code}</b></td>
+              <td>{p.name}{p.text && <div className="muted small wrap">{p.text}{p.page && ` (p. ${p.page})`}</div>}</td>
+              <td className="n">{p.courses}</td>
+              <td className="n">{p.mean == null ? "–" : p.mean.toFixed(1)}</td>
+            </tr>))}
+          </tbody>
+        </table>
+      </div>
+      {c.matrix.length > 0 && (
+        <div className="card flush matrix-wrap">
+          <table className="copo">
+            <thead><tr><th>Course</th>{c.pos.map(p => <th key={p.code} title={`${p.code} ${p.name}`}>{p.code}</th>)}</tr></thead>
+            <tbody>
+              {c.matrix.map(row => (
+                <tr key={row.course}>
+                  <td><b>{row.course}</b> <span className="muted small">{row.course_title}</span></td>
+                  {c.pos.map(p => row.cells[p.code]
+                    ? <td key={p.code} className={`s${row.cells[p.code]}`}>{row.cells[p.code]}</td>
+                    : <td key={p.code} className="muted">·</td>)}
+                </tr>))}
+              <tr className="sum"><td>Courses serving</td>{c.pos.map(p => <td key={p.code}>{p.courses}</td>)}</tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div className="card">
+        {c.unmapped.length > 0 && (
+          <details><summary>{c.unmapped.length} course outcome{plural(c.unmapped.length)} serve{c.unmapped.length === 1 ? "s" : ""} no PO</summary>
+            <ul className="ev">{c.unmapped.map((u, i) => <li key={i}><b>{u.course}</b>: {u.text}</li>)}</ul></details>
+        )}
+        <details><summary>Why each outcome maps where it does</summary>
+          {cosByCourse(c).map(([course, cos]) => (
+            <div key={course}><h3>{course}</h3>
+              <ul className="ev">{cos.map((co, i) => (
+                <li key={i}>{co.text}<br />
+                  {co.links.length ? co.links.map(l => `${l.po} ${l.strength} (${l.reasons.join(", ")})`).join("; ") : <i>serves no PO</i>}
+                </li>))}
+              </ul>
+            </div>))}
+        </details>
+      </div>
+    </>
+  );
+}
 
 function OutcomesSection({ o, courseCount }: { o: OutcomesResult; courseCount: number }) {
   const names = Object.fromEntries(o.levels.map(l => [l.level, l.name])) as Record<number, string>;

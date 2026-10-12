@@ -1,0 +1,76 @@
+# Graduate attributes of UGC's Learning Outcomes-based Curriculum Framework (LOCF) for
+# B.A./B.Sc. (Honours) Mathematics, section 3 (pages 5-6 of the Mathematics document),
+# as programme outcomes for CO-PO mapping. Texts are condensed from the document.
+#
+# Indicators say what in a course outcome shows it serves the attribute:
+#   verbs  - the outcome's opening verbs (as in taxonomies/bloom.yaml)
+#   skills - taxonomy skill ids, or whole areas as area:<id>
+#   words  - phrases anywhere in the outcome
+#   level  - the Bloom level the attribute calls for; an outcome at or above it maps more strongly
+# Format: see curintel/mapping.py.
+id: ugc-locf-mathematics
+name: UGC LOCF Mathematics graduate attributes
+source: UGC Learning Outcomes-based Curriculum Framework, B.A./B.Sc. (Honours) Mathematics, section 3
+outcomes:
+  - code: GA1
+    name: Disciplinary knowledge
+    text: Comprehensive knowledge of mathematics and understanding of the disciplines in the programme.
+    page: "5"
+    skills: [area:pure, area:applied, area:statistics]
+    verbs: [define, state, recall, identify, explain, describe, classify]   # not vague verbs: they show little
+    level: 2
+    via_course: true       # LOCF ticks disciplinary knowledge for every core course
+  - code: GA2
+    name: Communication skills
+    text: Communicate mathematical concepts effectively, with examples and geometric visualisation, and use mathematics as a precise language.
+    page: "5"
+    skills: [communication, latex, visualisation]
+    verbs: [explain, describe, discuss, present, illustrate, express, write, visualise, visualize, draw, sketch, plot, graph]
+    words: [present, presentation, communicate, communication, seminar, report, exposition, geometrical, visualisation, visualization, plots, diagrams]   # not "graphs": graph theory
+    level: 2
+  - code: GA3
+    name: Critical thinking and analytical reasoning
+    text: Think critically about mathematical concepts, analyse results and apply them across branches of mathematics.
+    page: "5"
+    verbs: [analyse, analyze, prove, justify, verify, deduce, derive, compare, contrast, examine, distinguish, evaluate, test, establish]
+    words: [proof, proofs, critical, critically, reasoning, logical, logically, rigorous, rigour, rigor]
+    level: 4
+  - code: GA4
+    name: Problem solving
+    text: Solve problems, including models of growth and decay, linear systems and linear programming, and give new solutions using mathematics.
+    page: "5"
+    skills: [modelling, optimisation, operations_research, numerical_methods, ode]
+    verbs: [solve, compute, calculate, find, determine, apply, approximate, interpolate, evaluate the, formulate, model, use]
+    words: [problem, problems, real life, real-life, application, applications, model, models]
+    level: 3
+  - code: GA5
+    name: Research-related skills
+    text: Ask appropriate questions about mathematical concepts and follow advances in the subject.
+    page: "6"
+    skills: [research]
+    verbs: [investigate, explore, formulate, propose, conjecture, design, develop]
+    words: [research, project, investigation, inquiry, literature, advances, open problem, unsolved]
+    level: 4
+  - code: GA6
+    name: Information/digital literacy
+    text: Use appropriate software and programming to solve equations and carry out mathematical investigations.
+    page: "6"
+    skills: [area:computational, area:data]
+    verbs: [program, code, implement]
+    words: [software, computer, programming, program, programs, code, python, numpy, pandas, matplotlib, latex, matlab, scilab, sage, mathematica, spreadsheet]
+    level: 3
+  - code: GA7
+    name: Self-directed learning
+    text: Work independently and study notions of mathematics in depth.
+    page: "6"
+    words: [independently, independent, self study, self-study, on their own, own pace, take up, further study]
+  - code: GA8
+    name: Moral and ethical awareness/reasoning
+    text: Recognise unethical behaviour such as fabricating or misrepresenting data, and act objectively and truthfully.
+    page: "6"
+    words: [ethic, ethics, ethical, plagiarism, integrity, honest, honesty, unbiased, misrepresent, fabrication]
+  - code: GA9
+    name: Lifelong learning
+    text: Acquire knowledge and skills through logical reasoning, and keep learning.
+    page: "6"
+    words: [lifelong, life-long, self-learning, self learning, future courses, in future, higher studies, further studies, advanced topics, foundation for, competitive examinations]

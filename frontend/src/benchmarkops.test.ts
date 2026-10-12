@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   basisCounts, byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coursesOnSentence,
-  coverMark, degreeOptions, gapSentence, levelSegments, outcomesSummary, parseSavedRegulatory, RULE_STATUS, schemeBySemester, parseSaved, peerCourses, peersSplit, resolveSelection,
+  coverMark, cosByCourse, degreeOptions, gapSentence, levelSegments, outcomesSummary, parseSavedRegulatory, RULE_STATUS,
+  schemeBySemester, unservedPos, parseSaved, peerCourses, peersSplit, resolveSelection,
   selectionProblem, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, Checklist, CourseOn, OutcomesResult, ProgrammeSummary, RuleResult, SkillResult } from "./types";
+import type {
+  BenchmarkResult, Checklist, CopoResult, CourseOn, OutcomesResult, ProgrammeSummary, RuleResult, SkillResult,
+} from "./types";
 
 const prog = (id: string, institution = `Inst ${id}`): ProgrammeSummary =>
   ({ id, institution, name: "B.Sc.", year: "", source: "", courses: 1, credits: 4, updated_at: "" });
@@ -256,5 +259,20 @@ describe("course outcomes", () => {
   it("makes bar segments in level order, unrated last", () => {
     expect(levelSegments(o.by_year[0], [1, 2, 3, 4, 5, 6]).map(s => [s.level, s.count, Math.round(s.width)]))
       .toEqual([[2, 1, 33], [5, 1, 33], [0, 1, 33]]);
+  });
+});
+
+describe("CO-PO mapping", () => {
+  const c: CopoResult = {
+    framework: { id: "f", name: "F", source: "" },
+    pos: [{ code: "P1", name: "Knowledge", text: "", page: "", courses: 2, mean: 2 },
+          { code: "P2", name: "Ethics", text: "", page: "", courses: 0, mean: null }],
+    matrix: [], unmapped: [],
+    cos: [{ course: "A", text: "x", level: 3, links: [] }, { course: "B", text: "y", level: 2, links: [] },
+          { course: "A", text: "z", level: 1, links: [] }],
+  };
+  it("names the POs no outcome serves", () => { expect(unservedPos(c)).toEqual(["P2 Ethics"]); });
+  it("groups outcomes by course, in order", () => {
+    expect(cosByCourse(c).map(([k, cos]) => [k, cos.map(x => x.text)])).toEqual([["A", ["x", "z"]], ["B", ["y"]]]);
   });
 });

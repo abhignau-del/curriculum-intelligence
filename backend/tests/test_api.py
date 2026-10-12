@@ -176,3 +176,20 @@ def test_programme_detail_includes_scheme(client):
     own, _ = ids(client)
     p = client.get(f"/api/programmes/{own}").json()["programme"]
     assert p["degree"] == "3-year" and len(p["scheme"]) == 24
+
+
+def test_benchmark_includes_outcomes_and_copo(client):
+    own, peers = ids(client)
+    d = client.post("/api/benchmark", json={"own": own, "peers": peers}).json()
+    assert d["outcomes"]["higher_order_share"] > 0
+    assert d["copo"]["framework"]["id"] == "ugc-locf-mathematics" and len(d["copo"]["pos"]) == 9
+    r = client.post("/api/benchmark", json={"own": own, "peers": peers, "framework": "../secret.yaml"})
+    assert r.status_code == 400 and "No built-in outcome framework" in r.json()["detail"]
+    r = client.post("/api/benchmark", json={"own": own, "peers": peers, "framework": "own"})
+    assert r.status_code == 400 and "states no programme outcomes" in r.json()["detail"]
+    html = client.post("/api/benchmark/report", json={"own": own, "peers": peers}).text
+    assert "<h2>CO–PO mapping" in html
+    # a peer without outcomes under review: neither section
+    peer = peers[0]
+    d = client.post("/api/benchmark", json={"own": peer, "peers": [own]}).json()
+    assert d["outcomes"] is None and d["copo"] is None

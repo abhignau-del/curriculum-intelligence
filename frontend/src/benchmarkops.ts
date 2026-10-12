@@ -1,6 +1,6 @@
 import type {
-  Basis, BenchmarkResult, Checklist, CourseOn, Evidence, Level, OutcomesResult, ProgrammeSummary, RuleStatus, SchemeItem,
-  SkillResult, Status,
+  Basis, BenchmarkResult, Checklist, CopoResult, CourseOn, Evidence, Level, OutcomesResult, ProgrammeSummary, RuleStatus,
+  SchemeItem, SkillResult, Status,
 } from "./types";
 
 /** What the user picked last time. Peers are stored as exclusions, so programmes
@@ -237,4 +237,18 @@ export function levelSegments(row: { count: number; levels: Record<string, numbe
   const segs = levels.map(lv => ({ level: lv, count: row.levels[String(lv)] ?? 0 }));
   segs.push({ level: 0, count: row.levels["none"] ?? 0 });
   return segs.filter(s => s.count > 0).map(s => ({ ...s, width: row.count ? 100 * s.count / row.count : 0 }));
+}
+
+// ----- CO-PO mapping -------------------------------------------------------------
+
+/** The POs no course outcome serves, as in the HTML report's note. */
+export function unservedPos(c: CopoResult): string[] {
+  return c.pos.filter(p => p.courses === 0).map(p => `${p.code} ${p.name}`.trim());
+}
+
+/** Each course outcome with its links, grouped by course in order: [course, outcomes][]. */
+export function cosByCourse(c: CopoResult): [string, CopoResult["cos"]][] {
+  const groups = new Map<string, CopoResult["cos"]>();
+  for (const co of c.cos) groups.set(co.course, [...(groups.get(co.course) ?? []), co]);
+  return [...groups];
 }

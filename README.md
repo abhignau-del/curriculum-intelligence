@@ -88,6 +88,31 @@ states its outcomes. The verb list is
 own with `--verbs`. PDF profiles read outcomes with `outcomes_start` and
 `outcomes_end`.
 
+### CO–PO mapping
+
+`curintel copo PROGRAMME` maps course outcomes (COs) to programme outcomes
+(POs) and builds the course articulation matrix that NAAC and NBA ask for, on
+their 1–3 scale (1 slight, 2 moderate, 3 substantial).
+
+- **Which POs.** The programme's own POs and PSOs when it states them (JSON
+  `programme_outcomes`, or the template's *Programme outcomes* sheet);
+  otherwise the nine graduate attributes of UGC's LOCF for Mathematics
+  (`--framework ugc-locf-mathematics`, built in). Any framework can be written
+  in YAML ([`frameworks/`](backend/src/curintel/frameworks)).
+- **How a CO serves a PO.** Each PO has indicators: opening verbs, skills (or
+  whole skill areas) and words. A CO serves a PO when one matches; it maps
+  more strongly when indicators of two kinds match and when its Bloom level
+  reaches the level the PO calls for. A PO written in plain text gets its
+  indicators from its own wording, and these are held to more: a generic verb
+  (*use*, *apply*) does not make a link on its own, and common words
+  (*theory*, *methods*, or any word in over a fifth of the programme's
+  outcomes) are ignored. Every link lists the indicators behind it.
+- **What it shows.** Courses serving each PO and their mean strength, the POs
+  no course outcome serves, and the matrix, with the reasons for every cell.
+
+The benchmark report and web app add this section when the programme under
+review states course outcomes.
+
 ### Regulatory checklist
 
 `curintel regcheck PROGRAMME` checks a programme against the rules of a
@@ -165,6 +190,7 @@ to the server on port 8000).
 | `curintel report OWN PEERS... [-o file.html] [--json file.json] [-t taxonomy.yaml] [-r RULES]` | the benchmark report; PEERS can be files or folders |
 | `curintel regcheck PROGRAMME [-r RULES] [--degree 3-year]` | the regulatory checklist (default rules: `ugc-ccfup-2022`) |
 | `curintel outcomes PROGRAMME [-o file.html] [--json file.json]` | Bloom's levels of the course outcomes, with checks |
+| `curintel copo PROGRAMME [--framework NAME\|FILE\|own] [-o file.html] [--json file.json]` | CO–PO mapping and articulation matrix |
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
@@ -232,7 +258,7 @@ institutional data in the git-ignored `private-data/` folder.
 4. **Core vs elective coverage** (v0.4).
 5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
 6. **Regulatory checklist**: UGC credit framework rules, credit schemes, course rules (v0.6).
-7. **Course outcomes**: Bloom's levels and checks (v0.7); CO/PO mapping next.
+7. **Course outcomes**: Bloom's levels and checks (v0.7); CO–PO mapping (v0.8).
 8. Industry skill demand.
 9. More discipline taxonomies.
 

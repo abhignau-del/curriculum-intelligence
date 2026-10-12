@@ -16,13 +16,15 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from pydantic import ValidationError
 
-from .schema import Course, Programme, SchemeItem
+from .schema import Course, Programme, ProgrammeOutcome, SchemeItem
 
 PROGRAMME_FIELDS = [("Institution", "institution"), ("Programme", "name"),
                     ("Source", "source"), ("Syllabus year", "year"), ("Degree", "degree")]
 COURSE_COLUMNS = ["Code", "Title", "Semester", "Credits", "Category", "Topics", "Outcomes"]
 SCHEME_SHEET = "Credit scheme"
 SCHEME_COLUMNS = ["Semester", "Category", "Credits", "Note"]
+PO_SHEET = "Programme outcomes"
+PO_COLUMNS = ["Code", "Name", "Outcome"]
 
 
 class ImportError_(ValueError):
@@ -163,8 +165,20 @@ def from_workbook(source: str | Path | bytes | BinaryIO, filename: str | None = 
                 what = {"category": "Category", "credits": "Credits"}.get(first["loc"][0], first["loc"][0])
                 msg = "needed" if what == "Category" else "must be a number, 0 or more"
                 raise ImportError_(f"{fname}: {SCHEME_SHEET} row {n}, {what}: {msg}") from exc
+    pos = []
+    if PO_SHEET in wb.sheetnames:              # optional: POs / PSOs for CO-PO mapping
+        prows = wb[PO_SHEET].iter_rows(values_only=True)
+        phead = [str(h).strip() if h is not None else "" for h in next(prows, [])]
+        pcol = {name: phead.index(name) for name in PO_COLUMNS if name in phead}
+        for n, row in enumerate(prows, start=2):
+            if not any(v not in (None, "") for v in row):
+                continue
+            val = {name: str(row[i]).strip() if i < len(row) and row[i] is not None else "" for name, i in pcol.items()}
+            if not val.get("Code") or not val.get("Outcome"):
+                raise ImportError_(f"{fname}: {PO_SHEET} row {n}: needs a Code and an Outcome")
+            pos.append(ProgrammeOutcome(code=val["Code"], name=val.get("Name", ""), text=val["Outcome"]))
     try:
-        return Programme(**meta, courses=courses, scheme=scheme)
+        return Programme(**meta, courses=courses, scheme=scheme, programme_outcomes=pos)
     except ValidationError as exc:
         first = exc.errors()[0]
         where = "Courses sheet" if first["loc"][0] == "courses" else f"Programme sheet, {first['loc'][0]}"
@@ -203,7 +217,15 @@ def write_template(path: str | Path | BinaryIO, programme: Programme | None = No
         ss.append([item.semester, item.category, item.credits, item.note])
     for i, w in enumerate([10, 26, 8, 60]):
         ss.column_dimensions[chr(65 + i)].width = w
-    for sheet in (ws, cs, ss):
+    ps = wb.create_sheet(PO_SHEET)
+    ps.append(PO_COLUMNS)
+    for o in (programme.programme_outcomes if programme else []):
+        ps.append([o.code, o.name, o.text])
+        for cell in ps[ps.max_row]:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+    for i, w in enumerate([8, 28, 90]):
+        ps.column_dimensions[chr(65 + i)].width = w
+    for sheet in (ws, cs, ss, ps):
         for c in sheet[1]:
             c.font, c.fill = head, fill
         sheet.freeze_panes = "A2"
@@ -219,6 +241,9 @@ def write_template(path: str | Path | BinaryIO, programme: Programme | None = No
         "university's own category names (Major, Minor, AEC, SEC, VAC, ...).",
         "Degree (Programme sheet, optional): e.g. 3-year or 4-year (Honours); it decides which credit "
         "minimums apply.",
+        "Programme outcomes (optional, for CO-PO mapping): the programme's own POs and PSOs, one per row - "
+        "e.g. PSO1 | Problem solving | Apply mathematical methods to solve problems in science. Without them, "
+        "course outcomes are mapped to UGC's LOCF graduate attributes.",
     ]:
         notes.append([line])
     notes.append([])

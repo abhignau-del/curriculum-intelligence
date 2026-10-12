@@ -12,10 +12,11 @@ from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
 from .pdfimport import ProfileError
+from .mapping import choose_framework, map_outcomes
 from .outcomes import Bloom, analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, check
-from .report import outcomes_dict, render_html, render_outcomes_html, to_dict
+from .report import copo_dict, outcomes_dict, render_html, render_outcomes_html, to_dict
 from .schema import load_programme, save_programme
 from .taxonomy import Taxonomy, TaxonomyError
 
@@ -44,12 +45,16 @@ def cmd_report(args) -> None:
     b = benchmark(own, peers, tax)
     overlaps = find_overlaps(own, tax)
     checklists = [check(own, Rules.resolve(r), tax, args.degree) for r in args.rules or []]
-    outcomes = analyse_outcomes(own) if any(c.outcomes for c in own.courses) else None
+    outcomes = copo = None
+    if any(c.outcomes for c in own.courses):
+        outcomes = analyse_outcomes(own)
+        copo = map_outcomes(own, choose_framework(args.framework, own, tax), tax)
     out = Path(args.output)
-    out.write_text(render_html(b, overlaps, checklists, outcomes), encoding="utf-8")
+    out.write_text(render_html(b, overlaps, checklists, outcomes, copo), encoding="utf-8")
     print(f"Report written to {out}")
     if args.json:
-        Path(args.json).write_text(json.dumps(to_dict(b, overlaps, checklists, outcomes), indent=2), encoding="utf-8")
+        Path(args.json).write_text(json.dumps(to_dict(b, overlaps, checklists, outcomes, copo), indent=2),
+                                   encoding="utf-8")
         print(f"Data written to {args.json}")
     gaps = b.by_status("gap")
     print(f"Alignment with {len(peers)} peers: {b.alignment:.0f}%" if b.alignment is not None
@@ -134,6 +139,24 @@ def cmd_outcomes(args) -> None:
         print(f"Data written to {args.json}")
 
 
+def cmd_copo(args) -> None:
+    """Map course outcomes to programme outcomes."""
+    tax = _taxonomy(args.taxonomy)
+    prog = load_programme(args.programme)
+    m = map_outcomes(prog, choose_framework(args.framework, prog, tax), tax)
+    print(f"{prog.institution} - {prog.name}: {len(m.cos)} course outcomes against {m.framework.name}")
+    for po, n, mean in m.po_summary():
+        print(f"  {po.code:<5} {po.name[:44]:<44} {n:>3} courses  mean {'-' if mean is None else f'{mean:.1f}'}")
+    if m.unmapped:
+        print(f"  {len(m.unmapped)} course outcomes serve no PO")
+    if args.output:
+        Path(args.output).write_text(render_outcomes_html(m.outcomes, m), encoding="utf-8")
+        print(f"Report written to {args.output}")
+    if args.json:
+        Path(args.json).write_text(json.dumps(copo_dict(m), indent=2), encoding="utf-8")
+        print(f"Data written to {args.json}")
+
+
 def cmd_import_acaddoc(args) -> None:
     prog = from_acaddoc([Path(p) for p in args.paths], args.institution, args.name, args.only)
     save_programme(prog, args.output)
@@ -203,6 +226,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="also check the programme against these rules: a built-in name such as "
                         "ugc-ccfup-2022, or a rules YAML file (repeatable)")
     p.add_argument("--degree", help='check as this degree, e.g. "3-year" (default: the one the programme records)')
+    p.add_argument("--framework", help='programme outcomes for CO-PO mapping: a built-in name, a YAML file, or "own" '
+                                       "(default: the programme's own, else ugc-locf-mathematics)")
     p.set_defaults(func=cmd_report)
 
     p = sub.add_parser("regcheck", help="check a programme against regulatory rules (default: ugc-ccfup-2022)")
@@ -218,6 +243,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", help="write the analysis as JSON to this file")
     p.add_argument("--verbs", help="a Bloom verb list YAML (default: the built-in list)")
     p.set_defaults(func=cmd_outcomes)
+
+    p = sub.add_parser("copo", help="map course outcomes to programme outcomes (CO-PO matrix)")
+    p.add_argument("programme")
+    p.add_argument("--framework", help='a built-in name, a framework YAML, or "own" '
+                                       "(default: the programme's own outcomes, else ugc-locf-mathematics)")
+    p.add_argument("-o", "--output", help="write an HTML report (outcomes and CO-PO) to this file")
+    p.add_argument("--json", help="write the mapping as JSON to this file")
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_copo)
 
     p = sub.add_parser("check", help="list the skills found in each course of a programme")
     p.add_argument("programme")

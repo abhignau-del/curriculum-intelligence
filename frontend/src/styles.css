@@ -165,3 +165,13 @@ table.years td.lvls .small { white-space: normal; }
   table.years td[data-label] { min-width: max-content; }
   table.years td[data-label]::before { content: attr(data-label); display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
 }
+
+/* CO-PO matrix */
+table.copo td, table.copo th { text-align: center; padding: 4px 6px; font-size: 13px; }
+table.copo td:first-child, table.copo th:first-child { text-align: left; }
+table.copo td.s1 { background: var(--b1); }
+table.copo td.s2 { background: var(--b3); color: #fff; }
+table.copo td.s3 { background: var(--b5); color: #fff; }
+@media (prefers-color-scheme: dark) { table.copo td.s2, table.copo td.s3 { color: #14171c; } }
+table.copo tr.sum td { background: var(--soft); font-weight: 600; }
+.wrap { white-space: normal; }

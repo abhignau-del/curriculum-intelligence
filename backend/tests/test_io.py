@@ -117,7 +117,7 @@ def test_cli_check_and_template(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "Calculus" in out and "C0: Arrays and functions" in out
     assert main(["template", "-o", str(tmp_path / "t.xlsx")]) == 0
-    assert set(load_workbook(tmp_path / "t.xlsx").sheetnames) == {"Programme", "Courses", "Credit scheme", "How to fill"}
+    assert set(load_workbook(tmp_path / "t.xlsx").sheetnames) == {"Programme", "Courses", "Credit scheme", "Programme outcomes", "How to fill"}
 
 
 def test_workbook_round_trip_keeps_degree_and_scheme(tmp_path):

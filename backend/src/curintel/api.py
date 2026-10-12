@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, ValidationError
 from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc_texts, from_workbook, write_template
+from .mapping import FrameworkError, builtin_frameworks, choose_framework, map_outcomes
 from .outcomes import analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, RulesError, builtin_rules, check
@@ -38,6 +39,7 @@ class BenchmarkRequest(BaseModel):
     peers: list[str] = Field(min_length=1)
     rules: list[str] = Field(default_factory=list)   # built-in rules names (no file paths over HTTP)
     degree: Optional[str] = None                     # overrides the programme's recorded degree
+    framework: Optional[str] = None                  # CO-PO: a built-in name or "own" (default: own, else LOCF)
 
 
 class AcadDocFile(BaseModel):
@@ -197,13 +199,21 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
                 checklists.append(check(own, Rules.builtin(name), tax, req.degree or None))
             except RulesError as exc:
                 raise HTTPException(400, str(exc)) from None
-        outcomes = analyse_outcomes(own) if any(c.outcomes for c in own.courses) else None
-        return b, find_overlaps(own, tax), checklists, outcomes
+        outcomes = copo = None
+        if any(c.outcomes for c in own.courses):
+            if req.framework not in (None, "own", *builtin_frameworks()):
+                raise HTTPException(400, f"No built-in outcome framework named {req.framework!r}")
+            try:
+                outcomes = analyse_outcomes(own)
+                copo = map_outcomes(own, choose_framework(req.framework, own, tax), tax)
+            except FrameworkError as exc:
+                raise HTTPException(400, str(exc)) from None
+        return b, find_overlaps(own, tax), checklists, outcomes, copo
 
     @app.post("/api/benchmark")
     def run_benchmark(req: BenchmarkRequest):
-        b, overlaps, checklists, outcomes = run(req)
-        out = to_dict(b, overlaps, checklists, outcomes)
+        b, overlaps, checklists, outcomes, copo = run(req)
+        out = to_dict(b, overlaps, checklists, outcomes, copo)
         out["programme"]["id"] = req.own
         for peer, pid in zip(out["peers"], dict.fromkeys(req.peers)):
             peer["id"] = pid
@@ -211,8 +221,8 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
 
     @app.post("/api/benchmark/report")
     def benchmark_report(req: BenchmarkRequest):
-        b, overlaps, checklists, outcomes = run(req)
-        return Response(render_html(b, overlaps, checklists, outcomes), media_type="text/html; charset=utf-8",
+        b, overlaps, checklists, outcomes, copo = run(req)
+        return Response(render_html(b, overlaps, checklists, outcomes, copo), media_type="text/html; charset=utf-8",
                         headers=_attachment(f"{b.own.institution} benchmark.html"))
 
     if FRONTEND.is_dir():

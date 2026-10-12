@@ -11,6 +11,7 @@ from typing import Optional
 
 from . import __version__
 from .analysis import Benchmark, SkillRow, unmapped_lines
+from .mapping import MappingReport
 from .outcomes import HIGHER_ORDER, OutcomeReport
 from .overlap import OverlapPair
 from .regulatory import Checklist
@@ -75,8 +76,21 @@ def outcomes_dict(rep: OutcomeReport) -> dict:
     }
 
 
+def copo_dict(m: MappingReport) -> dict:
+    return {
+        "framework": {"id": m.framework.id, "name": m.framework.name, "source": m.framework.source},
+        "pos": [{"code": po.code, "name": po.name, "text": po.text, "page": po.page, "courses": n, "mean": mean}
+                for po, n, mean in m.po_summary()],
+        "matrix": [{"course": code, "course_title": title, "cells": cells} for code, title, cells in m.course_matrix()],
+        "cos": [{"course": co.course_code, "text": co.text, "level": co.level,
+                 "links": [{"po": li.po, "strength": li.strength, "reasons": li.reasons} for li in co.links]}
+                for co in m.cos],
+        "unmapped": [{"course": co.course_code, "text": co.text} for co in m.unmapped],
+    }
+
+
 def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = (),
-            outcomes: Optional[OutcomeReport] = None) -> dict:
+            outcomes: Optional[OutcomeReport] = None, copo: Optional[MappingReport] = None) -> dict:
     def ev(e):
         return {"course": e.course_code, "course_title": e.course_title, "field": e.field,
                 "line": e.line, "term": e.term}
@@ -109,6 +123,7 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklis
         "structure": [s.__dict__ for s in b.structure],
         "regulatory": [checklist_dict(cl) for cl in checklists],
         "outcomes": outcomes_dict(outcomes) if outcomes else None,
+        "copo": copo_dict(copo) if copo else None,
     }
 
 
@@ -167,6 +182,11 @@ font-size:11px;font-weight:700;padding:0 4px;margin-right:6px}.lv1,.lv2,.lv0{col
 .lv1{background:var(--b1)}.lv2{background:var(--b2)}.lv3{background:var(--b3)}.lv4{background:var(--b4)}
 .lv5{background:var(--b5)}.lv6{background:var(--b6)}.lv0{background:var(--b0)}
 ul.co{list-style:none;padding-left:0;margin:4px 0 10px;font-size:14px}ul.co li{margin:3px 0}
+table.copo td,table.copo th{text-align:center;padding:4px 6px;font-size:13px}
+table.copo td:first-child,table.copo th:first-child{text-align:left}
+table.copo td.s1{background:var(--b1)}table.copo td.s2{background:var(--b3);color:#fff}table.copo td.s3{background:var(--b5);color:#fff}
+@media (prefers-color-scheme:dark){table.copo td.s2,table.copo td.s3{color:#14171c}}
+table.copo tr.sum td{background:var(--soft);font-weight:600}
 .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:baseline}
 table.years td.lvls{min-width:220px}table.years td.lvls .small{white-space:normal}
 @media (max-width:640px){table.years tr{display:grid;grid-template-columns:1fr auto auto auto;column-gap:12px}
@@ -415,7 +435,57 @@ def section_outcomes(rep: OutcomeReport) -> str:
     return head + summary + table + "<div style='margin-top:10px'>" + "".join(parts) + "</div>"
 
 
-def render_outcomes_html(rep: OutcomeReport) -> str:
+def section_copo(m: MappingReport) -> str:
+    fw = m.framework
+    head = (f"<h2>CO–PO mapping: {escape(fw.name)}</h2><p class='muted'>Which programme outcomes each course "
+            "outcome serves, on the 1–3 scale of NAAC and NBA matrices (1 slight, 2 moderate, 3 substantial). "
+            "An outcome serves a PO when its verbs, the skills it names or its words match the PO's indicators; "
+            "it maps more strongly when indicators of two kinds match, and when its Bloom level reaches the "
+            "level the PO calls for. A course's cell is the rounded mean over its outcomes that serve the PO."
+            + (f" Source: {escape(fw.source)}." if fw.source else "") + "</p>")
+    if not m.cos:
+        return head + "<p class='muted'>No course in this programme states its outcomes, so there is nothing to map.</p>"
+    summary = m.po_summary()
+    weak = [po for po, n, mean in summary if n == 0]
+    notes = ""
+    if weak:
+        notes += ("<p>" + ", ".join(f"<b>{escape(po.code)}</b> {escape(po.name)}" for po in weak)
+                  + (" is" if len(weak) == 1 else " are") + " served by no course outcome.</p>")
+    po_rows = "".join(
+        f"<tr><td><b>{escape(po.code)}</b></td><td>{escape(po.name)}<br><span class='muted small'>{escape(po.text)}"
+        f"{' (p. ' + escape(po.page) + ')' if po.page else ''}</span></td><td class='n'>{n}</td>"
+        f"<td class='n'>{'–' if mean is None else f'{mean:.1f}'}</td></tr>" for po, n, mean in summary)
+    pos_table = ("<div class='card'><table><tr><th>PO</th><th>Outcome</th><th class='n'>Courses</th>"
+                 "<th class='n'>Mean</th></tr>" + po_rows + "</table></div>")
+    codes = [po.code for po in fw.outcomes]
+    head_row = "<tr><th>Course</th>" + "".join(
+        f"<th title='{escape(po.label)}'>{escape(po.code)}</th>" for po in fw.outcomes) + "</tr>"
+    body = []
+    for code, title, cells in m.course_matrix():
+        tds = "".join(f"<td class='s{cells[c]}'>{cells[c]}</td>" if c in cells else "<td class='muted'>·</td>"
+                      for c in codes)
+        body.append(f"<tr><td><b>{escape(code)}</b> <span class='muted small'>{escape(title)}</span></td>{tds}</tr>")
+    body.append("<tr class='sum'><td>Courses serving</td>" + "".join(f"<td>{n}</td>" for _, n, _ in summary) + "</tr>")
+    matrix = ("<div class='card'><table class='copo'>" + head_row + "".join(body) + "</table></div>")
+    per_co: dict[str, list] = {}
+    for co in m.cos:
+        per_co.setdefault(co.course_code, []).append(co)
+    detail = "".join(
+        f"<h3>{escape(cos[0].course_title)} <span class='muted small'>{escape(code)}</span></h3><ul class='ev'>"
+        + "".join(f"<li>{escape(co.text)}<br>" + ("; ".join(f"<b>{escape(li.po)}</b> {li.strength} "
+                                                              f"({escape(', '.join(li.reasons))})" for li in co.links)
+                                                   or "<i>serves no PO</i>") + "</li>" for co in cos)
+        + "</ul>" for code, cos in per_co.items())
+    unmapped = ""
+    if m.unmapped:
+        unmapped = (f"<details><summary>{len(m.unmapped)} course outcome{'' if len(m.unmapped) == 1 else 's'} "
+                    "serve no PO</summary>" + _evidence_list(
+                        [f"<b>{escape(co.course_code)}</b>: {escape(co.text)}" for co in m.unmapped]) + "</details>")
+    return (head + notes + pos_table + "<h3>Course articulation matrix</h3>" + matrix + unmapped
+            + f"<details><summary>Why each outcome maps where it does</summary>{detail}</details>")
+
+
+def render_outcomes_html(rep: OutcomeReport, copo: Optional[MappingReport] = None) -> str:
     """A page of its own for the outcomes analysis of one programme."""
     p = rep.programme
     title = f"{escape(p.name)}: Course Outcomes"
@@ -425,6 +495,7 @@ def render_outcomes_html(rep: OutcomeReport) -> str:
 <h1>{escape(p.name)}</h1>
 <p class="lead">{escape(p.institution)}{' · ' + escape(p.year) if p.year else ''} · course outcomes</p>
 {section_outcomes(rep)}
+{section_copo(copo) if copo else ""}
 <footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}. Verb list: {escape(rep.bloom.name)}.</footer>
 </main></body></html>"""
 
@@ -556,7 +627,7 @@ def _regulatory_tiles(checklists) -> str:
 
 
 def render_html(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = (),
-                outcomes: Optional[OutcomeReport] = None) -> str:
+                outcomes: Optional[OutcomeReport] = None, copo: Optional[MappingReport] = None) -> str:
     gaps = b.by_status("gap")
     high = sum(r.priority == "High" for r in gaps)
     flagged = [o for o in overlaps if not o.theory_lab_pair]
@@ -586,6 +657,7 @@ benchmarked against {len(b.peers)} peer programmes</p>
 {_section_matrix(b)}
 {"".join(_section_checklist(cl) for cl in checklists)}
 {section_outcomes(outcomes) if outcomes else ""}
+{section_copo(copo) if copo else ""}
 {_section_method(b, bool(checklists))}
 <footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}.</footer>
 </main></body></html>"""

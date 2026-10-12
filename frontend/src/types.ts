@@ -16,9 +16,11 @@ export interface Course {
 /** Credits a student earns in one category of course, from the programme's regulations. */
 export interface SchemeItem { category: string; credits: number; semester?: string | null; note?: string }
 
+export interface ProgrammeOutcome { code: string; name?: string; text: string }
+
 export interface Programme {
   institution: string; name: string; source: string; year: string; courses: Course[];
-  degree?: string; scheme?: SchemeItem[];
+  degree?: string; scheme?: SchemeItem[]; programme_outcomes?: ProgrammeOutcome[];
 }
 
 export interface ProgrammeDetail {
@@ -76,6 +78,16 @@ export interface BenchmarkResult {
   structure: { label: string; courses: number; credits: number | null }[];
   regulatory: Checklist[];                   // one per rules set asked for
   outcomes: OutcomesResult | null;           // when the programme under review states course outcomes
+  copo: CopoResult | null;                   // CO-PO mapping, likewise
+}
+
+/** Course outcomes mapped to programme outcomes (see backend mapping.py). */
+export interface CopoResult {
+  framework: { id: string; name: string; source: string };
+  pos: { code: string; name: string; text: string; page: string; courses: number; mean: number | null }[];
+  matrix: { course: string; course_title: string; cells: Record<string, number> }[];
+  cos: { course: string; text: string; level: number | null; links: { po: string; strength: number; reasons: string[] }[] }[];
+  unmapped: { course: string; text: string }[];
 }
 
 /** Bloom's levels of the programme's course outcomes (see backend outcomes.py). */
