@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field, ValidationError
 from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc_texts, from_workbook, write_template
+from .outcomes import analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, RulesError, builtin_rules, check
 from .report import render_html, to_dict
@@ -196,12 +197,13 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
                 checklists.append(check(own, Rules.builtin(name), tax, req.degree or None))
             except RulesError as exc:
                 raise HTTPException(400, str(exc)) from None
-        return b, find_overlaps(own, tax), checklists
+        outcomes = analyse_outcomes(own) if any(c.outcomes for c in own.courses) else None
+        return b, find_overlaps(own, tax), checklists, outcomes
 
     @app.post("/api/benchmark")
     def run_benchmark(req: BenchmarkRequest):
-        b, overlaps, checklists = run(req)
-        out = to_dict(b, overlaps, checklists)
+        b, overlaps, checklists, outcomes = run(req)
+        out = to_dict(b, overlaps, checklists, outcomes)
         out["programme"]["id"] = req.own
         for peer, pid in zip(out["peers"], dict.fromkeys(req.peers)):
             peer["id"] = pid
@@ -209,8 +211,8 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
 
     @app.post("/api/benchmark/report")
     def benchmark_report(req: BenchmarkRequest):
-        b, overlaps, checklists = run(req)
-        return Response(render_html(b, overlaps, checklists), media_type="text/html; charset=utf-8",
+        b, overlaps, checklists, outcomes = run(req)
+        return Response(render_html(b, overlaps, checklists, outcomes), media_type="text/html; charset=utf-8",
                         headers=_attachment(f"{b.own.institution} benchmark.html"))
 
     if FRONTEND.is_dir():

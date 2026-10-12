@@ -64,6 +64,30 @@ their titles and topics (TF‑IDF cosine). Pairs at 40% or more are flagged,
 These thresholds were tuned on the fictional samples. Expect to adjust them
 on real syllabi.
 
+Skills are found in course titles and topic lines only. Course outcomes are
+not counted as evidence of a skill: they often look ahead ("a foundation for
+machine learning"), and not every syllabus states them.
+
+### Course outcomes
+
+`curintel outcomes PROGRAMME` reads each course outcome's level in the revised
+Bloom's taxonomy from the verbs that open it: *Define* is Remember, *Solve* is
+Apply, *Prove* is Evaluate, *Design* is Create. With several opening verbs
+("Identify and classify") the highest counts. It reports:
+
+- outcomes per level by year of study, and the share of **higher-order**
+  outcomes (Analyse, Evaluate, Create), which usually rises through a programme;
+- **vague** outcomes, which open with a verb that is hard to assess
+  (*understand*, *learn*, *appreciate*);
+- outcomes with **no action verb**, outcomes **stated for more than one
+  course**, and courses that state none.
+
+The benchmark report adds the same section when the programme under review
+states its outcomes. The verb list is
+[`taxonomies/bloom.yaml`](backend/src/curintel/taxonomies/bloom.yaml); pass your
+own with `--verbs`. PDF profiles read outcomes with `outcomes_start` and
+`outcomes_end`.
+
 ### Regulatory checklist
 
 `curintel regcheck PROGRAMME` checks a programme against the rules of a
@@ -140,6 +164,7 @@ to the server on port 8000).
 |---|---|
 | `curintel report OWN PEERS... [-o file.html] [--json file.json] [-t taxonomy.yaml] [-r RULES]` | the benchmark report; PEERS can be files or folders |
 | `curintel regcheck PROGRAMME [-r RULES] [--degree 3-year]` | the regulatory checklist (default rules: `ugc-ccfup-2022`) |
+| `curintel outcomes PROGRAMME [-o file.html] [--json file.json]` | Bloom's levels of the course outcomes, with checks |
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
@@ -207,7 +232,7 @@ institutional data in the git-ignored `private-data/` folder.
 4. **Core vs elective coverage** (v0.4).
 5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
 6. **Regulatory checklist**: UGC credit framework rules, credit schemes, course rules (v0.6).
-7. CO/PO and outcome mapping.
+7. **Course outcomes**: Bloom's levels and checks (v0.7); CO/PO mapping next.
 8. Industry skill demand.
 9. More discipline taxonomies.
 

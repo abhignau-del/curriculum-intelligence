@@ -1,0 +1,75 @@
+# Action verbs for course outcomes, by level of the revised Bloom's taxonomy
+# (Anderson & Krathwohl, 2001). Each verb belongs to one level. Lists of this kind vary;
+# where they disagree, the level is the one most mathematics syllabi intend.
+#
+# `vague` verbs say little that can be assessed ("understand", "learn", "appreciate").
+# Those with a level keep it, but are flagged; the rest give no level.
+# Phrases ("make use of") are matched before single words.
+name: Revised Bloom's taxonomy (action verbs)
+levels:
+  - level: 1
+    id: remember
+    name: Remember
+    verbs: [define, list, state, recall, name, identify, label, match, memorise, memorize,
+            recognise, recognize, reproduce, recite, record, repeat, enumerate, quote, tabulate]
+  - level: 2
+    id: understand
+    name: Understand
+    verbs: [explain, describe, discuss, summarise, summarize, interpret, classify, illustrate,
+            paraphrase, outline, express, represent, translate, restate, review, exemplify,
+            explore, comprehend, understand]
+  - level: 3
+    id: apply
+    name: Apply
+    # In mathematics, "differentiate" and "integrate" are operations, so they sit here.
+    verbs: [apply, use, solve, compute, calculate, determine, find, demonstrate, implement,
+            execute, perform, carry out, draw, sketch, plot, graph, construct, interpolate,
+            approximate, estimate, differentiate, integrate, simplify, transform, convert,
+            manipulate, operate, practise, practice, employ, utilise, utilize, make use of,
+            write, program, code, visualise, visualize, measure, work out, handle, obtain,
+            evaluate the, locate, reduce, factorise, factorize, model]
+  - level: 4
+    id: analyse
+    name: Analyse
+    verbs: [analyse, analyze, compare, contrast, distinguish, examine, investigate, categorise,
+            categorize, deduce, derive, relate, inspect, test, discriminate, organise, organize,
+            break down, infer, characterise, characterize, decompose, diagnose]
+  - level: 5
+    id: evaluate
+    name: Evaluate
+    # "evaluate the ..." (an integral, a limit) is an operation and is listed under Apply.
+    verbs: [evaluate, prove, justify, verify, assess, judge, critique, criticise, criticize,
+            argue, validate, check, appraise, defend, conclude, recommend, select, choose,
+            establish]
+  - level: 6
+    id: create
+    name: Create
+    verbs: [create, design, develop, formulate, compose, devise, propose, plan, produce,
+            generate, invent, build, synthesise, synthesize, hypothesise, hypothesize,
+            modify, adapt, improve, extend, conjecture, construct a model]
+
+# Verbs that say little that can be assessed. `level` is kept where the verb has one.
+vague:
+  understand: 2
+  comprehend: 2
+  know: 1
+  learn: null
+  appreciate: null
+  realise: null
+  realize: null
+  familiarise: null
+  familiarize: null
+  "be familiar": null
+  "be aware": null
+  gain: null
+  acquire: null
+  get: null
+  have: null
+  "take up": null
+  "develop an understanding": 2
+  "develop understanding": 2
+  "be acquainted": null
+  "become acquainted": null
+  "be introduced": null
+  "get introduced": null
+  "expand": null

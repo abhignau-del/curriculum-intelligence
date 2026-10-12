@@ -1,5 +1,6 @@
 import type {
-  Basis, BenchmarkResult, Checklist, CourseOn, Evidence, Level, ProgrammeSummary, RuleStatus, SchemeItem, SkillResult, Status,
+  Basis, BenchmarkResult, Checklist, CourseOn, Evidence, Level, OutcomesResult, ProgrammeSummary, RuleStatus, SchemeItem,
+  SkillResult, Status,
 } from "./types";
 
 /** What the user picked last time. Peers are stored as exclusions, so programmes
@@ -216,4 +217,24 @@ export function parseSavedRegulatory(raw: string | null): SavedRegulatory {
       return v;
   } catch { /* corrupt storage */ }
   return { rules: [], degree: "" };
+}
+
+// ----- course outcomes ---------------------------------------------------------
+
+/** "77 outcomes in 23 of 23 courses · 20% higher-order · 16 vague (21%) · ..." as in the HTML report. */
+export function outcomesSummary(o: OutcomesResult, courseCount: number): string {
+  const n = o.outcomes.length;
+  if (!n) return "No course in this programme states its outcomes.";
+  const courses = new Set(o.outcomes.map(x => x.course)).size;
+  const vague = o.outcomes.filter(x => x.flags.includes("vague")).length;
+  const noVerb = o.outcomes.filter(x => x.flags.includes("no_verb")).length;
+  return `${n} outcomes in ${courses} of ${courseCount} courses · ${pct(o.higher_order_share == null ? null : 100 * o.higher_order_share)} higher-order · `
+    + `${vague} vague (${pct(100 * vague / n)}) · ${noVerb} with no action verb · ${o.duplicates.length} stated for more than one course.`;
+}
+
+/** Bar segments for one year: level (0 = no level), count and width in %. */
+export function levelSegments(row: { count: number; levels: Record<string, number> }, levels: number[]): { level: number; count: number; width: number }[] {
+  const segs = levels.map(lv => ({ level: lv, count: row.levels[String(lv)] ?? 0 }));
+  segs.push({ level: 0, count: row.levels["none"] ?? 0 });
+  return segs.filter(s => s.count > 0).map(s => ({ ...s, width: row.count ? 100 * s.count / row.count : 0 }));
 }

@@ -75,6 +75,19 @@ export interface BenchmarkResult {
   overlaps: Overlap[];
   structure: { label: string; courses: number; credits: number | null }[];
   regulatory: Checklist[];                   // one per rules set asked for
+  outcomes: OutcomesResult | null;           // when the programme under review states course outcomes
+}
+
+/** Bloom's levels of the programme's course outcomes (see backend outcomes.py). */
+export interface OutcomesResult {
+  verb_list: string;
+  levels: { level: number; id: string; name: string }[];
+  outcomes: { course: string; course_title: string; semester: string | null; text: string;
+              level: number | null; verbs: string[]; flags: string[] }[];
+  without_outcomes: { course: string; course_title: string }[];
+  duplicates: { text: string; courses: string[] }[];
+  by_year: { year: string; count: number; levels: Record<string, number>; higher_order_share: number | null; vague: number }[];
+  higher_order_share: number | null;
 }
 
 export type RuleStatus = "met" | "partly" | "not_met" | "not_checked";

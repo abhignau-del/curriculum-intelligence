@@ -252,10 +252,31 @@ OWN_SCHEME = {
 }
 
 
+# Riverside's course outcomes, by year of study. They climb from recall and routine problems
+# towards proof and design, as outcomes usually should, but keep some habits a review would
+# question: outcomes that open with "understand" or "learn", and one outcome copied into
+# every first-year course.
+OWN_OUTCOMES = {
+    1: ["Understand the basic ideas of {t}", "State the main definitions and results of {t}",
+        "Solve standard problems in {t}", "Use mathematical software to check their answers"],
+    2: ["Explain the methods of {t}", "Apply {t} to problems from science and economics",
+        "Learn the main techniques of {t}"],
+    3: ["Prove the main theorems of {t}", "Compute with the methods of {t} in applied problems",
+        "Analyse problems that combine {t} with earlier courses"],
+}
+
+
+def outcomes_for(course: Course) -> list[str]:
+    year = (["I", "II", "III", "IV", "V", "VI"].index(course.semester)) // 2 + 1
+    return [o.format(t=course.title) for o in OWN_OUTCOMES[year]]
+
+
 def main() -> None:
     out = Path(__file__).resolve().parents[1] / "samples"
     (out / "peers").mkdir(parents=True, exist_ok=True)
     own = build(*OWN)
+    for course in own.courses:
+        course.outcomes = outcomes_for(course)
     own.degree = "3-year"
     own.scheme = [SchemeItem(category=cat, credits=cr, semester=sem)
                   for sem, cats in OWN_SCHEME.items() for cat, cr in cats.items()]

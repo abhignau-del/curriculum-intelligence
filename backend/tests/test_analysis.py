@@ -106,3 +106,14 @@ def test_structure_credits_unknown_when_any_course_lacks_them(tax):
     b = benchmark(full, [part, prog("Other", ("Topology", []))], tax)
     assert [s.credits for s in b.structure] == [8, None, 4]
     assert b.peer_median_credits == 4          # unknown totals are left out of the median
+
+
+def test_outcomes_are_not_skill_evidence(tax):
+    from curintel.analysis import profile
+    from curintel.schema import Course, Programme
+    p = Programme(institution="U", name="B", courses=[Course(
+        code="C1", title="Calculus", topics=["Limits"],
+        outcomes=["Build a foundation for machine learning and mathematical modelling"])])
+    prof = profile(p, tax)
+    assert prof["machine_learning"].level == "absent" and prof["modelling"].level == "absent"
+    assert prof["calculus"].level == "covered"

@@ -36,6 +36,11 @@ Optional keys:
   category             category given to every course (default: none, i.e. core)
   categories           rules [{match: regex on "code title", category: ...}], first match
                        wins; a category naming elective/optional/DSE/GE marks an elective
+  outcomes_start       regex where a course's outcomes begin (e.g. 'Course Outcomes?:'); searched in
+                       the whole course block, since outcomes often follow the content
+  outcomes_end         where they end (e.g. 'References'); default: the end of the block
+  outcomes_strip       extra regexes removed from outcome text (lead-ins such as "the learner will
+                       be able to" are removed anyway)
   degree               "3-year" / "4-year (Honours)" ...: which variant of a framework applies
   scheme               the credit scheme: [{category, credits, semester, note}], one row per
                        category and semester, typed from the university's regulations (see
@@ -167,6 +172,37 @@ def topics_from(text: str, strip: list[str], extra_split: str | None = None) -> 
     return list(dict.fromkeys(phrases))
 
 
+OUTCOME_ITEM = re.compile(
+    r"^\s*(?:C\.?O\.?\s*-?\s*\d{1,2}\s*[:.)\-]?|\d{1,2}\s*[.)]|[•●▪◦\-–]|\(?[a-z]\)|\(?(?:i|ii|iii|iv|v|vi|vii|viii|ix|x)\))\s+",
+    re.I | re.M)
+# Lead-ins before (or at the start of) each outcome: "On completion of this course, the learner will be able to".
+LEAD_IN = re.compile(
+    r"^(?:(?:having|after|upon|on)\s+(?:successful(?:ly)?\s+)?(?:complet\w*|studying)[^,:]*[,:]?\s*)?"
+    r"(?:(?:the|a)\s+)?(?:students?|learners?|candidates?|graduates?|they)?\s*"
+    r"(?:will|shall|should|would|can|are\s+expected\s+to|is\s+expected\s+to)?\s*"
+    r"(?:be\s+(?:able|enabled)\s+to|have\s+the\s+ability\s+to)?\s*[:\-]?\s*", re.I)
+
+
+def outcomes_from(text: str, strip: list[str] = ()) -> list[str]:
+    """Split a block of course outcomes into one statement each, without lead-ins or numbering."""
+    text = re.sub(r"-\n(?=[a-z])", "", text)
+    for rx in strip:
+        text = re.sub(rx, " ", text)
+    marks = list(OUTCOME_ITEM.finditer(text))
+    if marks:
+        pieces = [text[m.end(): (marks[k + 1].start() if k + 1 < len(marks) else len(text))]
+                  for k, m in enumerate(marks)]
+    else:                                   # running prose: one outcome per sentence
+        pieces = re.split(r"(?<=[.;])\s+(?=[A-Z])", text)
+    out = []
+    for piece in pieces:
+        piece = re.sub(r"\s+", " ", piece).strip()
+        piece = LEAD_IN.sub("", piece, count=1).strip(" .;:-–")
+        if len(piece.split()) >= 3:
+            out.append(piece[0].upper() + piece[1:])
+    return list(dict.fromkeys(out))
+
+
 # ----- profiles ----------------------------------------------------------
 
 def _rx(profile: dict, key: str, flags: int = 0) -> Optional[re.Pattern]:
@@ -207,6 +243,9 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
         raise ProfileError(f"{profile_path.name}: duplicates must be merge or number")
     c_start = _rx(prof, "content_start", re.I)
     c_end = _rx(prof, "content_end", re.I)
+    o_start = _rx(prof, "outcomes_start", re.I)
+    o_end = _rx(prof, "outcomes_end", re.I)
+    o_strip = list(prof.get("outcomes_strip", []))
     include = _rx(prof, "include", re.I)
     exclude = _rx(prof, "exclude", re.I)
     title_rx = _rx(prof, "title", re.S)
@@ -271,7 +310,8 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
             code = (groups.get("code") or "").strip()
             if not code and groups.get("num"):     # e.g. CORE + "13" -> DSC-13
                 kind = (groups.get("kind") or "").strip()
-                code = f"{kind_codes.get(kind.upper(), kind)}-{re.sub(r'\s+', '', groups['num'])}".strip("-")
+                num = re.sub(r"\s+", "", groups["num"])   # outside the f-string: Python 3.11 allows no backslash there
+                code = f"{kind_codes.get(kind.upper(), kind)}-{num}".strip("-")
             code = aliases.get(code, code)
             header = block[: c_start.search(block).start()] if c_start and c_start.search(block) else block[:600]
 
@@ -312,6 +352,16 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
             topics = topics_from(repair_split_words(content, vocab), strip, extra_split)
             if not topics:
                 warnings.append("no topics found")
+            outcomes: list[str] = []
+            if o_start:
+                os_ = o_start.search(block)
+                if os_:
+                    o_text = block[os_.end():]
+                    if o_end and (oe := o_end.search(o_text)):
+                        o_text = o_text[: oe.start()]
+                    outcomes = outcomes_from(repair_split_words(o_text, vocab), o_strip)
+                if not outcomes:
+                    warnings.append("no outcomes found")
 
             credits = None
             if credits_rx and (cm := credits_rx.search(header)):
@@ -333,12 +383,13 @@ def extract(profile_path: str | Path, extra_vocab: set[str] = frozenset()) -> Dr
             if code in by_code:              # another part of the same course
                 first = by_code[code]
                 first.course.topics = list(dict.fromkeys([*first.course.topics, *topics]))
+                first.course.outcomes = list(dict.fromkeys([*first.course.outcomes, *outcomes]))
                 first.warnings.extend(warnings)
                 merged.append((code, f"{path.name} p{lines[i][0]}"))
                 continue
             try:
                 course = Course(code=code, title=title or code, credits=credits,
-                                semester=str(semester) or None, topics=topics,
+                                semester=str(semester) or None, topics=topics, outcomes=outcomes,
                                 category=category_for(code, title))
             except ValidationError as exc:
                 excluded.append((code, title, f"invalid: {exc.errors()[0]['msg']}"))

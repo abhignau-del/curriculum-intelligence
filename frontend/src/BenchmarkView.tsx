@@ -3,10 +3,13 @@ import { api, download, saveBlob } from "./api";
 import type { Selection } from "./api";
 import {
   byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coverMark, degreeOptions,
-  gapSentence, parseSaved, parseSavedRegulatory, pct, peerCourses, peersSplit, resolveSelection, RULE_STATUS,
+  gapSentence, levelSegments, outcomesSummary, parseSaved, parseSavedRegulatory, pct, peerCourses, peersSplit,
+  resolveSelection, RULE_STATUS,
   selectionProblem, skillsByArea, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, Checklist, Evidence, ProgrammeSummary, RulesInfo, SkillResult, TaxonomyView } from "./types";
+import type {
+  BenchmarkResult, Checklist, Evidence, OutcomesResult, ProgrammeSummary, RulesInfo, SkillResult, TaxonomyView,
+} from "./types";
 
 const STORAGE_KEY = "curintel.selection";
 const REG_KEY = "curintel.regulatory";
@@ -156,6 +159,7 @@ function Results({ r, stale, onCell, onError, selection }: {
         <a href="#gaps">Gaps</a><a href="#watch">Watch</a><a href="#strengths">Strengths</a>
         <a href="#overlap">Overlap</a><a href="#areas">Areas</a><a href="#structure">Structure</a><a href="#matrix">Matrix</a>
         {r.regulatory.length > 0 && <a href="#regulatory">Rules</a>}
+        {r.outcomes && <a href="#outcomes">Outcomes</a>}
         <span className="spacer" />
         <button className="btn small" onClick={() => download("/api/benchmark/report", "benchmark.html", selection).catch(e => onError(e.message))}>
           Download report (.html)
@@ -278,6 +282,7 @@ function Results({ r, stale, onCell, onError, selection }: {
       </div>
 
       {r.regulatory.map((cl, i) => <ChecklistSection key={cl.id} cl={cl} first={i === 0} />)}
+      {r.outcomes && <OutcomesSection o={r.outcomes} courseCount={r.structure[0]?.courses ?? 0} />}
 
       {r.unmapped.length > 0 && (
         <details className="card">
@@ -316,6 +321,53 @@ function ChecklistSection({ cl, first }: { cl: Checklist; first: boolean }) {
             </tr>))}
           </tbody>
         </table>
+      </div>
+    </>
+  );
+}
+
+const plural = (n: number) => (n === 1 ? "" : "s");
+
+function OutcomesSection({ o, courseCount }: { o: OutcomesResult; courseCount: number }) {
+  const names = Object.fromEntries(o.levels.map(l => [l.level, l.name])) as Record<number, string>;
+  const levels = o.levels.map(l => l.level);
+  const flagged = (flag: string) => o.outcomes.filter(x => x.flags.includes(flag));
+  const list = (title: string, items: string[]) => items.length > 0 && (
+    <details><summary>{title}</summary><ul className="ev">{items.map((t, i) => <li key={i}>{t}</li>)}</ul></details>);
+  return (
+    <>
+      <Section id="outcomes" title="Course outcomes"
+               hint="Each outcome's level in the revised Bloom's taxonomy, read from the verbs that open it. Higher-order means Analyse, Evaluate or Create; outcomes that open with a verb hard to assess (understand, learn) are marked vague." />
+      <p>{outcomesSummary(o, courseCount)}</p>
+      {o.by_year.length > 0 && (
+        <div className="card flush">
+          <table className="years">
+            <thead><tr><th>Year</th><th className="n">Outcomes</th><th>Levels</th><th className="n">Higher-order</th><th className="n">Vague</th></tr></thead>
+            <tbody>{o.by_year.map(y => {
+              const segs = levelSegments(y, levels);
+              return (
+                <tr key={y.year}>
+                  <td>{y.year || "Semester not recorded"}</td>
+                  <td className="n" data-label="Outcomes">{y.count}</td>
+                  <td className="lvls">
+                    <div className="stack">{segs.map(s => <i key={s.level} className={`lv${s.level}`} style={{ width: `${s.width}%` }}
+                                                         title={`${s.level ? names[s.level] : "No level"}: ${s.count}`} />)}</div>
+                    <span className="muted small">{segs.map(s => `${s.level ? names[s.level] : "no level"} ${s.count}`).join(" · ")}</span>
+                  </td>
+                  <td className="n" data-label="Higher-order">{pct(y.higher_order_share == null ? null : 100 * y.higher_order_share)}</td>
+                  <td className="n" data-label="Vague">{y.vague}</td>
+                </tr>);
+            })}</tbody>
+          </table>
+        </div>
+      )}
+      <div className="card">
+        {list(`${flagged("vague").length} vague outcome${plural(flagged("vague").length)}`, flagged("vague").map(x => `${x.course}: ${x.text}`))}
+        {list(`${flagged("no_verb").length} outcome${plural(flagged("no_verb").length)} with no action verb at the start`, flagged("no_verb").map(x => `${x.course}: ${x.text}`))}
+        {list(`${o.duplicates.length} outcome${o.duplicates.length === 1 ? " is" : "s are"} stated for more than one course`, o.duplicates.map(d => `${d.courses.join(", ")}: ${d.text}`))}
+        {list(`${o.without_outcomes.length} course${o.without_outcomes.length === 1 ? " states" : "s state"} no outcomes`,
+              o.without_outcomes.map(c => `${c.course} ${c.course_title}`))}
+        {list("Every outcome, with its level", o.outcomes.map(x => `${x.course} · ${x.level ? `${x.level} ${names[x.level]}` : "no level"} · ${x.text}`))}
       </div>
     </>
   );

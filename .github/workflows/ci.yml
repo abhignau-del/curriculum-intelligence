@@ -7,11 +7,14 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]      # the oldest supported (pyproject requires-python) and the current one
     defaults: { run: { working-directory: backend } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with: { python-version: "${{ matrix.python }}" }
       - run: pip install -e ".[dev]"
       - run: python -m pytest -q
       - name: Sample report builds

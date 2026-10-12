@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   basisCounts, byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coursesOnSentence,
-  coverMark, degreeOptions, gapSentence, parseSavedRegulatory, RULE_STATUS, schemeBySemester, parseSaved, peerCourses, peersSplit, resolveSelection,
+  coverMark, degreeOptions, gapSentence, levelSegments, outcomesSummary, parseSavedRegulatory, RULE_STATUS, schemeBySemester, parseSaved, peerCourses, peersSplit, resolveSelection,
   selectionProblem, splitOnTerm, toSaved,
 } from "./benchmarkops";
-import type { BenchmarkResult, Checklist, CourseOn, ProgrammeSummary, RuleResult, SkillResult } from "./types";
+import type { BenchmarkResult, Checklist, CourseOn, OutcomesResult, ProgrammeSummary, RuleResult, SkillResult } from "./types";
 
 const prog = (id: string, institution = `Inst ${id}`): ProgrammeSummary =>
   ({ id, institution, name: "B.Sc.", year: "", source: "", courses: 1, credits: 4, updated_at: "" });
@@ -234,5 +234,27 @@ describe("regulatory checklist", () => {
   it("labels statuses like the HTML report", () => {
     expect(RULE_STATUS.not_met).toEqual({ label: "Not met", css: "High" });
     expect(RULE_STATUS.partly.css).toBe("Medium");
+  });
+});
+
+describe("course outcomes", () => {
+  const o: OutcomesResult = {
+    verb_list: "v", levels: [1, 2, 3, 4, 5, 6].map(l => ({ level: l, id: String(l), name: String(l) })),
+    outcomes: [
+      { course: "A", course_title: "A", semester: "I", text: "Understand x", level: 2, verbs: ["understand"], flags: ["vague"] },
+      { course: "A", course_title: "A", semester: "I", text: "Prove y", level: 5, verbs: ["prove"], flags: [] },
+      { course: "B", course_title: "B", semester: "II", text: "Knowledge of z", level: null, verbs: [], flags: ["no_verb"] },
+    ],
+    without_outcomes: [{ course: "C", course_title: "C" }], duplicates: [],
+    by_year: [{ year: "Year 1", count: 3, levels: { "2": 1, "5": 1, none: 1 }, higher_order_share: 0.5, vague: 1 }],
+    higher_order_share: 0.5,
+  };
+  it("summarises like the HTML report", () => {
+    expect(outcomesSummary(o, 3)).toBe("3 outcomes in 2 of 3 courses · 50% higher-order · 1 vague (33%) · 1 with no action verb · 0 stated for more than one course.");
+    expect(outcomesSummary({ ...o, outcomes: [] }, 3)).toBe("No course in this programme states its outcomes.");
+  });
+  it("makes bar segments in level order, unrated last", () => {
+    expect(levelSegments(o.by_year[0], [1, 2, 3, 4, 5, 6]).map(s => [s.level, s.count, Math.round(s.width)]))
+      .toEqual([[2, 1, 33], [5, 1, 33], [0, 1, 33]]);
   });
 });

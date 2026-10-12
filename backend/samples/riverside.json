@@ -18,6 +18,12 @@
         "Taylor's theorem and Maclaurin series",
         "Maxima and minima of functions of one variable",
         "Curve tracing"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Calculus",
+        "State the main definitions and results of Calculus",
+        "Solve standard problems in Calculus",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -32,6 +38,12 @@
         "Gradient, divergence and curl",
         "Line integrals and surface integrals",
         "Green's theorem in the plane"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Calculus II",
+        "State the main definitions and results of Calculus II",
+        "Solve standard problems in Calculus II",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -46,6 +58,12 @@
         "Line integrals, surface integrals and volume integrals",
         "Green's theorem in the plane",
         "Stokes's theorem and Gauss divergence theorem"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Vector Calculus",
+        "State the main definitions and results of Vector Calculus",
+        "Solve standard problems in Vector Calculus",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -59,6 +77,12 @@
         "Sequences of real numbers, Cauchy sequences",
         "Convergence of series, comparison and ratio tests",
         "Continuity and uniform continuity"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Real Analysis I",
+        "State the main definitions and results of Real Analysis I",
+        "Solve standard problems in Real Analysis I",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -73,6 +97,12 @@
         "Matrix of a linear transformation",
         "Eigenvalues and eigenvectors, diagonalisation",
         "Inner product spaces, Gram-Schmidt process"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Linear Algebra",
+        "State the main definitions and results of Linear Algebra",
+        "Solve standard problems in Linear Algebra",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -87,6 +117,12 @@
         "Cosets and Lagrange's theorem",
         "Normal subgroups and quotient groups",
         "Homomorphisms and isomorphism theorems"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Group Theory",
+        "State the main definitions and results of Group Theory",
+        "Solve standard problems in Group Theory",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -100,6 +136,12 @@
         "Uniform convergence of sequences and series of functions",
         "Power series",
         "Improper integrals"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Real Analysis II",
+        "State the main definitions and results of Real Analysis II",
+        "Solve standard problems in Real Analysis II",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -113,6 +155,12 @@
         "Linear differential equations with constant coefficients",
         "Wronskian and variation of parameters",
         "Mathematical modelling with differential equations"
+      ],
+      "outcomes": [
+        "Understand the basic ideas of Differential Equations",
+        "State the main definitions and results of Differential Equations",
+        "Solve standard problems in Differential Equations",
+        "Use mathematical software to check their answers"
       ]
     },
     {
@@ -126,6 +174,11 @@
         "Ideals and quotient rings",
         "Ring homomorphisms",
         "Polynomial rings"
+      ],
+      "outcomes": [
+        "Explain the methods of Ring Theory",
+        "Apply Ring Theory to problems from science and economics",
+        "Learn the main techniques of Ring Theory"
       ]
     },
     {
@@ -140,6 +193,11 @@
         "Laurent series",
         "Residue theorem and its applications",
         "Conformal mapping"
+      ],
+      "outcomes": [
+        "Explain the methods of Complex Analysis",
+        "Apply Complex Analysis to problems from science and economics",
+        "Learn the main techniques of Complex Analysis"
       ]
     },
     {
@@ -154,6 +212,11 @@
         "Binomial, Poisson and normal distribution",
         "Correlation and regression",
         "Tests of significance: t test and chi square test"
+      ],
+      "outcomes": [
+        "Explain the methods of Probability and Statistics",
+        "Apply Probability and Statistics to problems from science and economics",
+        "Learn the main techniques of Probability and Statistics"
       ]
     },
     {
@@ -168,6 +231,11 @@
         "Charpit's method",
         "Classification of second order equations",
         "Heat equation, wave equation and Laplace equation by separation of variables"
+      ],
+      "outcomes": [
+        "Explain the methods of Partial Differential Equations",
+        "Apply Partial Differential Equations to problems from science and economics",
+        "Learn the main techniques of Partial Differential Equations"
       ]
     },
     {
@@ -182,6 +250,11 @@
         "Projectile motion",
         "Central forces",
         "Simple harmonic motion"
+      ],
+      "outcomes": [
+        "Explain the methods of Mechanics",
+        "Apply Mechanics to problems from science and economics",
+        "Learn the main techniques of Mechanics"
       ]
     },
     {
@@ -196,6 +269,11 @@
         "Interpolation",
         "Numerical differentiation and numerical integration: trapezoidal rule, Simpson's rule",
         "Numerical solution of ODE: Euler's method, Runge-Kutta methods"
+      ],
+      "outcomes": [
+        "Explain the methods of Numerical Methods",
+        "Apply Numerical Methods to problems from science and economics",
+        "Learn the main techniques of Numerical Methods"
       ]
     },
     {
@@ -208,6 +286,11 @@
         "Programming in C: bisection and Newton-Raphson",
         "Gauss-Seidel iteration",
         "Trapezoidal rule and Simpson's rule programs"
+      ],
+      "outcomes": [
+        "Explain the methods of Numerical Methods Lab (C)",
+        "Apply Numerical Methods Lab (C) to problems from science and economics",
+        "Learn the main techniques of Numerical Methods Lab (C)"
       ]
     },
     {
@@ -221,6 +304,11 @@
         "C programming: data types and control structures",
         "Arrays and functions",
         "Pointers and structures"
+      ],
+      "outcomes": [
+        "Explain the methods of Programming in C",
+        "Apply Programming in C to problems from science and economics",
+        "Learn the main techniques of Programming in C"
       ]
     },
     {
@@ -235,6 +323,11 @@
         "Correlation and regression",
         "Probability distributions: binomial, Poisson and normal",
         "Tests of significance: t test, chi square test"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Statistical Methods",
+        "Compute with the methods of Statistical Methods in applied problems",
+        "Analyse problems that combine Statistical Methods with earlier courses"
       ]
     },
     {
@@ -249,6 +342,11 @@
         "Fourier series",
         "Fourier transform",
         "Applications to differential equations"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Integral Transforms",
+        "Compute with the methods of Integral Transforms in applied problems",
+        "Analyse problems that combine Integral Transforms with earlier courses"
       ]
     },
     {
@@ -263,6 +361,11 @@
         "Congruences, Chinese remainder theorem",
         "Fermat's little theorem and Euler's totient function",
         "Quadratic residues"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Number Theory",
+        "Compute with the methods of Number Theory in applied problems",
+        "Analyse problems that combine Number Theory with earlier courses"
       ]
     },
     {
@@ -278,6 +381,11 @@
         "Planar graphs",
         "Graph colouring",
         "Shortest path algorithms"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Graph Theory",
+        "Compute with the methods of Graph Theory in applied problems",
+        "Analyse problems that combine Graph Theory with earlier courses"
       ]
     },
     {
@@ -291,6 +399,11 @@
         "Complete metric spaces",
         "Contraction mapping, Banach fixed point theorem",
         "Compactness in metric spaces"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Metric Spaces",
+        "Compute with the methods of Metric Spaces in applied problems",
+        "Analyse problems that combine Metric Spaces with earlier courses"
       ]
     },
     {
@@ -304,6 +417,11 @@
         "The Kerala school",
         "Greek mathematics",
         "Development of calculus"
+      ],
+      "outcomes": [
+        "Prove the main theorems of History of Mathematics",
+        "Compute with the methods of History of Mathematics in applied problems",
+        "Analyse problems that combine History of Mathematics with earlier courses"
       ]
     },
     {
@@ -316,6 +434,11 @@
         "Research methodology",
         "Literature review",
         "Dissertation and viva voce"
+      ],
+      "outcomes": [
+        "Prove the main theorems of Project / Dissertation",
+        "Compute with the methods of Project / Dissertation in applied problems",
+        "Analyse problems that combine Project / Dissertation with earlier courses"
       ]
     }
   ],

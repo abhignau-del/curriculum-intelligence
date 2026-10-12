@@ -12,9 +12,10 @@ from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
 from .pdfimport import ProfileError
+from .outcomes import Bloom, analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, check
-from .report import render_html, to_dict
+from .report import outcomes_dict, render_html, render_outcomes_html, to_dict
 from .schema import load_programme, save_programme
 from .taxonomy import Taxonomy, TaxonomyError
 
@@ -43,11 +44,12 @@ def cmd_report(args) -> None:
     b = benchmark(own, peers, tax)
     overlaps = find_overlaps(own, tax)
     checklists = [check(own, Rules.resolve(r), tax, args.degree) for r in args.rules or []]
+    outcomes = analyse_outcomes(own) if any(c.outcomes for c in own.courses) else None
     out = Path(args.output)
-    out.write_text(render_html(b, overlaps, checklists), encoding="utf-8")
+    out.write_text(render_html(b, overlaps, checklists, outcomes), encoding="utf-8")
     print(f"Report written to {out}")
     if args.json:
-        Path(args.json).write_text(json.dumps(to_dict(b, overlaps, checklists), indent=2), encoding="utf-8")
+        Path(args.json).write_text(json.dumps(to_dict(b, overlaps, checklists, outcomes), indent=2), encoding="utf-8")
         print(f"Data written to {args.json}")
     gaps = b.by_status("gap")
     print(f"Alignment with {len(peers)} peers: {b.alignment:.0f}%" if b.alignment is not None
@@ -101,6 +103,35 @@ def cmd_regcheck(args) -> None:
         for label, credits in cl.unmapped.items():
             print(f"  scheme label not matched to a category: {label} ({credits:g} credits)")
         print()
+
+
+def cmd_outcomes(args) -> None:
+    """Bloom's levels of a programme's course outcomes, and checks on them."""
+    prog = load_programme(args.programme)
+    rep = analyse_outcomes(prog, Bloom.load(args.verbs) if args.verbs else None)
+    names = {lv.level: lv.name for lv in rep.bloom.levels}
+    n = len(rep.results)
+    print(f"{prog.institution} - {prog.name}: {n} outcomes in {rep.courses_with_outcomes} of {len(prog.courses)} courses")
+    if n:
+        share = rep.higher_order_share(rep.results)
+        print(f"  higher-order (Analyse and above): {'-' if share is None else f'{share:.0%}'}; "
+              f"vague: {len(rep.flagged('vague'))}; no action verb: {len(rep.flagged('no_verb'))}; "
+              f"stated for more than one course: {len(rep.duplicates)}")
+        for year, rs in rep.by_year():
+            counts = rep.counts(rs)
+            levels = ", ".join(f"{names[lv]} {c}" for lv, c in counts.items() if lv is not None and c)
+            hs = rep.higher_order_share(rs)
+            print(f"  {year or 'semester not recorded'}: {len(rs)} outcomes ({levels}"
+                  f"{f', no level {counts[None]}' if counts[None] else ''}); "
+                  f"higher-order {'-' if hs is None else f'{hs:.0%}'}")
+    if rep.without_outcomes:
+        print(f"  courses with no outcomes: {', '.join(c for c, _ in rep.without_outcomes)}")
+    if args.output:
+        Path(args.output).write_text(render_outcomes_html(rep), encoding="utf-8")
+        print(f"Report written to {args.output}")
+    if args.json:
+        Path(args.json).write_text(json.dumps(outcomes_dict(rep), indent=2), encoding="utf-8")
+        print(f"Data written to {args.json}")
 
 
 def cmd_import_acaddoc(args) -> None:
@@ -180,6 +211,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--degree", help='check as this degree, e.g. "3-year" (default: the one the programme records)')
     p.add_argument("-t", "--taxonomy")
     p.set_defaults(func=cmd_regcheck)
+
+    p = sub.add_parser("outcomes", help="Bloom's levels of a programme's course outcomes, with checks")
+    p.add_argument("programme")
+    p.add_argument("-o", "--output", help="write an HTML report to this file")
+    p.add_argument("--json", help="write the analysis as JSON to this file")
+    p.add_argument("--verbs", help="a Bloom verb list YAML (default: the built-in list)")
+    p.set_defaults(func=cmd_outcomes)
 
     p = sub.add_parser("check", help="list the skills found in each course of a programme")
     p.add_argument("programme")

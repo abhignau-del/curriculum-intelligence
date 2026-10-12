@@ -7,9 +7,11 @@ from __future__ import annotations
 
 from datetime import date
 from html import escape
+from typing import Optional
 
 from . import __version__
 from .analysis import Benchmark, SkillRow, unmapped_lines
+from .outcomes import HIGHER_ORDER, OutcomeReport
 from .overlap import OverlapPair
 from .regulatory import Checklist
 
@@ -58,7 +60,23 @@ def checklist_dict(cl: Checklist) -> dict:
     }
 
 
-def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = ()) -> dict:
+def outcomes_dict(rep: OutcomeReport) -> dict:
+    return {
+        "verb_list": rep.bloom.name,
+        "levels": [{"level": lv.level, "id": lv.id, "name": lv.name} for lv in rep.bloom.levels],
+        "outcomes": [{"course": r.course_code, "course_title": r.course_title, "semester": r.semester,
+                      "text": r.text, "level": r.level, "verbs": r.verbs, "flags": r.flags} for r in rep.results],
+        "without_outcomes": [{"course": c, "course_title": t} for c, t in rep.without_outcomes],
+        "duplicates": [{"text": t, "courses": codes} for t, codes in rep.duplicates],
+        "by_year": [{"year": y, "count": len(rs), "levels": {("none" if k is None else str(k)): v for k, v in rep.counts(rs).items()},
+                     "higher_order_share": rep.higher_order_share(rs),
+                     "vague": sum("vague" in r.flags for r in rs)} for y, rs in rep.by_year()],
+        "higher_order_share": rep.higher_order_share(rep.results),
+    }
+
+
+def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = (),
+            outcomes: Optional[OutcomeReport] = None) -> dict:
     def ev(e):
         return {"course": e.course_code, "course_title": e.course_title, "field": e.field,
                 "line": e.line, "term": e.term}
@@ -90,6 +108,7 @@ def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklis
         "overlaps": [o.__dict__ for o in overlaps],
         "structure": [s.__dict__ for s in b.structure],
         "regulatory": [checklist_dict(cl) for cl in checklists],
+        "outcomes": outcomes_dict(outcomes) if outcomes else None,
     }
 
 
@@ -139,6 +158,22 @@ table.rules tr+tr{border-top:1px solid var(--line);padding-bottom:6px}
 table.rules td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}}
 a{color:var(--accent)}
 code{font-size:13px}footer{margin-top:48px;color:var(--muted);font-size:13px}
+:root{--b1:#c9d6e3;--b2:#9fb7cf;--b3:#6f93b8;--b4:#3f6e9c;--b5:#284f78;--b6:#163453;--b0:#e8e3d8}
+@media (prefers-color-scheme:dark){:root{--b1:#2b3a4a;--b2:#3a5168;--b3:#4f6f8f;--b4:#6d93b8;--b5:#93b6d8;--b6:#c3daf0;--b0:#3a3428}}
+.stack{display:flex;height:14px;border-radius:3px;overflow:hidden;min-width:160px;background:var(--soft)}
+.stack i{display:block;height:100%}.lv{display:inline-block;min-width:22px;text-align:center;border-radius:3px;
+font-size:11px;font-weight:700;padding:0 4px;margin-right:6px}.lv1,.lv2,.lv0{color:#1d2430}.lv3,.lv4,.lv5,.lv6{color:#fff}
+@media (prefers-color-scheme:dark){.lv1,.lv2,.lv3,.lv0{color:#e6e8eb}.lv4,.lv5,.lv6{color:#14171c}}
+.lv1{background:var(--b1)}.lv2{background:var(--b2)}.lv3{background:var(--b3)}.lv4{background:var(--b4)}
+.lv5{background:var(--b5)}.lv6{background:var(--b6)}.lv0{background:var(--b0)}
+ul.co{list-style:none;padding-left:0;margin:4px 0 10px;font-size:14px}ul.co li{margin:3px 0}
+.sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:baseline}
+table.years td.lvls{min-width:220px}table.years td.lvls .small{white-space:normal}
+@media (max-width:640px){table.years tr{display:grid;grid-template-columns:1fr auto auto auto;column-gap:12px}
+table.years tr:first-child{display:none}table.years td{border:0;padding:3px 0;min-width:0}
+table.years td.lvls{grid-column:1/-1;order:5}table.years tr+tr{border-top:1px solid var(--line);padding:6px 0}
+table.years td[data-label]{min-width:max-content}table.years td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);
+text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}}
 """
 
 
@@ -308,6 +343,92 @@ def _section_structure(b: Benchmark) -> str:
             "<th class='n'>Courses offered</th><th class='n'>Credits offered</th></tr>" + rows + "</table></div>")
 
 
+def _lv(level: Optional[int], names: dict[int, str]) -> str:
+    if level is None:
+        return "<span class='lv lv0' title='No level: vague or no action verb'>–</span>"
+    return f"<span class='lv lv{level}' title='{escape(names[level])}'>{level}</span>"
+
+
+def section_outcomes(rep: OutcomeReport) -> str:
+    names = {lv.level: lv.name for lv in rep.bloom.levels}
+    n, total_courses = len(rep.results), len(rep.programme.courses)
+    head = ("<h2>Course outcomes</h2><p class='muted'>Each outcome's level in the revised Bloom's taxonomy, "
+            "read from the verbs that open it (1 Remember, 2 Understand, 3 Apply, 4 Analyse, 5 Evaluate, "
+            "6 Create). Higher-order means Analyse, Evaluate or Create. Outcomes that open with a verb hard "
+            "to assess, such as <i>understand</i> or <i>learn</i>, are marked vague.</p>")
+    if not n:
+        return head + "<p class='muted'>No course in this programme states its outcomes.</p>"
+    vague, no_verb = rep.flagged("vague"), rep.flagged("no_verb")
+    share = rep.higher_order_share(rep.results)
+    summary = (f"<p>{n} outcomes in {rep.courses_with_outcomes} of {total_courses} courses · "
+               f"{_pct(None if share is None else 100 * share)} higher-order · {len(vague)} vague "
+               f"({_pct(100 * len(vague) / n)}) · {len(no_verb)} with no action verb · "
+               f"{len(rep.duplicates)} stated for more than one course.</p>")
+    rows = []
+    for year, rs in rep.by_year():
+        counts = rep.counts(rs)
+        bar = "".join(f"<i class='lv{lv}' style='width:{100 * c / len(rs):.1f}%' title='{escape(names[lv])}: {c}'></i>"
+                      for lv, c in counts.items() if lv is not None and c)
+        if counts[None]:
+            bar += f"<i class='lv0' style='width:{100 * counts[None] / len(rs):.1f}%' title='No level: {counts[None]}'></i>"
+        nums = " · ".join(f"<i class='sw lv{lv}'></i>{escape(names[lv])} {c}"
+                          for lv, c in counts.items() if lv is not None and c)
+        hs = rep.higher_order_share(rs)
+        rows.append(f"<tr><td>{escape(year or 'Semester not recorded')}</td><td class='n' data-label='Outcomes'>{len(rs)}</td>"
+                    f"<td class='lvls'><div class='stack'>{bar}</div><span class='muted small'>{nums}"
+                    f"{f' · {counts[None]} no level' if counts[None] else ''}</span></td>"
+                    f"<td class='n' data-label='Higher-order'>{_pct(None if hs is None else 100 * hs)}</td>"
+                    f"<td class='n' data-label='Vague'>{sum('vague' in r.flags for r in rs)}</td></tr>")
+    table = ("<div class='card'><table class='years'><tr><th>Year</th><th class='n'>Outcomes</th><th>Levels</th>"
+             "<th class='n'>Higher-order</th><th class='n'>Vague</th></tr>" + "".join(rows) + "</table></div>")
+    parts = []
+    if vague:
+        by_verb: dict[str, int] = {}
+        for r in vague:
+            by_verb[r.verbs[0]] = by_verb.get(r.verbs[0], 0) + 1
+        verbs = ", ".join(f"<i>{escape(v)}</i> ({c})" for v, c in sorted(by_verb.items(), key=lambda kv: -kv[1]))
+        parts.append(f"<details><summary>{len(vague)} vague outcome{'' if len(vague) == 1 else 's'}: {verbs}</summary>"
+                     + _evidence_list([f"<b>{escape(r.course_code)}</b>: {escape(r.text)}" for r in vague]) + "</details>")
+    if no_verb:
+        parts.append(f"<details><summary>{len(no_verb)} outcome{'' if len(no_verb) == 1 else 's'} with no action verb at the start</summary>"
+                     + _evidence_list([f"<b>{escape(r.course_code)}</b>: {escape(r.text)}" for r in no_verb]) + "</details>")
+    if rep.duplicates:
+        k = len(rep.duplicates)
+        parts.append(f"<details><summary>{k} outcome{' is' if k == 1 else 's are'} stated for more than one course</summary>"
+                     + _evidence_list([f"<b>{escape(', '.join(codes))}</b>: {escape(t)}" for t, codes in rep.duplicates])
+                     + "</details>")
+    if rep.without_outcomes:
+        k = len(rep.without_outcomes)
+        parts.append(f"<details><summary>{k} course{' states' if k == 1 else 's state'} no outcomes</summary>"
+                     + _evidence_list([f"<b>{escape(c)}</b> {escape(t)}" for c, t in rep.without_outcomes]) + "</details>")
+    courses: dict[str, list] = {}
+    for r in rep.results:
+        courses.setdefault(r.course_code, []).append(r)
+    vague_note = " <span class='muted small'>(vague)</span>"
+    per_course = "".join(
+        f"<h3>{escape(rs[0].course_title)} <span class='muted small'>{escape(code)}"
+        f"{' · semester ' + escape(rs[0].semester) if rs[0].semester else ''}</span></h3><ul class='co'>"
+        + "".join(f"<li>{_lv(r.level, names)}{escape(r.text)}{vague_note if 'vague' in r.flags else ''}</li>"
+                  for r in rs)
+        + "</ul>" for code, rs in courses.items())
+    parts.append(f"<details><summary>Every outcome, by course</summary>{per_course}</details>")
+    return head + summary + table + "<div style='margin-top:10px'>" + "".join(parts) + "</div>"
+
+
+def render_outcomes_html(rep: OutcomeReport) -> str:
+    """A page of its own for the outcomes analysis of one programme."""
+    p = rep.programme
+    title = f"{escape(p.name)}: Course Outcomes"
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title><style>{CSS}</style></head>
+<body><main>
+<h1>{escape(p.name)}</h1>
+<p class="lead">{escape(p.institution)}{' · ' + escape(p.year) if p.year else ''} · course outcomes</p>
+{section_outcomes(rep)}
+<footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}. Verb list: {escape(rep.bloom.name)}.</footer>
+</main></body></html>"""
+
+
 STATUS_PILL = {"met": ("Met", "ok"), "partly": ("Partly met", "Medium"),
                "not_met": ("Not met", "High"), "not_checked": ("Not checked", "soft")}
 
@@ -390,8 +511,9 @@ def _section_method(b: Benchmark, regulatory: bool = False) -> str:
               "or the taxonomy is missing a term. Worth a look before trusting a “not found”.</p>"
               + _evidence_list([f"<b>{escape(c)}</b>: “{escape(line)}”" for c, line in unmapped]))
     return f"""<h2>How this was worked out</h2>
-<p>Every course title, topic line and outcome was searched for the terms listed under each skill in the
-<b>{escape(b.taxonomy.name)}</b> taxonomy ({len(b.taxonomy.skills)} skills). Matching ignores case and
+<p>Every course title and topic line was searched for the terms listed under each skill in the
+<b>{escape(b.taxonomy.name)}</b> taxonomy ({len(b.taxonomy.skills)} skills). Course outcomes are not counted
+as evidence of a skill: they often look ahead to later study, and not every syllabus states them. Matching ignores case and
 punctuation, and the longest phrase wins (“partial differential equations” counts for PDEs, not ODEs). No
 AI or statistics are involved: each mark in this report traces back to a phrase in a syllabus.</p>
 <p>Limits: a syllabus can teach a skill without naming it, and naming it does not show depth. Treat a gap as a
@@ -433,7 +555,8 @@ def _regulatory_tiles(checklists) -> str:
     return "".join(tiles) + '<div class="tile na"><b>Not yet analysed</b><span>Industry alignment</span></div>'
 
 
-def render_html(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = ()) -> str:
+def render_html(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = (),
+                outcomes: Optional[OutcomeReport] = None) -> str:
     gaps = b.by_status("gap")
     high = sum(r.priority == "High" for r in gaps)
     flagged = [o for o in overlaps if not o.theory_lab_pair]
@@ -462,6 +585,7 @@ benchmarked against {len(b.peers)} peer programmes</p>
 {_section_structure(b)}
 {_section_matrix(b)}
 {"".join(_section_checklist(cl) for cl in checklists)}
+{section_outcomes(outcomes) if outcomes else ""}
 {_section_method(b, bool(checklists))}
 <footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}.</footer>
 </main></body></html>"""

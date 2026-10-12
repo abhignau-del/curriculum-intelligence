@@ -57,7 +57,7 @@ COURSE_ON_MIN_LINES = 3
 class Evidence:
     course_code: str
     course_title: str
-    field: Literal["title", "topic", "outcome"]
+    field: Literal["title", "topic"]
     line: str
     term: str
 
@@ -95,12 +95,16 @@ class SkillCoverage:
 
 
 def _lines(programme: Programme):
+    """Titles and topic lines: the evidence for skills.
+
+    Course outcomes are left out. They often look ahead ("a foundation for ... machine
+    learning"), and peers' outcomes are not always available, so counting them would
+    credit a programme with skills it only mentions. They are analysed in `outcomes`.
+    """
     for c in programme.courses:
         yield c, "title", c.title
         for t in c.topics:
             yield c, "topic", t
-        for o in c.outcomes:
-            yield c, "outcome", o
 
 
 def profile(programme: Programme, taxonomy: Taxonomy, *, core_only: bool = False) -> dict[str, SkillCoverage]:
