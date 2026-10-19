@@ -1,6 +1,6 @@
 import type {
-  Basis, BenchmarkResult, Checklist, CopoResult, CourseOn, Evidence, Level, OutcomesResult, ProgrammeSummary, RuleStatus,
-  SchemeItem, SkillResult, Status,
+  Basis, BenchmarkResult, Checklist, CopoResult, CourseOn, Evidence, Level, OutcomesResult, Policy, ProgrammeSummary,
+  RuleStatus, SchemeItem, SkillResult, Status,
 } from "./types";
 
 /** What the user picked last time. Peers are stored as exclusions, so programmes
@@ -251,4 +251,44 @@ export function cosByCourse(c: CopoResult): [string, CopoResult["cos"]][] {
   const groups = new Map<string, CopoResult["cos"]>();
   for (const co of c.cos) groups.set(co.course, [...(groups.get(co.course) ?? []), co]);
   return [...groups];
+}
+
+// ----- outcome attainment ----------------------------------------------------------
+
+/** The policy as the form shows it: whole percentages for shares and weights. */
+export interface PolicyForm { l3: number; l2: number; l1: number; internal: number; external: number; direct: number; target: number }
+
+export function toForm(p: Policy): PolicyForm {
+  const at = (lv: number) => Math.round(100 * (p.thresholds.find(t => t[1] === lv)?.[0] ?? 0));
+  const total = p.weights.internal + p.weights.external || 1;
+  return { l3: at(3), l2: at(2), l1: at(1), internal: Math.round(100 * p.weights.internal / total),
+           external: Math.round(100 * p.weights.external / total), direct: Math.round(100 * p.direct_share),
+           target: p.target_level };
+}
+
+/** The policy to send, or the reason the form can't be used. */
+export function fromForm(f: PolicyForm, name = "Policy set in the web app"): Policy | string {
+  const pct = [f.l3, f.l2, f.l1, f.internal, f.external, f.direct];
+  if (pct.some(v => !Number.isFinite(v) || v < 0 || v > 100)) return "Percentages must be between 0 and 100.";
+  if (!(f.l3 > f.l2 && f.l2 > f.l1)) return "The share for level 3 must be above level 2's, and level 2's above level 1's.";
+  if (f.internal + f.external === 0) return "Internal and external weights can't both be 0.";
+  if (!Number.isFinite(f.target) || f.target < 0 || f.target > 3) return "The target level must be between 0 and 3.";
+  return { name, thresholds: [[f.l3 / 100, 3], [f.l2 / 100, 2], [f.l1 / 100, 1]],
+           weights: { internal: f.internal / 100, external: f.external / 100 }, direct_share: f.direct / 100,
+           target_level: f.target };
+}
+
+export function parseSavedPolicy(raw: string | null): PolicyForm | null {
+  try {
+    const v = JSON.parse(raw ?? "null");
+    const keys: (keyof PolicyForm)[] = ["l3", "l2", "l1", "internal", "external", "direct", "target"];
+    if (v && keys.every(k => typeof v[k] === "number")) return v;
+  } catch { /* corrupt storage */ }
+  return null;
+}
+
+/** "Met", "Below" or "No data" for a value against the target, as in the HTML report. */
+export function attainmentStatus(value: number | null, target: number): { label: string; css: string } {
+  if (value == null) return { label: "No data", css: "soft" };
+  return value >= target - 1e-9 ? { label: "Met", css: "ok" } : { label: "Below", css: "High" };
 }

@@ -12,11 +12,12 @@ from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
 from .pdfimport import ProfileError
+from .attainment import AttainmentError, Policy, compute, read_data, write_template as write_attainment_template
 from .mapping import choose_framework, map_outcomes
 from .outcomes import Bloom, analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, check
-from .report import copo_dict, outcomes_dict, render_html, render_outcomes_html, to_dict
+from .report import attainment_dict, copo_dict, outcomes_dict, render_html, render_outcomes_html, to_dict
 from .schema import load_programme, save_programme
 from .taxonomy import Taxonomy, TaxonomyError
 
@@ -157,6 +158,39 @@ def cmd_copo(args) -> None:
         print(f"Data written to {args.json}")
 
 
+def cmd_attainment_template(args) -> None:
+    prog = load_programme(args.programme)
+    if not any(c.outcomes for c in prog.courses):
+        raise AttainmentError("the programme states no course outcomes to record attainment for")
+    write_attainment_template(args.output, prog, args.batch or "")
+    n = sum(len(c.outcomes) for c in prog.courses)
+    print(f"Attainment workbook for {n} course outcomes written to {args.output}")
+
+
+def cmd_attainment(args) -> None:
+    """CO and PO attainment for a batch, from aggregated assessment results."""
+    tax = _taxonomy(args.taxonomy)
+    prog = load_programme(args.programme)
+    data = read_data(args.data)
+    policy = Policy.load(args.policy) if args.policy else Policy()
+    mapping = map_outcomes(prog, choose_framework(args.framework, prog, tax), tax)
+    rep = compute(mapping, data, policy)
+    print(f"{prog.institution} - {prog.name}{', batch ' + data.batch if data.batch else ''}")
+    print(f"  {len(rep.attained())} of {len(rep.assessed)} assessed course outcomes reached level "
+          f"{policy.target_level:g}" + (f"; {len(rep.no_data)} not assessed" if rep.no_data else ""))
+    for code, name, value, n in rep.po_values:
+        shown = "no data" if value is None else f"{value:.2f}" + ("" if value >= policy.target_level - 1e-9 else "  below target")
+        print(f"  {code:<5} {name[:44]:<44} {shown}")
+    if rep.unknown:
+        print(f"  left out (no such course outcome): {', '.join(rep.unknown)}")
+    if args.output:
+        Path(args.output).write_text(render_outcomes_html(mapping.outcomes, mapping, rep), encoding="utf-8")
+        print(f"Report written to {args.output}")
+    if args.json:
+        Path(args.json).write_text(json.dumps(attainment_dict(rep), indent=2), encoding="utf-8")
+        print(f"Data written to {args.json}")
+
+
 def cmd_import_acaddoc(args) -> None:
     prog = from_acaddoc([Path(p) for p in args.paths], args.institution, args.name, args.only)
     save_programme(prog, args.output)
@@ -252,6 +286,22 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", help="write the mapping as JSON to this file")
     p.add_argument("-t", "--taxonomy")
     p.set_defaults(func=cmd_copo)
+
+    p = sub.add_parser("attainment-template", help="write a workbook for entering a batch's results per course outcome")
+    p.add_argument("programme")
+    p.add_argument("-o", "--output", default="attainment.xlsx")
+    p.add_argument("--batch", help='e.g. "2023-26"')
+    p.set_defaults(func=cmd_attainment_template)
+
+    p = sub.add_parser("attainment", help="CO and PO attainment for a batch, from aggregated results")
+    p.add_argument("programme")
+    p.add_argument("data", help="the filled-in attainment workbook (.xlsx) or JSON")
+    p.add_argument("--policy", help="attainment policy YAML: thresholds, weights, target (default: common practice)")
+    p.add_argument("--framework", help='programme outcomes: a built-in name, a YAML file, or "own"')
+    p.add_argument("-o", "--output", help="write an HTML report (outcomes, CO-PO, attainment) to this file")
+    p.add_argument("--json", help="write the attainment as JSON to this file")
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_attainment)
 
     p = sub.add_parser("check", help="list the skills found in each course of a programme")
     p.add_argument("programme")

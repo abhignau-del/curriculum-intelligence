@@ -122,3 +122,22 @@ export interface Checklist {
 
 /** A built-in rules set the server can check against. */
 export interface RulesInfo { id: string; name: string; source: string; variants: { id: string; name: string }[] }
+
+/** How attainment counts become levels (see backend attainment.py). */
+export interface Policy {
+  name: string;
+  thresholds: [number, number][];           // [share of students reaching the target, level 1-3], highest first
+  weights: { internal: number; external: number };
+  direct_share: number;                     // overall = direct x share + survey x (1 - share)
+  target_level: number;
+}
+
+export interface AttainmentResult {
+  batch: string;
+  policy: Policy;
+  framework: string;
+  cos: { course: string; co: number; text: string; shares: Record<string, number>; levels: Record<string, number>;
+         direct: number | null; overall: number | null; notes: string[] }[];
+  pos: { code: string; name: string; attainment: number | null; outcomes: number }[];
+  attained: number; assessed: number; no_data: string[]; unknown: string[];
+}

@@ -193,3 +193,50 @@ def test_benchmark_includes_outcomes_and_copo(client):
     peer = peers[0]
     d = client.post("/api/benchmark", json={"own": peer, "peers": [own]}).json()
     assert d["outcomes"] is None and d["copo"] is None
+
+
+def test_attainment_template_and_upload(client, tmp_path):
+    from openpyxl import load_workbook
+    own, peers = ids(client)
+    r = client.get(f"/api/programmes/{own}/attainment-template.xlsx", params={"batch": "2024-27"})
+    assert r.status_code == 200 and "attainment.xlsx" in r.headers["content-disposition"]
+    (tmp_path / "a.xlsx").write_bytes(r.content)
+    wb = load_workbook(tmp_path / "a.xlsx")
+    assert wb["Batch"]["B1"].value == "2024-27"
+    ws = wb["Attainment"]
+    ws.cell(row=2, column=6).value, ws.cell(row=2, column=7).value = 60, 45      # RMA101 CO1 internal, 75%
+    wb.save(tmp_path / "a.xlsx")
+    body = (tmp_path / "a.xlsx").read_bytes()
+    r = client.post(f"/api/programmes/{own}/attainment", params={"filename": "a.xlsx"}, content=body)
+    assert r.status_code == 200
+    d = r.json()
+    assert d["batch"] == "2024-27" and d["assessed"] == 1 and d["cos"][0]["levels"] == {"internal": 3}
+    assert d["policy"]["target_level"] == 2.0
+    # a policy of the client's own
+    r = client.post(f"/api/programmes/{own}/attainment", content=body,
+                    params={"filename": "a.xlsx", "policy": json.dumps({"thresholds": [[0.8, 3], [0.7, 2], [0.5, 1]]})})
+    assert r.json()["cos"][0]["levels"] == {"internal": 2}
+    html = client.post(f"/api/programmes/{own}/attainment", content=body,
+                       params={"filename": "a.xlsx", "format": "html"}).text
+    assert "<h2>Outcome attainment: 2024-27</h2>" in html
+    assert client.get("/api/attainment/policy").json()["weights"] == {"internal": 0.3, "external": 0.7}
+
+
+@pytest.mark.parametrize("params,body,message", [
+    ({"filename": "a.csv"}, b"x", "expected the attainment workbook"),
+    ({"filename": "a.json"}, b"{", "not valid JSON"),
+    ({"filename": "a.json", "policy": '{"thresholds": [[2, 3]]}'}, b"{}", "Policy: thresholds: each is"),
+    ({"filename": "a.json", "framework": "../x.yaml"}, b"{}", "No built-in outcome framework"),
+    ({"filename": "a.json"}, json.dumps({"records": [{"course": "X", "co": 1, "kind": "internal", "students": 5,
+                                                       "reached": 9}]}).encode(), "reached is more than students"),
+])
+def test_attainment_upload_errors(client, params, body, message):
+    own, _ = ids(client)
+    r = client.post(f"/api/programmes/{own}/attainment", params=params, content=body)
+    assert r.status_code == 400 and message in r.json()["detail"]
+
+
+def test_attainment_needs_outcomes(client):
+    own, peers = ids(client)
+    r = client.get(f"/api/programmes/{peers[0]}/attainment-template.xlsx")
+    assert r.status_code == 400 and "no course outcomes" in r.json()["detail"]

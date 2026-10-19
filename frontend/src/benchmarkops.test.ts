@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   basisCounts, byStatus, cellEvidence, checklistNotes, checklistSummary, checklistTiles, courseOnNote, coursesOnSentence,
-  coverMark, cosByCourse, degreeOptions, gapSentence, levelSegments, outcomesSummary, parseSavedRegulatory, RULE_STATUS,
+  attainmentStatus, coverMark, cosByCourse, degreeOptions, fromForm, gapSentence, levelSegments, outcomesSummary,
+  parseSavedPolicy, parseSavedRegulatory, RULE_STATUS, toForm,
   schemeBySemester, unservedPos, parseSaved, peerCourses, peersSplit, resolveSelection,
   selectionProblem, splitOnTerm, toSaved,
 } from "./benchmarkops";
 import type {
-  BenchmarkResult, Checklist, CopoResult, CourseOn, OutcomesResult, ProgrammeSummary, RuleResult, SkillResult,
+  BenchmarkResult, Checklist, CopoResult, CourseOn, OutcomesResult, Policy, ProgrammeSummary, RuleResult, SkillResult,
 } from "./types";
 
 const prog = (id: string, institution = `Inst ${id}`): ProgrammeSummary =>
@@ -274,5 +275,32 @@ describe("CO-PO mapping", () => {
   it("names the POs no outcome serves", () => { expect(unservedPos(c)).toEqual(["P2 Ethics"]); });
   it("groups outcomes by course, in order", () => {
     expect(cosByCourse(c).map(([k, cos]) => [k, cos.map(x => x.text)])).toEqual([["A", ["x", "z"]], ["B", ["y"]]]);
+  });
+});
+
+describe("attainment policy form", () => {
+  const policy: Policy = { name: "d", thresholds: [[0.7, 3], [0.6, 2], [0.5, 1]], weights: { internal: 0.3, external: 0.7 },
+                           direct_share: 0.8, target_level: 2 };
+  it("round-trips the policy through the form", () => {
+    const f = toForm(policy);
+    expect(f).toEqual({ l3: 70, l2: 60, l1: 50, internal: 30, external: 70, direct: 80, target: 2 });
+    expect(fromForm(f, "d")).toEqual(policy);
+  });
+  it("explains a form that can't be used", () => {
+    const f = toForm(policy);
+    expect(fromForm({ ...f, l2: 75 })).toMatch(/level 3 must be above level 2/);
+    expect(fromForm({ ...f, internal: 0, external: 0 })).toMatch(/can't both be 0/);
+    expect(fromForm({ ...f, direct: 120 })).toMatch(/between 0 and 100/);
+    expect(fromForm({ ...f, target: 4 })).toMatch(/target level/);
+  });
+  it("reads saved settings defensively", () => {
+    expect(parseSavedPolicy(JSON.stringify(toForm(policy)))).toEqual(toForm(policy));
+    expect(parseSavedPolicy('{"l3": "70"}')).toBeNull();
+    expect(parseSavedPolicy("{bad")).toBeNull();
+  });
+  it("labels attainment against the target", () => {
+    expect(attainmentStatus(2, 2)).toEqual({ label: "Met", css: "ok" });
+    expect(attainmentStatus(1.99, 2)).toEqual({ label: "Below", css: "High" });
+    expect(attainmentStatus(null, 2)).toEqual({ label: "No data", css: "soft" });
   });
 });

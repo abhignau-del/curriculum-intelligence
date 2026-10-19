@@ -7,6 +7,7 @@ Mathematics syllabi but copied from no real one. Run from backend/:
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -271,6 +272,24 @@ def outcomes_for(course: Course) -> list[str]:
     return [o.format(t=course.title) for o in OWN_OUTCOMES[year]]
 
 
+def attainment_for(own: Programme) -> dict:
+    """A fictional batch's results: 60 students; higher-order outcomes reached by fewer of them,
+    and a few outcomes left out of the exit survey."""
+    import random
+    rng = random.Random(2026)
+    records = []
+    for c in own.courses:
+        for i, text in enumerate(c.outcomes, start=1):
+            harder = 0.12 if text.split()[0] in ("Prove", "Analyse") else 0.0
+            for kind, base in (("internal", 0.78), ("external", 0.66), ("survey", 0.80)):
+                if kind == "survey" and rng.random() < 0.15:
+                    continue
+                share = max(0.3, min(0.95, base - harder + rng.uniform(-0.12, 0.08)))
+                records.append({"course": c.code, "co": i, "kind": kind, "students": 60,
+                                "reached": round(60 * share)})
+    return {"batch": "2023-26 (fictional)", "records": records}
+
+
 def main() -> None:
     out = Path(__file__).resolve().parents[1] / "samples"
     (out / "peers").mkdir(parents=True, exist_ok=True)
@@ -281,6 +300,8 @@ def main() -> None:
     own.scheme = [SchemeItem(category=cat, credits=cr, semester=sem)
                   for sem, cats in OWN_SCHEME.items() for cat, cr in cats.items()]
     save_programme(own, out / "riverside.json")
+    (out / "riverside-attainment.json").write_text(json.dumps(attainment_for(own), indent=1) + "\n",
+                                                   encoding="utf-8")
     for name, prefix, keys in PEERS:
         slug = name.split()[0].lower()
         save_programme(build(name, prefix, keys), out / "peers" / f"{slug}.json")

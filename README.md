@@ -113,6 +113,40 @@ their 1–3 scale (1 slight, 2 moderate, 3 substantial).
 The benchmark report and web app add this section when the programme under
 review states course outcomes.
 
+### Outcome attainment
+
+`curintel attainment PROGRAMME RESULTS.xlsx` works out how far a batch attained
+each course outcome and, through the CO–PO mapping, each programme outcome.
+
+**[See a sample attainment report](https://abhignau-del.github.io/curriculum-intelligence/sample-attainment.html)**
+(fictional batch).
+
+1. `curintel attainment-template PROGRAMME -o results.xlsx --batch 2023-26`
+   writes a workbook with one row per course outcome and kind of assessment
+   (internal, external, exit survey).
+2. Fill in, for each row, how many students were assessed on the outcome and
+   how many reached the target mark. **Counts only**: no names or marks.
+3. Run `curintel attainment` for the HTML report and JSON.
+
+A **policy** file sets how counts become levels, and the report prints the
+policy it used. The defaults follow common practice, not a regulation, so set
+your institution's own (`--policy policy.yaml`):
+
+```yaml
+thresholds: [[0.7, 3], [0.6, 2], [0.5, 1]]   # share of students reaching the target -> level
+weights: {internal: 0.3, external: 0.7}     # direct attainment
+direct_share: 0.8                           # overall = direct 80 : exit survey 20
+target_level: 2                             # an outcome is attained at this level
+```
+
+In the web app, the programme screen has an **Outcome attainment** panel: download
+the entry sheet, upload the filled-in results, and adjust the policy in a small
+form (remembered in your browser; *Reset to defaults* restores the values above).
+
+A programme outcome's attainment is the attainment of the course outcomes that
+serve it, weighted by their mapping strength. When an outcome lacks a kind of
+assessment, the other weights are rescaled and the report says so.
+
 ### Regulatory checklist
 
 `curintel regcheck PROGRAMME` checks a programme against the rules of a
@@ -191,6 +225,8 @@ to the server on port 8000).
 | `curintel regcheck PROGRAMME [-r RULES] [--degree 3-year]` | the regulatory checklist (default rules: `ugc-ccfup-2022`) |
 | `curintel outcomes PROGRAMME [-o file.html] [--json file.json]` | Bloom's levels of the course outcomes, with checks |
 | `curintel copo PROGRAMME [--framework NAME\|FILE\|own] [-o file.html] [--json file.json]` | CO–PO mapping and articulation matrix |
+| `curintel attainment-template PROGRAMME [-o results.xlsx] [--batch B]` | a workbook for a batch's results per course outcome |
+| `curintel attainment PROGRAMME RESULTS [--policy P] [-o file.html] [--json file.json]` | CO and PO attainment |
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
@@ -258,7 +294,7 @@ institutional data in the git-ignored `private-data/` folder.
 4. **Core vs elective coverage** (v0.4).
 5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
 6. **Regulatory checklist**: UGC credit framework rules, credit schemes, course rules (v0.6).
-7. **Course outcomes**: Bloom's levels and checks (v0.7); CO–PO mapping (v0.8).
+7. **Course outcomes**: Bloom's levels and checks (v0.7); CO–PO mapping (v0.8); attainment (v0.9).
 8. Industry skill demand.
 9. More discipline taxonomies.
 

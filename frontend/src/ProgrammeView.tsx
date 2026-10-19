@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AttainmentPanel from "./AttainmentPanel";
 import { api, download } from "./api";
 import { schemeBySemester } from "./benchmarkops";
 import type { ProgrammeDetail } from "./types";
@@ -93,6 +94,8 @@ export default function ProgrammeView({ id, skillName, onError, onDeleted }: Pro
           </table>
         </div>
       )}
+
+      {p.courses.some(c => c.outcomes.length > 0) && <AttainmentPanel id={id} institution={p.institution} onError={onError} />}
 
       {(p.programme_outcomes ?? []).length > 0 && (
         <div className="card">

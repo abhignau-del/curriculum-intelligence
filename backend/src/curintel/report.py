@@ -11,6 +11,7 @@ from typing import Optional
 
 from . import __version__
 from .analysis import Benchmark, SkillRow, unmapped_lines
+from .attainment import AttainmentReport
 from .mapping import MappingReport
 from .outcomes import HIGHER_ORDER, OutcomeReport
 from .overlap import OverlapPair
@@ -87,6 +88,80 @@ def copo_dict(m: MappingReport) -> dict:
                 for co in m.cos],
         "unmapped": [{"course": co.course_code, "text": co.text} for co in m.unmapped],
     }
+
+
+def policy_words(rep: AttainmentReport) -> str:
+    pol = rep.policy
+    first, *rest = pol.thresholds
+    cuts = (f"level {first[1]} when {100 * first[0]:.0f}% or more of students reach the target"
+            + "".join(f", {lv} at {100 * cut:.0f}%" for cut, lv in rest))
+    w = pol.weights
+    direct = " : ".join(f"{k} {100 * w[k] / sum(w.values()):.0f}" for k in ("internal", "external") if k in w)
+    return (f"{cuts}, otherwise 0. Direct attainment = {direct}. Overall = direct {100 * pol.direct_share:.0f} : "
+            f"survey {100 * (1 - pol.direct_share):.0f}. Target level {pol.target_level:g}.")
+
+
+def attainment_dict(rep: AttainmentReport) -> dict:
+    return {
+        "batch": rep.data.batch,
+        "policy": rep.policy.model_dump(),
+        "framework": rep.mapping.framework.id,
+        "cos": [{"course": c.course, "co": c.co, "text": c.text, "shares": c.shares, "levels": c.levels,
+                 "direct": c.direct, "overall": c.overall, "notes": c.notes} for c in rep.cos],
+        "pos": [{"code": code, "name": name, "attainment": value, "outcomes": n} for code, name, value, n in rep.po_values],
+        "attained": len(rep.attained()), "assessed": len(rep.assessed),
+        "no_data": rep.no_data, "unknown": rep.unknown,
+    }
+
+
+def section_attainment(rep: AttainmentReport) -> str:
+    target = rep.policy.target_level
+    head = (f"<h2>Outcome attainment{': ' + escape(rep.data.batch) if rep.data.batch else ''}</h2>"
+            "<p class='muted'>How far each course outcome was attained, from the share of students who reached the "
+            "target mark in each assessment, and each programme outcome through the CO–PO mapping (attainment of "
+            "the outcomes serving it, weighted by mapping strength). Levels run from 0 to 3. Policy: "
+            f"{escape(rep.policy.name)}: {escape(policy_words(rep))}</p>")
+    summary = (f"<p>{len(rep.attained())} of {len(rep.assessed)} assessed course outcomes reached the target level "
+               f"of {target:g}" + (f" · {len(rep.no_data)} not assessed" if rep.no_data else "") + ".</p>")
+    notes = ""
+    if rep.unknown:
+        notes += ("<p class='muted'>Data for outcomes the programme does not have, left out: "
+                  + escape(", ".join(rep.unknown)) + ".</p>")
+    po_rows = []
+    for code, name, value, n in rep.po_values:
+        if value is None:
+            bar, status = "<span class='muted small'>no assessed outcome serves it</span>", "<span class='pill soft'>No data</span>"
+        else:
+            bar = (f"<div class='bar' title='{value:.2f} of 3'><i style='width:{100 * value / 3:.1f}%'></i></div>")
+            status = ("<span class='pill ok'>Met</span>" if value >= target - 1e-9
+                      else "<span class='pill High'>Below</span>")
+        po_rows.append(f"<tr><td><b>{escape(code)}</b> {escape(name)}</td><td class='barc'>{bar}</td>"
+                       f"<td class='n'>{'–' if value is None else f'{value:.2f}'}</td><td class='n'>{n}</td>"
+                       f"<td>{status}</td></tr>")
+    po_table = ("<div class='card'><table class='att'><tr><th>Programme outcome</th><th class='barc'></th>"
+                "<th class='n'>Attainment</th><th class='n'>COs</th><th></th></tr>" + "".join(po_rows) + "</table></div>")
+    below = sorted((c for c in rep.assessed if c.overall < target - 1e-9), key=lambda c: c.overall)
+    below_list = ""
+    if below:
+        below_list = (f"<details><summary>{len(below)} course outcome{'' if len(below) == 1 else 's'} below the "
+                      "target level</summary>" + _evidence_list(
+                          [f"<b>{escape(c.label)}</b> {c.overall:.2f}: {escape(c.text)}" for c in below]) + "</details>")
+
+    def cell(c, kind):
+        if kind not in c.levels:
+            return "<td class='n muted'>–</td>"
+        return f"<td class='n'>{100 * c.shares[kind]:.0f}% <span class='muted small'>→ {c.levels[kind]}</span></td>"
+    rows = []
+    for c in rep.cos:
+        overall = "–" if c.overall is None else f"{c.overall:.2f}"
+        mark = ("" if c.overall is None else (" ✓" if c.overall >= target - 1e-9 else ""))
+        note = f"<br><span class='muted small'>{escape('; '.join(c.notes))}</span>" if c.notes else ""
+        rows.append(f"<tr><td><b>{escape(c.label)}</b></td><td>{escape(c.text)}{note}</td>{cell(c, 'internal')}"
+                    f"{cell(c, 'external')}{cell(c, 'survey')}<td class='n'><b>{overall}</b>{mark}</td></tr>")
+    co_table = ("<details><summary>Every course outcome</summary><div class='card'><table><tr><th>CO</th>"
+                "<th>Outcome</th><th class='n'>Internal</th><th class='n'>External</th><th class='n'>Survey</th>"
+                "<th class='n'>Overall</th></tr>" + "".join(rows) + "</table></div></details>")
+    return head + summary + notes + po_table + below_list + co_table
 
 
 def to_dict(b: Benchmark, overlaps: list[OverlapPair], checklists: list[Checklist] = (),
@@ -187,6 +262,7 @@ table.copo td:first-child,table.copo th:first-child{text-align:left}
 table.copo td.s1{background:var(--b1)}table.copo td.s2{background:var(--b3);color:#fff}table.copo td.s3{background:var(--b5);color:#fff}
 @media (prefers-color-scheme:dark){table.copo td.s2,table.copo td.s3{color:#14171c}}
 table.copo tr.sum td{background:var(--soft);font-weight:600}
+@media (max-width:640px){table.att .barc{display:none}}
 .sw{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:baseline}
 table.years td.lvls{min-width:220px}table.years td.lvls .small{white-space:normal}
 @media (max-width:640px){table.years tr{display:grid;grid-template-columns:1fr auto auto auto;column-gap:12px}
@@ -485,7 +561,8 @@ def section_copo(m: MappingReport) -> str:
             + f"<details><summary>Why each outcome maps where it does</summary>{detail}</details>")
 
 
-def render_outcomes_html(rep: OutcomeReport, copo: Optional[MappingReport] = None) -> str:
+def render_outcomes_html(rep: OutcomeReport, copo: Optional[MappingReport] = None,
+                         attainment: Optional[AttainmentReport] = None) -> str:
     """A page of its own for the outcomes analysis of one programme."""
     p = rep.programme
     title = f"{escape(p.name)}: Course Outcomes"
@@ -496,6 +573,7 @@ def render_outcomes_html(rep: OutcomeReport, copo: Optional[MappingReport] = Non
 <p class="lead">{escape(p.institution)}{' · ' + escape(p.year) if p.year else ''} · course outcomes</p>
 {section_outcomes(rep)}
 {section_copo(copo) if copo else ""}
+{section_attainment(attainment) if attainment else ""}
 <footer>Generated {date.today().isoformat()} by Curriculum Intelligence {__version__}. Verb list: {escape(rep.bloom.name)}.</footer>
 </main></body></html>"""
 

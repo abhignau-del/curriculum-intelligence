@@ -175,3 +175,11 @@ table.copo td.s3 { background: var(--b5); color: #fff; }
 @media (prefers-color-scheme: dark) { table.copo td.s2, table.copo td.s3 { color: #14171c; } }
 table.copo tr.sum td { background: var(--soft); font-weight: 600; }
 .wrap { white-space: normal; }
+
+/* Outcome attainment panel */
+.wrap-row { flex-wrap: wrap; gap: 8px 12px; align-items: flex-end; }
+.small-field { min-width: 0; }
+.small-field input { width: 100%; max-width: 160px; }
+.policy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 12px; align-items: end; margin: 8px 0; }
+.att-results { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+table.att td, table.att th { padding: 6px 8px; }

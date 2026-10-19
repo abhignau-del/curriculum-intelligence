@@ -1,0 +1,1559 @@
+{
+ "batch": "2023-26 (fictional)",
+ "records": [
+  {
+   "course": "RMA101",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA101",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA101",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA101",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA101",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 35
+  },
+  {
+   "course": "RMA101",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA101",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA101",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA101",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 50
+  },
+  {
+   "course": "RMA101",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA101",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA101",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA102",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA102",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA102",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA102",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA102",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA102",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA102",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA102",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA102",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 53
+  },
+  {
+   "course": "RMA102",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA102",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA102",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA103",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA103",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA103",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA103",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA103",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA103",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA103",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA103",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA103",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA103",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA103",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA103",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA104",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA104",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA104",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA104",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA104",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA104",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA104",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA104",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 34
+  },
+  {
+   "course": "RMA104",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA104",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA201",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA201",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA201",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA201",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 50
+  },
+  {
+   "course": "RMA201",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA201",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA201",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA201",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA201",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA201",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA201",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA201",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA202",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA202",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA202",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA202",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA202",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA202",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA202",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA202",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA202",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA202",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA202",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA202",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA203",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA203",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA203",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA203",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA203",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA203",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA203",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA203",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA203",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA203",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA203",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA204",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA204",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA204",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA204",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA204",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA204",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA204",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA204",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA204",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA204",
+   "co": 4,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA204",
+   "co": 4,
+   "kind": "external",
+   "students": 60,
+   "reached": 35
+  },
+  {
+   "course": "RMA204",
+   "co": 4,
+   "kind": "survey",
+   "students": 60,
+   "reached": 50
+  },
+  {
+   "course": "RMA301",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA301",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA301",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA301",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA301",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA301",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA301",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA301",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA302",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA302",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA302",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA302",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA302",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA302",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA302",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA302",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA302",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA303",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA303",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA303",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA303",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA303",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA303",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA303",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA303",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA304",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA304",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA304",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA304",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA304",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA304",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 50
+  },
+  {
+   "course": "RMA304",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA304",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA304",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA401",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 47
+  },
+  {
+   "course": "RMA401",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA401",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA401",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 35
+  },
+  {
+   "course": "RMA401",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA401",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA401",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA401",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 50
+  },
+  {
+   "course": "RMA402",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA402",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA402",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA402",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA402",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA402",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA402",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA402",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA402",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA403",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA403",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA403",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA403",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA403",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA403",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA403",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA403",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA403",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA404",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA404",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA404",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 51
+  },
+  {
+   "course": "RMA404",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA404",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA404",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA404",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA404",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA404",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA501",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA501",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 29
+  },
+  {
+   "course": "RMA501",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA501",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 46
+  },
+  {
+   "course": "RMA501",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA501",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA501",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 32
+  },
+  {
+   "course": "RMA501",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA502",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA502",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 28
+  },
+  {
+   "course": "RMA502",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 35
+  },
+  {
+   "course": "RMA502",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA502",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA502",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA502",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA502",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 34
+  },
+  {
+   "course": "RMA502",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA503",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA503",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 29
+  },
+  {
+   "course": "RMA503",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA503",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA503",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA503",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA503",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA503",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA504",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA504",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 26
+  },
+  {
+   "course": "RMA504",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA504",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA504",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA504",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA504",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 35
+  },
+  {
+   "course": "RMA504",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA601",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA601",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA601",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 36
+  },
+  {
+   "course": "RMA601",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 45
+  },
+  {
+   "course": "RMA601",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA601",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 49
+  },
+  {
+   "course": "RMA601",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA601",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 33
+  },
+  {
+   "course": "RMA601",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 38
+  },
+  {
+   "course": "RMA602",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 44
+  },
+  {
+   "course": "RMA602",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 29
+  },
+  {
+   "course": "RMA602",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 39
+  },
+  {
+   "course": "RMA602",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA602",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 41
+  },
+  {
+   "course": "RMA602",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 52
+  },
+  {
+   "course": "RMA602",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA602",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 27
+  },
+  {
+   "course": "RMA602",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 37
+  },
+  {
+   "course": "RMA603",
+   "co": 1,
+   "kind": "internal",
+   "students": 60,
+   "reached": 43
+  },
+  {
+   "course": "RMA603",
+   "co": 1,
+   "kind": "external",
+   "students": 60,
+   "reached": 32
+  },
+  {
+   "course": "RMA603",
+   "co": 1,
+   "kind": "survey",
+   "students": 60,
+   "reached": 40
+  },
+  {
+   "course": "RMA603",
+   "co": 2,
+   "kind": "internal",
+   "students": 60,
+   "reached": 48
+  },
+  {
+   "course": "RMA603",
+   "co": 2,
+   "kind": "external",
+   "students": 60,
+   "reached": 34
+  },
+  {
+   "course": "RMA603",
+   "co": 2,
+   "kind": "survey",
+   "students": 60,
+   "reached": 42
+  },
+  {
+   "course": "RMA603",
+   "co": 3,
+   "kind": "internal",
+   "students": 60,
+   "reached": 34
+  },
+  {
+   "course": "RMA603",
+   "co": 3,
+   "kind": "external",
+   "students": 60,
+   "reached": 29
+  },
+  {
+   "course": "RMA603",
+   "co": 3,
+   "kind": "survey",
+   "students": 60,
+   "reached": 41
+  }
+ ]
+}

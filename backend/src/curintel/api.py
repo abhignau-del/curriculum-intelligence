@@ -21,11 +21,12 @@ from pydantic import BaseModel, Field, ValidationError
 from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc_texts, from_workbook, write_template
+from .attainment import AttainmentError, Policy, _message, compute, read_data, write_template as write_attainment_template
 from .mapping import FrameworkError, builtin_frameworks, choose_framework, map_outcomes
 from .outcomes import analyse_outcomes
 from .overlap import find_overlaps
 from .regulatory import Rules, RulesError, builtin_rules, check
-from .report import render_html, to_dict
+from .report import attainment_dict, render_html, render_outcomes_html, to_dict
 from .schema import Programme
 from .store import Store
 from .taxonomy import Taxonomy
@@ -84,6 +85,10 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
 
     @app.exception_handler(ImportError_)
     async def import_error(_req, exc: ImportError_):
+        return JSONResponse({"detail": str(exc)}, status_code=400)
+
+    @app.exception_handler(AttainmentError)
+    async def attainment_error(_req, exc: AttainmentError):
         return JSONResponse({"detail": str(exc)}, status_code=400)
 
     @app.get("/api/health")
@@ -179,6 +184,48 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
         write_template(buf)
         return Response(buf.getvalue(), headers=_attachment("programme-template.xlsx"),
                         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    # ----- outcome attainment ------------------------------------------
+    @app.get("/api/attainment/policy")
+    def default_policy():
+        return Policy().model_dump()
+
+    @app.get("/api/programmes/{pid}/attainment-template.xlsx")
+    def attainment_template(pid: str, batch: str = ""):
+        p = get_or_404(pid)
+        if not any(c.outcomes for c in p.courses):
+            raise HTTPException(400, "This programme states no course outcomes to record attainment for")
+        buf = BytesIO()
+        write_attainment_template(buf, p, batch)
+        return Response(buf.getvalue(), headers=_attachment(f"{p.institution} attainment.xlsx"),
+                        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    @app.post("/api/programmes/{pid}/attainment")
+    async def attainment(pid: str, request: Request, filename: str, policy: Optional[str] = None,
+                         framework: Optional[str] = None, format: str = "json"):
+        """Body: the raw bytes of a filled-in attainment workbook (.xlsx) or JSON. `policy` is the
+        policy as JSON (default: common practice); `format=html` returns the report instead."""
+        p = get_or_404(pid)
+        data = await request.body()
+        if len(data) > MAX_UPLOAD:
+            raise HTTPException(413, "File is larger than 10 MB")
+        if not filename.lower().endswith((".xlsx", ".json")):
+            raise HTTPException(400, f"{filename}: expected the attainment workbook (.xlsx) or JSON")
+        try:
+            pol = Policy.model_validate_json(policy) if policy else Policy()
+        except ValidationError as exc:
+            raise HTTPException(400, f"Policy: {_message(exc)}") from None
+        if framework not in (None, "own", *builtin_frameworks()):
+            raise HTTPException(400, f"No built-in outcome framework named {framework!r}")
+        try:
+            mapping = map_outcomes(p, choose_framework(framework, p, tax), tax)
+        except FrameworkError as exc:
+            raise HTTPException(400, str(exc)) from None
+        rep = compute(mapping, read_data(data, filename), pol)
+        if format == "html":
+            return Response(render_outcomes_html(mapping.outcomes, mapping, rep), media_type="text/html; charset=utf-8",
+                            headers=_attachment(f"{p.institution} attainment.html"))
+        return attainment_dict(rep)
 
     # ----- analysis ----------------------------------------------------
     def run(req: BenchmarkRequest):

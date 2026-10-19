@@ -1,4 +1,4 @@
-import type { BenchmarkResult, ProgrammeDetail, ProgrammeSummary, RulesInfo, TaxonomyView } from "./types";
+import type { AttainmentResult, BenchmarkResult, Policy, ProgrammeDetail, ProgrammeSummary, RulesInfo, TaxonomyView } from "./types";
 
 const BASE = import.meta.env.VITE_API_URL ?? "";
 
@@ -39,7 +39,25 @@ export const api = {
   importAcadDoc: (institution: string, name: string, only: string, files: { name: string; text: string }[]) =>
     call<ProgrammeSummary>("/api/programmes/acaddoc", json("POST", { institution, name, only, files })),
   benchmark: (sel: Selection) => call<BenchmarkResult>("/api/benchmark", json("POST", sel)),
+  defaultPolicy: () => call<Policy>("/api/attainment/policy"),
+  attainment: (id: string, file: File, policy: Policy) =>
+    call<AttainmentResult>(attainmentPath(id, file, policy),
+      { method: "POST", body: file, headers: { "Content-Type": "application/octet-stream" } }),
 };
+
+/** The upload address for a batch's results; `format=html` asks for the report instead. */
+export function attainmentPath(id: string, file: File, policy: Policy, format: "json" | "html" = "json"): string {
+  const q = new URLSearchParams({ filename: file.name, policy: JSON.stringify(policy), format });
+  return `/api/programmes/${id}/attainment?${q}`;
+}
+
+/** Post a file and hand the response to the browser as a download (the attainment report). */
+export async function downloadPost(path: string, file: File, fallbackName: string): Promise<void> {
+  const r = await fetch(BASE + path, { method: "POST", body: file, headers: { "Content-Type": "application/octet-stream" } });
+  if (!r.ok) throw await toError(r);
+  const name = /filename="?([^"]+)"?/.exec(r.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
+  saveBlob(await r.blob(), name);
+}
 
 /** Fetch a file (GET, or POST with a JSON body) and hand it to the browser as a download. */
 export async function download(path: string, fallbackName: string, body?: unknown): Promise<void> {
