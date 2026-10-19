@@ -22,6 +22,7 @@ from . import __version__
 from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc_texts, from_workbook, write_template
 from .attainment import AttainmentError, Policy, _message, compute, read_data, write_template as write_attainment_template
+from .evidence import build as build_evidence, to_bytes as docx_bytes
 from .mapping import FrameworkError, builtin_frameworks, choose_framework, map_outcomes
 from .outcomes import analyse_outcomes
 from .overlap import find_overlaps
@@ -226,6 +227,34 @@ def create_app(store: Store | None = None, taxonomy: Taxonomy | None = None) -> 
             return Response(render_outcomes_html(mapping.outcomes, mapping, rep), media_type="text/html; charset=utf-8",
                             headers=_attachment(f"{p.institution} attainment.html"))
         return attainment_dict(rep)
+
+    @app.post("/api/programmes/{pid}/evidence.docx")
+    async def evidence(pid: str, request: Request, filename: str = "", policy: Optional[str] = None,
+                       framework: Optional[str] = None):
+        """A Word evidence pack for NAAC metric 2.6.1. Body: optionally a batch's results (as for
+        /attainment, with `filename`); without one the pack has no attainment section."""
+        p = get_or_404(pid)
+        if not any(c.outcomes for c in p.courses):
+            raise HTTPException(400, "This programme states no course outcomes, so there is no evidence pack to build")
+        data = await request.body()
+        if len(data) > MAX_UPLOAD:
+            raise HTTPException(413, "File is larger than 10 MB")
+        if framework not in (None, "own", *builtin_frameworks()):
+            raise HTTPException(400, f"No built-in outcome framework named {framework!r}")
+        try:
+            pol = Policy.model_validate_json(policy) if policy else Policy()
+            mapping = map_outcomes(p, choose_framework(framework, p, tax), tax)
+        except ValidationError as exc:
+            raise HTTPException(400, f"Policy: {_message(exc)}") from None
+        except FrameworkError as exc:
+            raise HTTPException(400, str(exc)) from None
+        att = None
+        if data:
+            if not filename.lower().endswith((".xlsx", ".json")):
+                raise HTTPException(400, f"{filename or 'upload'}: expected the attainment workbook (.xlsx) or JSON")
+            att = compute(mapping, read_data(data, filename), pol)
+        return Response(docx_bytes(build_evidence(mapping, att)), headers=_attachment(f"{p.institution} NAAC 2.6.1 evidence.docx"),
+                        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
     # ----- analysis ----------------------------------------------------
     def run(req: BenchmarkRequest):

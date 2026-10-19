@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, attainmentPath, download, downloadPost } from "./api";
+import { api, attainmentPath, download, downloadPost, evidencePath } from "./api";
 import { attainmentStatus, fromForm, parseSavedPolicy, toForm } from "./benchmarkops";
 import type { PolicyForm } from "./benchmarkops";
 import type { AttainmentResult } from "./types";
@@ -66,6 +66,13 @@ export default function AttainmentPanel({ id, institution, onError }: Props) {
         <button className="btn" onClick={() => download(`/api/programmes/${id}/attainment-template.xlsx?batch=${encodeURIComponent(batch)}`,
                                                         "attainment.xlsx").catch(e => onError(e.message))}>
           Download entry sheet (.xlsx)
+        </button>
+        <button className="btn" disabled={busy || !policy || typeof policy === "string"} onClick={() => {
+          if (!policy || typeof policy === "string") return;
+          downloadPost(evidencePath(id, result ? file : null, policy), result ? file : null, `${institution} NAAC 2.6.1 evidence.docx`)
+            .catch(e => onError(e.message));
+        }} title={result ? "Includes the uploaded batch's attainment" : "Upload results first to include attainment"}>
+          Download NAAC 2.6.1 evidence (.docx)
         </button>
         <label className="btn">
           Upload results…

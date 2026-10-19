@@ -144,7 +144,29 @@ the entry sheet, upload the filled-in results, and adjust the policy in a small
 form (remembered in your browser; *Reset to defaults* restores the values above).
 
 A programme outcome's attainment is the attainment of the course outcomes that
-serve it, weighted by their mapping strength. When an outcome lacks a kind of
+serve it, weighted by their mapping strength.
+
+### NAAC 2.6.1 evidence pack
+
+`curintel evidence PROGRAMME [--attainment RESULTS] -o evidence.docx` (or the
+*Download NAAC 2.6.1 evidence* button in the web app's attainment panel) writes
+an editable Word document for NAAC's university-manual metric 2.6.1 (learning
+outcomes stated, integrated into assessment, made public, and their attainment
+evaluated):
+
+1. programme outcomes, or the framework the course outcomes were mapped to;
+2. every course's outcomes with their Bloom levels;
+3. the CO–PO articulation matrix (landscape page) and how it was built;
+4. attainment for the batch, when results are given;
+5. a table of actions for outcomes below target, for the department to complete.
+
+It opens with **Before submission**: what the data shows still needs doing
+(no programme outcomes of its own, vague or copied outcomes, courses without
+outcomes, programme outcomes nothing serves, outcomes not assessed, where the
+outcomes are published). It is a draft to check and complete, not a finished
+submission.
+
+**[Download a sample evidence pack](docs/sample-evidence-2.6.1.docx)** (fictional college and batch). When an outcome lacks a kind of
 assessment, the other weights are rescaled and the report says so.
 
 ### Regulatory checklist
@@ -227,6 +249,7 @@ to the server on port 8000).
 | `curintel copo PROGRAMME [--framework NAME\|FILE\|own] [-o file.html] [--json file.json]` | CO–PO mapping and articulation matrix |
 | `curintel attainment-template PROGRAMME [-o results.xlsx] [--batch B]` | a workbook for a batch's results per course outcome |
 | `curintel attainment PROGRAMME RESULTS [--policy P] [-o file.html] [--json file.json]` | CO and PO attainment |
+| `curintel evidence PROGRAMME [--attainment RESULTS] [-o file.docx]` | Word evidence pack for NAAC metric 2.6.1 |
 | `curintel check PROGRAMME` | the skills found in each course, plus syllabus lines with no recognised skill (to spot missing taxonomy terms) |
 | `curintel template -o peer.xlsx` | a blank Excel workbook for typing in a peer's syllabus |
 | `curintel import-acaddoc FILES... --institution I --name N -o prog.json [--only CSE]` | turn [AcadDoc](https://github.com/abhignau-del/acaddoc) course files into a programme |
@@ -294,7 +317,7 @@ institutional data in the git-ignored `private-data/` folder.
 4. **Core vs elective coverage** (v0.4).
 5. **Courses on a skill**: a whole course vs a few lines in other courses (v0.5).
 6. **Regulatory checklist**: UGC credit framework rules, credit schemes, course rules (v0.6).
-7. **Course outcomes**: Bloom's levels and checks (v0.7); CO–PO mapping (v0.8); attainment (v0.9).
+7. **Course outcomes**: Bloom's levels and checks (v0.7); CO–PO mapping (v0.8); attainment (v0.9); NAAC 2.6.1 evidence pack (v0.10).
 8. Industry skill demand.
 9. More discipline taxonomies.
 

@@ -92,6 +92,7 @@ class Framework:
     name: str
     source: str
     outcomes: list[PO]
+    own: bool = False                      # the programme's own outcomes, not a framework's
 
     @classmethod
     def from_dict(cls, data: dict, where: str = "framework") -> "Framework":
@@ -139,7 +140,7 @@ class Framework:
             else:
                 pos.append(derive_po(o.code, o.name, o.text, bloom, taxonomy))
         return cls(f"{programme.label} outcomes", f"{programme.institution}: programme outcomes",
-                   programme.source, pos)
+                   programme.source, pos, own=True)
 
 
 def builtin_frameworks() -> list[str]:

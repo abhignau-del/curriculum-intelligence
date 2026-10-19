@@ -13,6 +13,7 @@ from .analysis import benchmark, profile, unmapped_lines
 from .importers import ImportError_, from_acaddoc, write_template
 from .pdfimport import ProfileError
 from .attainment import AttainmentError, Policy, compute, read_data, write_template as write_attainment_template
+from .evidence import build as build_evidence
 from .mapping import choose_framework, map_outcomes
 from .outcomes import Bloom, analyse_outcomes
 from .overlap import find_overlaps
@@ -191,6 +192,20 @@ def cmd_attainment(args) -> None:
         print(f"Data written to {args.json}")
 
 
+def cmd_evidence(args) -> None:
+    """A Word evidence pack for NAAC metric 2.6.1: outcomes, CO-PO matrix and attainment."""
+    tax = _taxonomy(args.taxonomy)
+    prog = load_programme(args.programme)
+    if not any(c.outcomes for c in prog.courses):
+        raise AttainmentError("the programme states no course outcomes, so there is no evidence pack to build")
+    mapping = map_outcomes(prog, choose_framework(args.framework, prog, tax), tax)
+    att = None
+    if args.attainment:
+        att = compute(mapping, read_data(args.attainment), Policy.load(args.policy) if args.policy else Policy())
+    build_evidence(mapping, att).save(args.output)
+    print(f"Evidence pack written to {args.output}" + ("" if att else " (no attainment results given)"))
+
+
 def cmd_import_acaddoc(args) -> None:
     prog = from_acaddoc([Path(p) for p in args.paths], args.institution, args.name, args.only)
     save_programme(prog, args.output)
@@ -302,6 +317,15 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", help="write the attainment as JSON to this file")
     p.add_argument("-t", "--taxonomy")
     p.set_defaults(func=cmd_attainment)
+
+    p = sub.add_parser("evidence", help="a Word evidence pack for NAAC metric 2.6.1 (outcomes, CO-PO, attainment)")
+    p.add_argument("programme")
+    p.add_argument("--attainment", help="a batch's results (.xlsx or .json) to include")
+    p.add_argument("--policy", help="attainment policy YAML (default: common practice)")
+    p.add_argument("--framework", help='programme outcomes: a built-in name, a YAML file, or "own"')
+    p.add_argument("-o", "--output", default="evidence-2.6.1.docx")
+    p.add_argument("-t", "--taxonomy")
+    p.set_defaults(func=cmd_evidence)
 
     p = sub.add_parser("check", help="list the skills found in each course of a programme")
     p.add_argument("programme")

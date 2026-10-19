@@ -51,9 +51,15 @@ export function attainmentPath(id: string, file: File, policy: Policy, format: "
   return `/api/programmes/${id}/attainment?${q}`;
 }
 
-/** Post a file and hand the response to the browser as a download (the attainment report). */
-export async function downloadPost(path: string, file: File, fallbackName: string): Promise<void> {
-  const r = await fetch(BASE + path, { method: "POST", body: file, headers: { "Content-Type": "application/octet-stream" } });
+/** The NAAC 2.6.1 evidence pack; with a results file, it includes the batch's attainment. */
+export function evidencePath(id: string, file: File | null, policy: Policy): string {
+  const q = new URLSearchParams({ filename: file?.name ?? "", policy: JSON.stringify(policy) });
+  return `/api/programmes/${id}/evidence.docx?${q}`;
+}
+
+/** Post a file (or nothing) and hand the response to the browser as a download. */
+export async function downloadPost(path: string, file: File | null, fallbackName: string): Promise<void> {
+  const r = await fetch(BASE + path, { method: "POST", body: file ?? "", headers: { "Content-Type": "application/octet-stream" } });
   if (!r.ok) throw await toError(r);
   const name = /filename="?([^"]+)"?/.exec(r.headers.get("content-disposition") ?? "")?.[1] ?? fallbackName;
   saveBlob(await r.blob(), name);
